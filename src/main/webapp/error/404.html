@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Introuvable · Not found — QA Reporting</title>
+    <!-- Chemins absolus : la page d'erreur est servie à l'URL qui a échoué
+         (ex. /app/admin/users/list.xhtml), un chemin relatif n'y mènerait nulle part. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap"/>
+    <link rel="stylesheet" href="/qa-reporting-j2ee/jakarta.faces.resource/style.css.xhtml?ln=css"/>
+</head>
+<body>
+<div class="login-wrapper">
+    <div class="card login-card">
+        <div class="error-code">404</div>
+        <h1>Introuvable</h1>
+        <p class="error-text" lang="fr">Cette page ou cet élément n'existe pas, ou ne fait pas partie de votre périmètre.</p>
+        <h2 lang="en">Not found</h2>
+        <p class="error-text" lang="en">This page or item does not exist, or is outside your scope.</p>
+        <a class="btn" href="/qa-reporting-j2ee/app/dashboard.xhtml">Retour au tableau de bord · Back to dashboard</a>
+    </div>
+</div>
+</body>
+</html>

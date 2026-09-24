@@ -1,5 +1,6 @@
 package com.qareporting.resource;
 
+import com.qareporting.security.CurrentUser;
 import com.qareporting.entity.Campaign;
 import com.qareporting.entity.Role;
 import com.qareporting.security.RequiresRole;
@@ -17,16 +18,20 @@ public class CampaignResource {
     @Inject
     CampaignService campaignService;
 
+    @Inject
+    CurrentUser currentUser;
+
     @GET
     public Response index() {
-        return Response.ok(campaignService.findAll()).build();
+        return Response.ok(campaignService.listForUser(currentUser.get())).build();
     }
 
     @GET
     @Path("/{id}")
     public Response show(@PathParam("id") Long id) {
         Campaign campaign = campaignService.find(id);
-        return campaign == null ? Response.status(404).build() : Response.ok(campaign).build();
+        return campaignService.canView(currentUser.get(), campaign)
+                ? Response.ok(campaign).build() : Response.status(404).build();
     }
 
     @POST
@@ -40,7 +45,7 @@ public class CampaignResource {
     @RequiresRole({Role.ADMIN, Role.QA_LEAD})
     public Response update(@PathParam("id") Long id, Campaign incoming) {
         Campaign existing = campaignService.find(id);
-        if (existing == null) {
+        if (existing == null || !campaignService.canView(currentUser.get(), existing)) {
             return Response.status(404).build();
         }
 

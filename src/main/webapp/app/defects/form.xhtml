@@ -4,8 +4,22 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="testId" value="#{defectFormBean.testId}"/>
+        <f:viewParam name="executionId" value="#{defectFormBean.executionId}"/>
+        <f:viewAction action="#{defectFormBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <h1>#{msg['defect.new']}</h1>
+        <h:panelGroup layout="block" styleClass="callout" rendered="#{defectFormBean.sourceTest != null}">
+            <div class="callout-text">
+                #{msg['defect.fromTest.linked']}
+                <h:link value="#{defectFormBean.sourceTest.title}" outcome="/app/tests/detail">
+                    <f:param name="id" value="#{defectFormBean.sourceTest.id}"/>
+                </h:link>
+            </div>
+        </h:panelGroup>
 
         <div class="card">
             <h:form>

@@ -14,6 +14,11 @@
 
         <div class="card">
             <p><strong>#{msg['defect.projectLbl']}</strong> #{defectDetailBean.defect.project.name}</p>
+            <h:panelGroup layout="block" rendered="#{defectDetailBean.defect.test != null}">
+                <p><strong>#{msg['defect.testLbl']}</strong>&#160;<h:link value="#{defectDetailBean.defect.test.title}" outcome="/app/tests/detail">
+                        <f:param name="id" value="#{defectDetailBean.defect.test.id}"/>
+                    </h:link></p>
+            </h:panelGroup>
             <p><strong>#{msg['defect.statusLbl']}</strong>
                 <span class="badge status-#{defectDetailBean.defect.status}"><span class="dot"></span>#{labels.of(defectDetailBean.defect.status)}</span></p>
             <p><strong>#{msg['defect.severityLbl']}</strong>
@@ -25,7 +30,7 @@
             <p><strong>#{msg['defect.descriptionLbl']}</strong> #{defectDetailBean.defect.description}</p>
         </div>
 
-        <div class="card">
+        <h:panelGroup layout="block" styleClass="card" rendered="#{perm.workOnDefects}">
             <h2>#{msg['common.actions']}</h2>
             <h:form>
                 <div class="form-row">
@@ -55,7 +60,7 @@
                                      action="#{defectDetailBean.reopen}"/>
                 </h:panelGroup>
 
-                <div class="form-row" style="margin-top:1rem">
+                <h:panelGroup layout="block" styleClass="form-row" style="margin-top:1rem" rendered="#{perm.assignDefects}">
                     <label for="assignee">#{msg['defect.assignTo']}</label>
                     <h:selectOneMenu id="assignee" value="#{defectDetailBean.assigneeId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
@@ -63,7 +68,46 @@
                                        itemValue="#{u.id}" itemLabel="#{u.name}"/>
                     </h:selectOneMenu>
                     <h:commandButton styleClass="btn" value="#{msg['defect.assign']}" action="#{defectDetailBean.assign}"/>
+                </h:panelGroup>
+            </h:form>
+        </h:panelGroup>
+
+        <div class="card">
+            <h2>#{msg['attachment.title']}</h2>
+            <h:form>
+                <h:panelGroup rendered="#{empty defectDetailBean.attachments}">
+                    <p class="subtitle">#{msg['attachment.none']}</p>
+                </h:panelGroup>
+                <ul class="attachment-list">
+                    <ui:repeat value="#{defectDetailBean.attachments}" var="att">
+                        <li class="attachment-item">
+                            <div class="attachment-main">
+                                <h:commandLink value="#{att.filename}" styleClass="attachment-name"
+                                               action="#{defectDetailBean.download(att.id)}"/>
+                                <div class="attachment-meta">
+                                    #{labels.fileSize(att.size)} · #{att.uploadedBy.name} ·
+                                    <h:outputText value="#{att.createdAt}">
+                                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/>
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <h:commandButton styleClass="btn btn-secondary btn-sm" value="#{msg['common.delete']}"
+                                             action="#{defectDetailBean.deleteAttachment(att.id)}"
+                                             rendered="#{defectDetailBean.canDelete(att)}"
+                                             onclick="return confirm('#{msg['attachment.deleteConfirm']}');"/>
+                        </li>
+                    </ui:repeat>
+                </ul>
+            </h:form>
+
+            <h:form enctype="multipart/form-data" rendered="#{perm.workOnDefects}" styleClass="attachment-upload">
+                <label for="upload">#{msg['attachment.add']}</label>
+                <div class="attachment-upload-row">
+                    <h:inputFile id="upload" value="#{defectDetailBean.upload}"/>
+                    <h:commandButton styleClass="btn" value="#{msg['attachment.send']}"
+                                     action="#{defectDetailBean.uploadAttachment}"/>
                 </div>
+                <div class="field-hint">#{msg['attachment.hint']}</div>
             </h:form>
         </div>
 

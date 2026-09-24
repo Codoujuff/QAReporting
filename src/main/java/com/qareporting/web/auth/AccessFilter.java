@@ -1,6 +1,8 @@
 package com.qareporting.web.auth;
 
 import com.qareporting.entity.Role;
+import com.qareporting.security.CurrentUser;
+import com.qareporting.security.Permissions;
 import jakarta.inject.Inject;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Single combined guard for every /app/* page: requires a logged-in session, and
@@ -19,12 +23,28 @@ import java.net.URLEncoder;
  * rather than two separately-mapped @WebFilters, since relative execution order
  * between multiple annotation-declared filters on overlapping patterns is otherwise
  * unspecified by the Servlet spec.
+ *
+ * Applique aussi la matrice des permissions aux écrans de saisie (PAGE_RULES) — les
+ * actions des beans la revérifient, ce filtre évite simplement d'afficher un formulaire
+ * inutilisable — et renseigne CurrentUser pour que le journal d'audit connaisse l'auteur
+ * des actions JSF comme de celles de l'API REST.
  */
 @WebFilter(urlPatterns = "/app/*")
 public class AccessFilter extends HttpFilter {
 
+    private static final Map<String, Set<String>> PAGE_RULES = Map.of(
+            "/app/campaigns/form.xhtml", Permissions.MANAGE_CAMPAIGNS,
+            "/app/tests/form.xhtml", Permissions.MANAGE_TESTS,
+            "/app/activity/form.xhtml", Permissions.LOG_ACTIVITY,
+            "/app/defects/form.xhtml", Permissions.WORK_ON_DEFECTS,
+            "/app/team.xhtml", Permissions.TEAM_VIEW
+    );
+
     @Inject
     private SessionAuth sessionAuth;
+
+    @Inject
+    private CurrentUser currentUser;
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -43,6 +63,14 @@ public class AccessFilter extends HttpFilter {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
+
+        Set<String> allowed = PAGE_RULES.get(request.getServletPath());
+        if (allowed != null && !Permissions.allows(allowed, sessionAuth.getRoleName())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        currentUser.set(sessionAuth.getCurrentUser());
 
         chain.doFilter(request, response);
     }

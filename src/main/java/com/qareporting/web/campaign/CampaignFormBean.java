@@ -1,5 +1,7 @@
 package com.qareporting.web.campaign;
 
+import com.qareporting.web.auth.PermissionBean;
+import com.qareporting.security.Permissions;
 import com.qareporting.entity.Campaign;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Environment;
@@ -48,6 +50,9 @@ public class CampaignFormBean implements Serializable {
     private List<Environment> environmentOptions;
     private List<User> userOptions;
 
+    @Inject
+    private PermissionBean perm;
+
     @PostConstruct
     public void init() {
         projectOptions = projectService.findAll();
@@ -57,6 +62,9 @@ public class CampaignFormBean implements Serializable {
     }
 
     public String save() {
+        if (!perm.require(Permissions.MANAGE_CAMPAIGNS)) {
+            return null;
+        }
         if (projectId == null) {
             addError(I18n.t("err.projectRequired"));
             return null;

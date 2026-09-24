@@ -1,5 +1,7 @@
 package com.qareporting.web.test;
 
+import com.qareporting.web.auth.PermissionBean;
+import com.qareporting.security.Permissions;
 import com.qareporting.entity.Environment;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Test;
@@ -38,6 +40,7 @@ public class TestDetailBean implements Serializable {
 
     private Long id;
     private Test test;
+    private Long failedExecution;
     private List<TestExecution> executions;
     private List<Environment> environmentOptions;
 
@@ -46,27 +49,53 @@ public class TestDetailBean implements Serializable {
     private Long environmentId;
     private String duration;
 
+    @Inject
+    private PermissionBean perm;
+
     @PostConstruct
     public void init() {
         environmentOptions = environmentService.findAll();
     }
 
+    public Long getFailedExecution() {
+        return failedExecution;
+    }
+
+    public void setFailedExecution(Long failedExecution) {
+        this.failedExecution = failedExecution;
+    }
+
     public void load() {
-        test = testService.find(id);
+        test = id == null ? null : testService.find(id);
+        if (!testService.canView(sessionAuth.getCurrentUser(), test)) {
+            test = null;
+            PermissionBean.notFound();
+            return;
+        }
         executions = testService.executions(id);
         environmentId = test.getEnvironment() != null ? test.getEnvironment().getId() : null;
     }
 
     public String execute() {
+        if (!perm.require(Permissions.EXECUTE_TESTS)) {
+            return null;
+        }
+        if (!testService.canView(sessionAuth.getCurrentUser(), testService.find(id))) {
+            PermissionBean.notFound();
+            return null;
+        }
         if (resultStatus == null) {
             addError(I18n.t("err.resultRequired"));
             return null;
         }
 
         Environment environment = environmentId != null ? environmentService.find(environmentId) : test.getEnvironment();
-        testService.execute(test, resultStatus, actualResult, sessionAuth.getCurrentUser(), environment, duration);
+        TestExecution execution = testService.execute(test, resultStatus, actualResult,
+                sessionAuth.getCurrentUser(), environment, duration);
 
-        return "detail.xhtml?faces-redirect=true&id=" + id;
+        // Un échec propose aussitôt de déclarer l'anomalie (cahier des charges §4.4).
+        String failed = resultStatus == Test.Status.failed ? "&failedExecution=" + execution.getId() : "";
+        return "detail.xhtml?faces-redirect=true&id=" + id + failed;
     }
 
     private void addError(String message) {

@@ -1,5 +1,7 @@
 package com.qareporting.web.test;
 
+import com.qareporting.web.auth.PermissionBean;
+import com.qareporting.security.Permissions;
 import com.qareporting.entity.Campaign;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Environment;
@@ -67,6 +69,9 @@ public class TestFormBean implements Serializable {
     private List<Environment> environmentOptions;
     private List<User> userOptions;
 
+    @Inject
+    private PermissionBean perm;
+
     @PostConstruct
     public void init() {
         projectOptions = projectService.findAll();
@@ -76,12 +81,16 @@ public class TestFormBean implements Serializable {
     }
 
     public String load() {
-        if (!sessionAuth.hasRole("admin", "qa_lead", "qa")) {
-            return "list.xhtml?faces-redirect=true";
+        if (!perm.require(Permissions.MANAGE_TESTS)) {
+            return null;
         }
 
         if (id != null) {
             test = testService.find(id);
+            if (!testService.canView(sessionAuth.getCurrentUser(), test)) {
+                PermissionBean.notFound();
+                return null;
+            }
             projectId = test.getProject() != null ? test.getProject().getId() : null;
             campaignId = test.getCampaign() != null ? test.getCampaign().getId() : null;
             environmentId = test.getEnvironment() != null ? test.getEnvironment().getId() : null;
@@ -95,8 +104,12 @@ public class TestFormBean implements Serializable {
     }
 
     public String save() {
-        if (!sessionAuth.hasRole("admin", "qa_lead", "qa")) {
-            return "list.xhtml?faces-redirect=true";
+        if (!perm.require(Permissions.MANAGE_TESTS)) {
+            return null;
+        }
+        if (id != null && !testService.canView(sessionAuth.getCurrentUser(), testService.find(id))) {
+            PermissionBean.notFound();
+            return null;
         }
         if (projectId == null) {
             addError(I18n.t("err.projectRequired"));
@@ -110,7 +123,12 @@ public class TestFormBean implements Serializable {
         test.setProject(projectService.find(projectId));
         test.setCampaign(campaignId == null ? null : campaignService.find(campaignId));
         test.setEnvironment(environmentId == null ? null : environmentService.find(environmentId));
-        test.setAssignedTo(assignedToId == null ? null : userService.find(assignedToId));
+        if (perm.has(Permissions.ASSIGN_TESTS)) {
+            test.setAssignedTo(assignedToId == null ? null : userService.find(assignedToId));
+        } else if (test.getId() == null) {
+            // Un QA qui rédige un cas de test en devient le testeur ; il ne réassigne pas.
+            test.setAssignedTo(sessionAuth.getCurrentUser());
+        }
 
         List<String> steps = new ArrayList<>();
         if (stepsText != null) {

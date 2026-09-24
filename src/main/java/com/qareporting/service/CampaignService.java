@@ -31,6 +31,16 @@ public class CampaignService extends AbstractCrudService<Campaign, Long> {
                 .getResultList();
     }
 
+    public boolean canView(User viewer, Campaign campaign) {
+        if (viewer == null || campaign == null) {
+            return false;
+        }
+        if (Scope.seesEverything(viewer) || viewer.getTeam() == null) {
+            return true;
+        }
+        return Scope.inTeam(campaign.getProject(), viewer.getTeam());
+    }
+
     /**
      * Same trigger as the Laravel version: a status change on a campaign
      * auto-notifies every active member of the owning project's team.
@@ -39,7 +49,8 @@ public class CampaignService extends AbstractCrudService<Campaign, Long> {
     public Campaign changeStatus(Campaign campaign, Campaign.Status newStatus) {
         Campaign.Status previous = campaign.getStatus();
         campaign.setStatus(newStatus);
-        Campaign saved = update(campaign);
+        Campaign saved = em.merge(campaign); // pas update() : tracé ci-dessous comme changement d'état
+        audit.record("status_changed", saved, AuditService.transition(previous, newStatus));
 
         if (previous != newStatus && saved.getProject() != null && saved.getProject().getTeam() != null) {
             String title = switch (newStatus) {

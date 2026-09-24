@@ -64,10 +64,14 @@
                 <div class="card">
                     <h2>#{msg['dashboard.quickActions']}</h2>
                     <div class="quick-actions">
-                        <h:link styleClass="btn" value="#{msg['dashboard.qaLogActivity']}" outcome="/app/activity/form"/>
-                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewDefect']}" outcome="/app/defects/form"/>
-                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewTest']}" outcome="/app/tests/form"/>
-                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewCampaign']}" outcome="/app/campaigns/form"/>
+                        <h:link styleClass="btn" value="#{msg['dashboard.qaLogActivity']}" outcome="/app/activity/form"
+                                rendered="#{perm.logActivity}"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewDefect']}" outcome="/app/defects/form"
+                                rendered="#{perm.workOnDefects}"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewTest']}" outcome="/app/tests/form"
+                                rendered="#{perm.manageTests}"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewCampaign']}" outcome="/app/campaigns/form"
+                                rendered="#{perm.manageCampaigns}"/>
                         <h:link value="#{msg['dashboard.qaSeeReports']}" outcome="/app/reporting"/>
                     </div>
                 </div>

@@ -31,23 +31,28 @@ public class DefectResource {
 
     @GET
     public Response index() {
-        return Response.ok(defectService.findAll()).build();
+        return Response.ok(defectService.listForUser(currentUser.get())).build();
     }
 
     @GET
     @Path("/{id}")
     public Response show(@PathParam("id") Long id) {
         Defect defect = defectService.find(id);
-        return defect == null ? Response.status(404).build() : Response.ok(defect).build();
+        return defectService.canView(currentUser.get(), defect)
+                ? Response.ok(defect).build() : Response.status(404).build();
     }
 
     @GET
     @Path("/{id}/history")
     public Response history(@PathParam("id") Long id) {
+        if (!defectService.canView(currentUser.get(), defectService.find(id))) {
+            return Response.status(404).build();
+        }
         return Response.ok(defectService.history(id)).build();
     }
 
     @POST
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response store(Defect defect) {
         return Response.status(201).entity(defectService.createWithHistory(defect, currentUser.get())).build();
     }
@@ -56,7 +61,7 @@ public class DefectResource {
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, Defect incoming) {
         Defect existing = defectService.find(id);
-        if (existing == null) {
+        if (existing == null || !defectService.canView(currentUser.get(), existing)) {
             return Response.status(404).build();
         }
         existing.setTitle(incoming.getTitle());
@@ -86,7 +91,7 @@ public class DefectResource {
     public Response assign(@PathParam("id") Long id, AssignRequest request) {
         Defect defect = defectService.find(id);
         User assignee = request == null ? null : userService.find(request.getUserId());
-        if (defect == null || assignee == null) {
+        if (defect == null || !defectService.canView(currentUser.get(), defect) || assignee == null) {
             return Response.status(404).build();
         }
         return Response.ok(defectService.assign(defect, assignee, currentUser.get())).build();
@@ -94,9 +99,10 @@ public class DefectResource {
 
     @POST
     @Path("/{id}/retest")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response retest(@PathParam("id") Long id, RetestRequest request) {
         Defect defect = defectService.find(id);
-        if (defect == null) {
+        if (defect == null || !defectService.canView(currentUser.get(), defect)) {
             return Response.status(404).build();
         }
         try {
@@ -109,9 +115,10 @@ public class DefectResource {
 
     @POST
     @Path("/{id}/close")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response close(@PathParam("id") Long id, CommentRequest request) {
         Defect defect = defectService.find(id);
-        if (defect == null) {
+        if (defect == null || !defectService.canView(currentUser.get(), defect)) {
             return Response.status(404).build();
         }
         String comment = request == null ? null : request.getComment();
@@ -120,9 +127,10 @@ public class DefectResource {
 
     @POST
     @Path("/{id}/reopen")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response reopen(@PathParam("id") Long id, CommentRequest request) {
         Defect defect = defectService.find(id);
-        if (defect == null) {
+        if (defect == null || !defectService.canView(currentUser.get(), defect)) {
             return Response.status(404).build();
         }
         String comment = request == null ? null : request.getComment();

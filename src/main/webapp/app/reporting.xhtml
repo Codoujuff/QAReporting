@@ -4,11 +4,174 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="period" value="#{activityReportBean.period}"/>
+        <f:viewParam name="date" value="#{activityReportBean.date}"/>
+        <f:viewAction action="#{activityReportBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <h1>#{msg['report.title']}</h1>
-        <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
-            #{msg['report.intro']}
-        </p>
+        <p class="subtitle">#{msg['report.intro']}</p>
+
+        <!-- ===================== Activité de test par période ===================== -->
+        <section class="report-section">
+            <div class="report-toolbar">
+                <h2 class="section-title">#{msg['activityReport.title']}</h2>
+                <nav class="segmented" aria-label="#{msg['activityReport.periodLabel']}">
+                    <h:link value="#{msg['activityReport.day']}" outcome="/app/reporting"
+                            styleClass="#{activityReportBean.resolvedPeriod == 'day' ? 'current' : ''}">
+                        <f:param name="period" value="day"/>
+                        <f:param name="date" value="#{activityReportBean.anchorDate}"/>
+                    </h:link>
+                    <h:link value="#{msg['activityReport.week']}" outcome="/app/reporting"
+                            styleClass="#{activityReportBean.resolvedPeriod == 'week' ? 'current' : ''}">
+                        <f:param name="period" value="week"/>
+                        <f:param name="date" value="#{activityReportBean.anchorDate}"/>
+                    </h:link>
+                    <h:link value="#{msg['activityReport.month']}" outcome="/app/reporting"
+                            styleClass="#{activityReportBean.resolvedPeriod == 'month' ? 'current' : ''}">
+                        <f:param name="period" value="month"/>
+                        <f:param name="date" value="#{activityReportBean.anchorDate}"/>
+                    </h:link>
+                </nav>
+            </div>
+
+            <div class="period-nav">
+                <h:link styleClass="btn btn-secondary btn-sm" value="‹" title="#{msg['activityReport.previous']}"
+                        outcome="/app/reporting">
+                    <f:param name="period" value="#{activityReportBean.resolvedPeriod}"/>
+                    <f:param name="date" value="#{activityReportBean.previousDate}"/>
+                </h:link>
+                <span class="period-label">#{activityReportBean.periodLabel}</span>
+                <h:link styleClass="btn btn-secondary btn-sm" value="›" title="#{msg['activityReport.next']}"
+                        outcome="/app/reporting">
+                    <f:param name="period" value="#{activityReportBean.resolvedPeriod}"/>
+                    <f:param name="date" value="#{activityReportBean.nextDate}"/>
+                </h:link>
+                <h:link value="#{msg['activityReport.current']}" outcome="/app/reporting"
+                        rendered="#{not activityReportBean.currentPeriod}">
+                    <f:param name="period" value="#{activityReportBean.resolvedPeriod}"/>
+                    <f:param name="date" value="#{activityReportBean.today}"/>
+                </h:link>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-tile">
+                    <div class="value">#{activityReportBean.total.testsExecuted}</div>
+                    <div class="label">#{msg['common.testsExecuted']}</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{activityReportBean.total.passed}</div>
+                    <div class="label">#{msg['common.passedPl']}</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{activityReportBean.total.failed}</div>
+                    <div class="label">#{msg['common.failedPl']}</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{activityReportBean.total.blocked}</div>
+                    <div class="label">#{msg['common.blockedPl']}</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{activityReportBean.total.defects}</div>
+                    <div class="label">#{msg['activity.defectsFound']}</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">
+                        <h:outputText value="#{activityReportBean.total.successRate}"
+                                      rendered="#{activityReportBean.total.testsExecuted gt 0}">
+                            <f:convertNumber pattern="0.0"/>
+                        </h:outputText>#{activityReportBean.total.testsExecuted gt 0 ? '%' : '—'}
+                    </div>
+                    <div class="label">#{msg['common.successRate']}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">
+                    <h2>#{msg['activityReport.byDay']}</h2>
+                    <div class="stack-legend" aria-hidden="true">
+                        <span><i class="seg-passed"></i>#{msg['common.passedPl']}</span>
+                        <span><i class="seg-failed"></i>#{msg['common.failedPl']}</span>
+                        <span><i class="seg-blocked"></i>#{msg['common.blockedPl']}</span>
+                        <span><i class="seg-notrun"></i>#{msg['common.notRunPl']}</span>
+                    </div>
+                </div>
+                <h:dataTable value="#{activityReportBean.byDay}" var="d" styleClass="data-table"
+                             rendered="#{not empty activityReportBean.byDay}">
+                    <h:column>
+                        <f:facet name="header">#{msg['common.date']}</f:facet>
+                        #{d.label}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.executed']}</f:facet>
+                        #{d.testsExecuted}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['activityReport.distribution']}</f:facet>
+                        <div class="stack-bar" role="img"
+                             aria-label="#{msg['common.passedPl']} #{d.passed}, #{msg['common.failedPl']} #{d.failed}, #{msg['common.blockedPl']} #{d.blocked}, #{msg['common.notRunPl']} #{d.notRun}">
+                            <span class="seg-passed" style="width:#{d.passedShare}%"></span>
+                            <span class="seg-failed" style="width:#{d.failedShare}%"></span>
+                            <span class="seg-blocked" style="width:#{d.blockedShare}%"></span>
+                            <span class="seg-notrun" style="width:#{d.notRunShare}%"></span>
+                        </div>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.successRate']}</f:facet>
+                        <h:outputText value="#{d.successRate}" rendered="#{d.testsExecuted gt 0}">
+                            <f:convertNumber pattern="0.0"/>
+                        </h:outputText>#{d.testsExecuted gt 0 ? '%' : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['activity.defectsFound']}</f:facet>
+                        #{d.defects}
+                    </h:column>
+                </h:dataTable>
+                <h:panelGroup rendered="#{empty activityReportBean.byDay}">
+                    <p class="subtitle">#{msg['activityReport.none']}</p>
+                </h:panelGroup>
+            </div>
+
+            <h:panelGroup layout="block" styleClass="card"
+                          rendered="#{activityReportBean.showTesters and not empty activityReportBean.byTester}">
+                <h2>#{msg['activityReport.byTester']}</h2>
+                <h:dataTable value="#{activityReportBean.byTester}" var="t" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">#{msg['common.member']}</f:facet>
+                        #{t.label}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['activityReport.entries']}</f:facet>
+                        #{t.entries}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.executed']}</f:facet>
+                        #{t.testsExecuted}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.passedPl']}</f:facet>
+                        #{t.passed}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.failedPl']}</f:facet>
+                        #{t.failed}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.blockedPl']}</f:facet>
+                        #{t.blocked}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.successRate']}</f:facet>
+                        <h:outputText value="#{t.successRate}"><f:convertNumber pattern="0.0"/></h:outputText>%
+                    </h:column>
+                </h:dataTable>
+            </h:panelGroup>
+        </section>
+
+        <!-- ===================== Anomalies ===================== -->
+        <h2 class="section-title">#{msg['report.defectsSection']}</h2>
 
         <div class="stat-row">
             <div class="stat-tile">

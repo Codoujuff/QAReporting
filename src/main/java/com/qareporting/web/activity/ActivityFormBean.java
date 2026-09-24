@@ -1,5 +1,7 @@
 package com.qareporting.web.activity;
 
+import com.qareporting.web.auth.PermissionBean;
+import com.qareporting.security.Permissions;
 import com.qareporting.entity.Activity;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Campaign;
@@ -66,6 +68,9 @@ public class ActivityFormBean implements Serializable {
     private final List<String> activityTypeOptions = List.of(
             "Exécution de tests", "Revue de tests", "Analyse d'anomalies", "Support");
 
+    @Inject
+    private PermissionBean perm;
+
     @PostConstruct
     public void init() {
         projectOptions = projectService.findAll();
@@ -75,6 +80,9 @@ public class ActivityFormBean implements Serializable {
     }
 
     public String save() {
+        if (!perm.require(Permissions.LOG_ACTIVITY)) {
+            return null;
+        }
         if (projectId == null) {
             addError(I18n.t("err.projectRequired"));
             return null;

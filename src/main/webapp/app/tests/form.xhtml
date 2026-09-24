@@ -48,11 +48,14 @@
                 </div>
                 <div class="form-row">
                     <label for="assignedTo">#{msg['common.assignedToM']}</label>
-                    <h:selectOneMenu id="assignedTo" value="#{testFormBean.assignedToId}">
+                    <h:selectOneMenu id="assignedTo" value="#{testFormBean.assignedToId}"
+                                     disabled="#{not perm.assignTests}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testFormBean.userOptions}" var="u"
                                        itemValue="#{u.id}" itemLabel="#{u.name}"/>
                     </h:selectOneMenu>
+                    <h:outputText styleClass="field-hint" value="#{msg['test.assignHint']}"
+                                  rendered="#{not perm.assignTests}"/>
                 </div>
                 <div class="form-row">
                     <label for="description">#{msg['common.description']}</label>

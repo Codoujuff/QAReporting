@@ -7,7 +7,8 @@
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['nav.campaigns']}</h1>
-            <h:link styleClass="btn" value="#{msg['campaign.new']}" outcome="/app/campaigns/form"/>
+            <h:link styleClass="btn" value="#{msg['campaign.new']}" outcome="/app/campaigns/form"
+                    rendered="#{perm.manageCampaigns}"/>
         </div>
 
         <div class="card">
@@ -65,16 +66,16 @@
                         <div class="table-actions">
                             <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doStart']}"
                                              action="#{campaignListBean.start(c)}"
-                                             rendered="#{campaignListBean.isStartable(c)}"/>
+                                             rendered="#{perm.manageCampaigns and campaignListBean.isStartable(c)}"/>
                             <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doComplete']}"
                                              action="#{campaignListBean.complete(c)}"
-                                             rendered="#{campaignListBean.isCompletable(c)}"/>
+                                             rendered="#{perm.manageCampaigns and campaignListBean.isCompletable(c)}"/>
                             <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doBlock']}"
                                              action="#{campaignListBean.block(c)}"
-                                             rendered="#{campaignListBean.isBlockable(c)}"/>
+                                             rendered="#{perm.manageCampaigns and campaignListBean.isBlockable(c)}"/>
                             <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doResume']}"
                                              action="#{campaignListBean.resume(c)}"
-                                             rendered="#{campaignListBean.isResumable(c)}"/>
+                                             rendered="#{perm.manageCampaigns and campaignListBean.isResumable(c)}"/>
                         </div>
                     </h:column>
                 </h:dataTable>

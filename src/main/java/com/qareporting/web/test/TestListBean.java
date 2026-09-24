@@ -32,7 +32,7 @@ public class TestListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        tests = testService.findAll();
+        tests = testService.listForUser(sessionAuth.getCurrentUser());
     }
 
     /** Réservé à ADMIN côté REST (TestResource.destroy) — le bouton lui-même

@@ -1,0 +1,46 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>#{msg['audit.title']}</h1>
+        <p class="subtitle">
+            <h:outputFormat value="#{msg['audit.intro']}">
+                <f:param value="#{auditListBean.maxRows}"/>
+            </h:outputFormat>
+        </p>
+
+        <div class="card">
+            <h:dataTable value="#{auditListBean.entries}" var="a" styleClass="data-table"
+                         rendered="#{not empty auditListBean.entries}">
+                <h:column>
+                    <f:facet name="header">#{msg['common.date']}</f:facet>
+                    <h:outputText value="#{a.createdAt}">
+                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm:ss"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{msg['common.user']}</f:facet>
+                    #{a.user != null ? a.user.name : msg['audit.system']}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{msg['audit.action']}</f:facet>
+                    <span class="badge">#{auditListBean.action(a)}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{msg['audit.object']}</f:facet>
+                    #{auditListBean.model(a)}#{a.modelId != null ? ' #'.concat(a.modelId) : ''}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{msg['audit.details']}</f:facet>
+                    #{auditListBean.changes(a)}
+                </h:column>
+            </h:dataTable>
+            <h:panelGroup rendered="#{empty auditListBean.entries}">
+                <p class="subtitle">#{msg['audit.none']}</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -17,6 +17,38 @@ public class TestService extends AbstractCrudService<Test, Long> {
         return Test.class;
     }
 
+    /** QA : ses tests (assignés) ; QA Lead : ceux de son équipe ; Manager/Admin : tous. */
+    public List<Test> listForUser(User viewer) {
+        if (Scope.seesEverything(viewer)) {
+            return findAll();
+        }
+        if (Scope.isLeadWithTeam(viewer)) {
+            return em.createQuery("SELECT t FROM Test t WHERE t.project.team = :team", Test.class)
+                    .setParameter("team", viewer.getTeam())
+                    .getResultList();
+        }
+        return em.createQuery("SELECT t FROM Test t WHERE t.assignedTo = :user", Test.class)
+                .setParameter("user", viewer)
+                .getResultList();
+    }
+
+    public boolean canView(User viewer, Test test) {
+        if (viewer == null || test == null) {
+            return false;
+        }
+        if (Scope.seesEverything(viewer)) {
+            return true;
+        }
+        if (Scope.isLeadWithTeam(viewer)) {
+            return Scope.inTeam(test.getProject(), viewer.getTeam());
+        }
+        return Scope.sameUser(test.getAssignedTo(), viewer);
+    }
+
+    public TestExecution findExecution(Long executionId) {
+        return executionId == null ? null : em.find(TestExecution.class, executionId);
+    }
+
     public List<TestExecution> executions(Long testId) {
         return em.createQuery(
                         "SELECT e FROM TestExecution e WHERE e.test.id = :testId ORDER BY e.executedAt DESC",
@@ -62,8 +94,10 @@ public class TestService extends AbstractCrudService<Test, Long> {
         execution.setDuration(duration);
         em.persist(execution);
 
+        Test.Status previous = test.getStatus();
         test.setStatus(result);
-        em.merge(test);
+        Test merged = em.merge(test);
+        audit.record("executed", merged, AuditService.transition(previous, result));
 
         return execution;
     }

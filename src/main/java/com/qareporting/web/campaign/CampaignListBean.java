@@ -1,5 +1,7 @@
 package com.qareporting.web.campaign;
 
+import com.qareporting.web.auth.PermissionBean;
+import com.qareporting.security.Permissions;
 import com.qareporting.entity.Campaign;
 import com.qareporting.entity.Test;
 import com.qareporting.service.CampaignService;
@@ -33,6 +35,9 @@ public class CampaignListBean implements Serializable {
     private SessionAuth sessionAuth;
 
     private List<Campaign> campaigns;
+
+    @Inject
+    private PermissionBean perm;
 
     @PostConstruct
     public void init() {
@@ -70,22 +75,32 @@ public class CampaignListBean implements Serializable {
     }
 
     public String start(Campaign campaign) {
-        campaignService.changeStatus(campaign, Campaign.Status.in_progress);
-        return refresh();
+        return changeStatus(campaign, Campaign.Status.in_progress);
     }
 
     public String complete(Campaign campaign) {
-        campaignService.changeStatus(campaign, Campaign.Status.completed);
-        return refresh();
+        return changeStatus(campaign, Campaign.Status.completed);
     }
 
     public String block(Campaign campaign) {
-        campaignService.changeStatus(campaign, Campaign.Status.blocked);
-        return refresh();
+        return changeStatus(campaign, Campaign.Status.blocked);
     }
 
     public String resume(Campaign campaign) {
-        campaignService.changeStatus(campaign, Campaign.Status.in_progress);
+        return changeStatus(campaign, Campaign.Status.in_progress);
+    }
+
+    /** Réservé QA Lead / Admin (même règle que PUT /api/campaigns/{id}), et dans le périmètre. */
+    private String changeStatus(Campaign campaign, Campaign.Status status) {
+        if (!perm.require(Permissions.MANAGE_CAMPAIGNS)) {
+            return null;
+        }
+        Campaign current = campaignService.find(campaign.getId());
+        if (!campaignService.canView(sessionAuth.getCurrentUser(), current)) {
+            PermissionBean.notFound();
+            return null;
+        }
+        campaignService.changeStatus(current, status);
         return refresh();
     }
 

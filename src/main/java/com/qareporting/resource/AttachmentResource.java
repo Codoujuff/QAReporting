@@ -1,5 +1,7 @@
 package com.qareporting.resource;
 
+import com.qareporting.security.RequiresRole;
+import com.qareporting.entity.Role;
 import com.qareporting.entity.Attachment;
 import com.qareporting.entity.Defect;
 import com.qareporting.security.CurrentUser;
@@ -21,10 +23,8 @@ import java.util.Set;
 @Path("/defects/{defectId}/attachments")
 public class AttachmentResource {
 
-    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
-            "image/png", "image/jpeg", "image/gif", "application/pdf", "text/plain",
-            "application/zip", "application/octet-stream");
-    private static final long MAX_SIZE_BYTES = 10L * 1024 * 1024; // 10 MB, same ceiling as the Laravel version
+    private static final Set<String> ALLOWED_MIME_TYPES = AttachmentService.ALLOWED_MIME_TYPES;
+    private static final long MAX_SIZE_BYTES = AttachmentService.MAX_SIZE_BYTES;
 
     @Inject
     AttachmentService attachmentService;
@@ -35,12 +35,36 @@ public class AttachmentResource {
     @Inject
     CurrentUser currentUser;
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response index(@PathParam("defectId") Long defectId) {
+        Defect defect = defectService.find(defectId);
+        if (!defectService.canView(currentUser.get(), defect)) {
+            return Response.status(404).build();
+        }
+        return Response.ok(attachmentService.listFor(defect)).build();
+    }
+
+    @GET
+    @Path("/{attachmentId}")
+    public Response download(@PathParam("defectId") Long defectId, @PathParam("attachmentId") Long attachmentId) {
+        Attachment attachment = attachmentService.find(attachmentId);
+        if (attachment == null || !attachment.getDefect().getId().equals(defectId)
+                || !defectService.canView(currentUser.get(), attachment.getDefect())) {
+            return Response.status(404).build();
+        }
+        return Response.ok(attachmentService.read(attachment), attachment.getMimeType())
+                .header("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"")
+                .build();
+    }
+
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response upload(@PathParam("defectId") Long defectId, MultipartFormDataInput input) {
         Defect defect = defectService.find(defectId);
-        if (defect == null) {
+        if (!defectService.canView(currentUser.get(), defect)) {
             return Response.status(404).build();
         }
 
@@ -79,6 +103,14 @@ public class AttachmentResource {
     @DELETE
     @Path("/{attachmentId}")
     public Response destroy(@PathParam("defectId") Long defectId, @PathParam("attachmentId") Long attachmentId) {
+        Attachment attachment = attachmentService.find(attachmentId);
+        if (attachment == null || !attachment.getDefect().getId().equals(defectId)
+                || !defectService.canView(currentUser.get(), attachment.getDefect())) {
+            return Response.status(404).build();
+        }
+        if (!attachmentService.canDelete(currentUser.get(), attachment)) {
+            return Response.status(403).build();
+        }
         return attachmentService.delete(attachmentId) ? Response.noContent().build() : Response.status(404).build();
     }
 

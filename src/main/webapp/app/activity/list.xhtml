@@ -11,7 +11,8 @@
         </p>
 
         <div class="card">
-            <h:link styleClass="btn" value="#{msg['activity.new']}" outcome="/app/activity/form"/>
+            <h:link styleClass="btn" value="#{msg['activity.new']}" outcome="/app/activity/form"
+                    rendered="#{perm.logActivity}"/>
 
             <h:dataTable value="#{activityListBean.activities}" var="a" styleClass="data-table" style="margin-top:16px;">
                 <h:column>

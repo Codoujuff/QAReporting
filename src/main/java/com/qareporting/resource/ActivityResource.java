@@ -1,5 +1,7 @@
 package com.qareporting.resource;
 
+import com.qareporting.security.RequiresRole;
+import com.qareporting.entity.Role;
 import com.qareporting.entity.Activity;
 import com.qareporting.security.CurrentUser;
 import com.qareporting.service.ActivityService;
@@ -28,10 +30,12 @@ public class ActivityResource {
     @Path("/{id}")
     public Response show(@PathParam("id") Long id) {
         Activity activity = activityService.find(id);
-        return activity == null ? Response.status(404).build() : Response.ok(activity).build();
+        return activityService.canView(currentUser.get(), activity)
+                ? Response.ok(activity).build() : Response.status(404).build();
     }
 
     @POST
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response store(Activity activity) {
         activity.setUser(currentUser.get());
         String error = activityService.validate(activity);
@@ -45,7 +49,7 @@ public class ActivityResource {
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, Activity incoming) {
         Activity existing = activityService.find(id);
-        if (existing == null) {
+        if (!activityService.canEdit(currentUser.get(), existing)) {
             return Response.status(404).build();
         }
         existing.setProject(incoming.getProject());
@@ -74,6 +78,9 @@ public class ActivityResource {
     @DELETE
     @Path("/{id}")
     public Response destroy(@PathParam("id") Long id) {
+        if (!activityService.canEdit(currentUser.get(), activityService.find(id))) {
+            return Response.status(404).build();
+        }
         return activityService.delete(id) ? Response.noContent().build() : Response.status(404).build();
     }
 }

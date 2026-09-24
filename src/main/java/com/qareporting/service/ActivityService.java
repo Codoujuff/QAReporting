@@ -40,6 +40,27 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
                 .getResultList();
     }
 
+    public boolean canView(User viewer, Activity activity) {
+        if (viewer == null || activity == null) {
+            return false;
+        }
+        if (Scope.seesEverything(viewer)) {
+            return true;
+        }
+        if (Scope.sameUser(activity.getUser(), viewer)) {
+            return true;
+        }
+        return Scope.isLeadWithTeam(viewer) && activity.getUser() != null && activity.getUser().getTeam() != null
+                && viewer.getTeam().getId().equals(activity.getUser().getTeam().getId());
+    }
+
+    /** Une déclaration d'activité ne se modifie / supprime que par son auteur (ou l'admin). */
+    public boolean canEdit(User viewer, Activity activity) {
+        return activity != null && viewer != null
+                && (Scope.sameUser(activity.getUser(), viewer)
+                    || (viewer.getRole() != null && Role.ADMIN.equals(viewer.getRole().getName())));
+    }
+
     /**
      * Same two server-enforced rules as the Laravel ActivityRequest validator:
      * passed+failed+blocked+not_run must equal tests_executed, and a blocked
@@ -62,6 +83,7 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
     public Activity createValidated(Activity activity) {
         activity.setIsBlocked(activity.getBlocked() > 0);
         em.persist(activity);
+        audit.record(AuditService.CREATED, activity);
         return activity;
     }
 }

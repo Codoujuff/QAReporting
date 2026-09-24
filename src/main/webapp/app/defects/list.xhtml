@@ -7,7 +7,8 @@
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['common.defects']}</h1>
-            <h:link styleClass="btn" value="#{msg['defect.new']}" outcome="/app/defects/form"/>
+            <h:link styleClass="btn" value="#{msg['defect.new']}" outcome="/app/defects/form"
+                    rendered="#{perm.workOnDefects}"/>
         </div>
 
         <div class="card">

@@ -1,5 +1,6 @@
 package com.qareporting.resource;
 
+import com.qareporting.security.Permissions;
 import com.qareporting.dto.ExecuteTestRequest;
 import com.qareporting.entity.Environment;
 import com.qareporting.entity.Role;
@@ -31,28 +32,32 @@ public class TestResource {
 
     @GET
     public Response index() {
-        return Response.ok(testService.findAll()).build();
+        return Response.ok(testService.listForUser(currentUser.get())).build();
     }
 
     @GET
     @Path("/{id}")
     public Response show(@PathParam("id") Long id) {
         Test test = testService.find(id);
-        return test == null ? Response.status(404).build() : Response.ok(test).build();
+        return testService.canView(currentUser.get(), test)
+                ? Response.ok(test).build() : Response.status(404).build();
     }
 
     @POST
-    @RequiresRole({Role.ADMIN, Role.QA_LEAD})
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response store(Test test) {
+        if (!Permissions.allows(Permissions.ASSIGN_TESTS, currentUser.get())) {
+            test.setAssignedTo(currentUser.get()); // un QA rédige ses propres cas
+        }
         return Response.status(201).entity(testService.create(test)).build();
     }
 
     @PUT
     @Path("/{id}")
-    @RequiresRole({Role.ADMIN, Role.QA_LEAD})
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response update(@PathParam("id") Long id, Test incoming) {
         Test existing = testService.find(id);
-        if (existing == null) {
+        if (existing == null || !testService.canView(currentUser.get(), existing)) {
             return Response.status(404).build();
         }
         existing.setTitle(incoming.getTitle());
@@ -63,7 +68,9 @@ public class TestResource {
         existing.setType(incoming.getType());
         existing.setCampaign(incoming.getCampaign());
         existing.setEnvironment(incoming.getEnvironment());
-        existing.setAssignedTo(incoming.getAssignedTo());
+        if (Permissions.allows(Permissions.ASSIGN_TESTS, currentUser.get())) {
+            existing.setAssignedTo(incoming.getAssignedTo());
+        }
         return Response.ok(testService.update(existing)).build();
     }
 
@@ -81,9 +88,10 @@ public class TestResource {
      */
     @POST
     @Path("/{id}/execute")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
     public Response execute(@PathParam("id") Long id, ExecuteTestRequest request) {
         Test test = testService.find(id);
-        if (test == null) {
+        if (test == null || !testService.canView(currentUser.get(), test)) {
             return Response.status(404).build();
         }
         if (request == null || request.getStatus() == null) {
@@ -111,6 +119,9 @@ public class TestResource {
     @GET
     @Path("/{id}/executions")
     public Response executions(@PathParam("id") Long id) {
+        if (!testService.canView(currentUser.get(), testService.find(id))) {
+            return Response.status(404).build();
+        }
         return Response.ok(testService.executions(id)).build();
     }
 }

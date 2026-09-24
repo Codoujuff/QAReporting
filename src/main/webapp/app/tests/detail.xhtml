@@ -6,11 +6,24 @@
 
     <f:metadata>
         <f:viewParam name="id" value="#{testDetailBean.id}"/>
+        <f:viewParam name="failedExecution" value="#{testDetailBean.failedExecution}"/>
         <f:viewAction action="#{testDetailBean.load}"/>
     </f:metadata>
 
     <ui:define name="content">
         <h1>#{testDetailBean.test.title}</h1>
+
+        <h:panelGroup layout="block" styleClass="callout callout-danger"
+                      rendered="#{testDetailBean.failedExecution != null and perm.workOnDefects}">
+            <div>
+                <div class="callout-title">#{msg['test.failedTitle']}</div>
+                <div class="callout-text">#{msg['test.failedText']}</div>
+            </div>
+            <h:link styleClass="btn btn-danger" value="#{msg['test.reportDefect']}" outcome="/app/defects/form">
+                <f:param name="testId" value="#{testDetailBean.id}"/>
+                <f:param name="executionId" value="#{testDetailBean.failedExecution}"/>
+            </h:link>
+        </h:panelGroup>
 
         <div class="card">
             <p><strong>#{msg['defect.projectLbl']}</strong> #{testDetailBean.test.project.name}</p>
@@ -32,7 +45,7 @@
             <p><strong>#{msg['test.expectedLbl']}</strong> #{testDetailBean.test.expectedResult}</p>
         </div>
 
-        <div class="card">
+        <h:panelGroup layout="block" styleClass="card" rendered="#{perm.executeTests}">
             <h2>#{msg['test.execute']}</h2>
             <h:form>
                 <div class="form-row">
@@ -60,7 +73,7 @@
                 </div>
                 <h:commandButton styleClass="btn" value="#{msg['test.saveResult']}" action="#{testDetailBean.execute}"/>
             </h:form>
-        </div>
+        </h:panelGroup>
 
         <div class="card">
             <h2>#{msg['test.executions']}</h2>
@@ -90,6 +103,14 @@
                 <h:column>
                     <f:facet name="header">#{msg['common.duration']}</f:facet>
                     #{e.duration}
+                </h:column>
+                <h:column rendered="#{perm.workOnDefects}">
+                    <f:facet name="header">#{msg['common.actions']}</f:facet>
+                    <h:link value="#{msg['test.reportDefectShort']}" outcome="/app/defects/form"
+                            rendered="#{e.status == 'failed'}">
+                        <f:param name="testId" value="#{testDetailBean.id}"/>
+                        <f:param name="executionId" value="#{e.id}"/>
+                    </h:link>
                 </h:column>
             </h:dataTable>
             <h:panelGroup rendered="#{empty testDetailBean.executions}">

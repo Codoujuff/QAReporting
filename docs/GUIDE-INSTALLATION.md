@@ -117,6 +117,60 @@ Connectez-vous avec le compte administrateur créé automatiquement :
 
 Depuis ce compte, vous pouvez créer d'autres utilisateurs (QA, QA Lead, Manager) pour tester les différents rôles.
 
+La langue se change avec le sélecteur **FR | EN**, en haut à droite (et sur la page de connexion). Le choix est mémorisé.
+
+---
+
+## Étape 6 : préparer l'application (première utilisation)
+
+L'application démarre vide, avec seulement le compte admin. Pour la rendre utilisable par une équipe, faites les étapes suivantes **dans cet ordre** (les suivantes ont besoin des précédentes) :
+
+| # | Qui | Où | Quoi |
+|---|---|---|---|
+| 1 | Admin | Administration → **Équipes** | Créer l'équipe QA (ex. « Équipe Paiement »). |
+| 2 | Admin | Administration → **Utilisateurs** | Créer les comptes : un **QA Lead**, un ou plusieurs **QA**, un **Manager**. Rattacher le lead et les QA à l'équipe. |
+| 3 | Admin | Administration → **Équipes** | Modifier l'équipe pour lui donner son responsable (le QA Lead). |
+| 4 | Admin | Administration → **Projets** | Créer le projet et le rattacher à l'équipe. **Sans équipe, le projet n'apparaît pas chez le QA Lead.** |
+| 5 | QA Lead | **Campagnes** → Nouvelle campagne | Créer la campagne du sprint / de la version, puis **Démarrer**. |
+| 6 | QA Lead | **Tests** → Nouveau test | Créer les cas de test et les **assigner** aux testeurs. |
+
+Les environnements (DEV, QA, PREPROD, PROD) et les paramètres généraux sont créés automatiquement au premier lancement.
+
+---
+
+## Utiliser l'application selon son rôle
+
+Chaque rôle ne voit que les menus et les boutons qu'il a le droit d'utiliser. Une page interdite affiche « Accès refusé » (403) ; un élément qui n'est pas dans votre périmètre affiche « Introuvable » (404).
+
+### QA (testeur)
+
+Voit ses tests, ses anomalies et son activité.
+
+1. **Tests** : ouvrir un test qui vous est assigné, choisir le **Résultat** (réussi, échoué, bloqué, non exécuté), puis **Enregistrer le résultat**.
+2. **Si le test échoue** : un encadré rouge propose **Déclarer l'anomalie**. Le formulaire est déjà rempli (projet, étapes, résultat attendu, résultat obtenu) : complétez puis **Créer**.
+3. **Anomalies** → ouvrir l'anomalie → **Pièces jointes** : ajouter une capture, une vidéo ou un journal (10 Mo maximum).
+4. **Nouveau test** : vous pouvez rédiger vos propres cas de test. Ils vous sont assignés automatiquement.
+5. En fin de journée : **Mon activité** → **Nouvelle activité**. La somme réussis + échoués + bloqués + non exécutés doit être égale au nombre de tests exécutés, et un motif est obligatoire s'il y a des tests bloqués.
+6. Quand le développeur a corrigé : sur l'anomalie, **Marquer corrigée**, puis après revérification **Revérification : réussie** (l'anomalie est fermée) ou **échouée** (elle est rouverte).
+
+### QA Lead (chef d'équipe)
+
+Voit tout ce qui concerne son équipe.
+
+- **Campagnes** : créer, démarrer, bloquer, reprendre, terminer. L'équipe reçoit une notification à chaque changement.
+- **Tests** : créer les cas de test et les répartir entre testeurs (champ « Assigné à »).
+- **Anomalies** : les assigner à un testeur (bloc **Assigner à** sur la fiche).
+- **Rapports** : activité de l'équipe par jour / semaine / mois, avec le détail **Par testeur**.
+- **Mon équipe** : anomalies assignées et créées par membre.
+
+### Manager
+
+Consultation seulement, sur tous les projets : **Vue d'ensemble** (indicateurs et graphiques) et **Rapports** (activité et anomalies, export CSV). Il ne crée ni ne modifie rien.
+
+### Admin
+
+Tout ce que font les autres rôles, plus l'**Administration** : utilisateurs, rôles, projets, équipes, environnements, paramètres généraux, et le **Journal d'audit** (qui a fait quoi et quand ; rien n'y est jamais supprimé). Il est le seul à pouvoir supprimer des éléments.
+
 ---
 
 ## Récapitulatif : à chaque fois que vous voulez relancer le site
@@ -147,12 +201,18 @@ Relancez ensuite l'application (étape 4). Si de nouvelles dépendances ont ét�
 | `Address already in use` ou port 8080 occupé | Un autre serveur (Tomcat, un autre WildFly, etc.) utilise le port 8080. Arrêtez-le. |
 | Erreur de téléchargement avec `-o` | Au tout premier lancement, retirez `-o` : il faut internet. |
 | La page affiche 404 | Vérifiez l'URL : elle doit se terminer par `/qa-reporting-j2ee/`. |
+| « Accès refusé » (403) sur une page | Votre rôle n'y a pas droit (voir « Utiliser l'application selon son rôle »). |
+| Un QA Lead ne voit aucun projet, test ou campagne | Le projet n'est rattaché à aucune équipe, ou le lead n'est pas membre de l'équipe (voir l'étape 6). |
+| Un QA ne voit pas un test | Le test ne lui est pas assigné : demandez au QA Lead de l'assigner. |
+| Erreur 500 avec `Unresolved compilation problem` dans le terminal | L'éditeur (VS Code, Eclipse) a compilé une version cassée d'un fichier. Supprimez **uniquement** le dossier `target/classes`, puis relancez. |
 
 ---
 
 ## Pour aller plus loin
 
-- **Tests unitaires** : `mvn test`
+- **Tests unitaires** : `mvn test` (32 tests : mots de passe, jetons, droits par rôle, portée des données, règles métier…)
+- **Ne lancez pas `mvn clean`** sans raison : il efface aussi le serveur WildFly installé dans `target/server`, qui sera retéléchargé (il faut alors internet et plusieurs minutes).
+- **Traductions** : tous les textes de l'interface sont dans `src/main/resources/com/qareporting/i18n/messages_fr.properties` et `messages_en.properties`. Pour corriger un libellé, modifiez la même clé dans les deux fichiers.
 - **Produire le fichier `.war`** : `mvn package`. Le fichier est créé dans `target/qa-reporting-j2ee.war`.
 - **API REST** : endpoints sous `http://127.0.0.1:8080/qa-reporting-j2ee/api/…` (ex. `/api/projects`). Ce n'est pas une page web : `/api/` seul renvoie 404, et les endpoints demandent un jeton (obtenu via `POST /api/login`).
 - **Cahier des charges** : `docs/Cahier-des-charges-QA-Reporting-J2EE-NOUVEAU.docx`

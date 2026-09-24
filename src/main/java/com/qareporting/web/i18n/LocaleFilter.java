@@ -29,7 +29,12 @@ public class LocaleFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        String requested = request.getParameter("lang");
+        // Surtout pas request.getParameter() ici : sur un POST, cela décoderait le formulaire
+        // avant que l'UTF-8 ne soit appliqué, et tous les accents saisis seraient corrompus.
+        if (request.getCharacterEncoding() == null) {
+            request.setCharacterEncoding("UTF-8");
+        }
+        String requested = langFromQueryString(request.getQueryString());
         if (requested != null && LocaleBean.SUPPORTED.contains(requested)) {
             localeBean.setLanguage(requested);
             Cookie cookie = new Cookie(COOKIE, requested);
@@ -50,5 +55,17 @@ public class LocaleFilter extends HttpFilter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    private static String langFromQueryString(String query) {
+        if (query == null) {
+            return null;
+        }
+        for (String pair : query.split("&")) {
+            if (pair.startsWith("lang=")) {
+                return pair.substring("lang=".length());
+            }
+        }
+        return null;
     }
 }

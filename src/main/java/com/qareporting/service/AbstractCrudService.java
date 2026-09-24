@@ -1,5 +1,6 @@
 package com.qareporting.service;
 
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,10 @@ public abstract class AbstractCrudService<T, ID> {
     @PersistenceContext(unitName = "qaReportingJ2eePU")
     protected EntityManager em;
 
+    /** Toute écriture passant par ces méthodes est tracée dans le journal d'audit. */
+    @Inject
+    protected AuditService audit;
+
     protected abstract Class<T> entityClass();
 
     public List<T> findAll() {
@@ -31,12 +36,15 @@ public abstract class AbstractCrudService<T, ID> {
     @Transactional
     public T create(T entity) {
         em.persist(entity);
+        audit.record(AuditService.CREATED, entity);
         return entity;
     }
 
     @Transactional
     public T update(T entity) {
-        return em.merge(entity);
+        T merged = em.merge(entity);
+        audit.record(AuditService.UPDATED, merged);
+        return merged;
     }
 
     @Transactional
@@ -45,6 +53,7 @@ public abstract class AbstractCrudService<T, ID> {
         if (entity == null) {
             return false;
         }
+        audit.record(AuditService.DELETED, entity);
         em.remove(entity);
         return true;
     }

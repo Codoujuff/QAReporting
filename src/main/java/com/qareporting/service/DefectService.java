@@ -21,6 +21,20 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         return Defect.class;
     }
 
+    /** Même règle que listForUser, pour un seul objet (ouverture par id). */
+    public boolean canView(User viewer, Defect defect) {
+        if (viewer == null || defect == null) {
+            return false;
+        }
+        if (Scope.seesEverything(viewer)) {
+            return true;
+        }
+        if (Scope.isLeadWithTeam(viewer)) {
+            return Scope.inTeam(defect.getProject(), viewer.getTeam());
+        }
+        return Scope.sameUser(defect.getAssignedTo(), viewer) || Scope.sameUser(defect.getCreatedBy(), viewer);
+    }
+
     /** Same visibility rule as reporting: QA sees their own, QA Lead their team's, Manager/Admin everything. */
     public List<Defect> listForUser(User viewer) {
         String roleName = viewer.getRole().getName();
@@ -51,6 +65,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         defect.setStatus(Defect.Status.open);
         em.persist(defect);
         recordHistory(defect, null, Defect.Status.open, createdBy, null);
+        audit.record(AuditService.CREATED, defect);
         return defect;
     }
 
@@ -60,6 +75,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         em.merge(defect);
         recordHistory(defect, defect.getStatus(), defect.getStatus(), actor,
                 "Assignée à " + assignee.getName() + ".");
+        audit.record("assigned", defect, java.util.Map.of("assignee", assignee.getName()));
         notificationService.notify(assignee, "defect_assigned", "Anomalie assignée",
                 defect.getTitle() + " vous a été assignée.");
         return defect;
@@ -77,6 +93,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         defect.setStatus(next);
         em.merge(defect);
         recordHistory(defect, previous, next, actor, comment);
+        audit.record(passed ? "retest_passed" : "retest_failed", defect, AuditService.transition(previous, next));
         return defect;
     }
 
@@ -86,6 +103,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         defect.setStatus(Defect.Status.fixed);
         em.merge(defect);
         recordHistory(defect, previous, Defect.Status.fixed, actor, comment);
+        audit.record("status_changed", defect, AuditService.transition(previous, Defect.Status.fixed));
         notificationService.notify(defect.getCreatedBy(), "defect_fixed", "Anomalie corrigée",
                 defect.getTitle() + " est passée à \"corrigée\".");
         return defect;
@@ -97,6 +115,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         defect.setStatus(Defect.Status.closed);
         em.merge(defect);
         recordHistory(defect, previous, Defect.Status.closed, actor, comment);
+        audit.record("status_changed", defect, AuditService.transition(previous, Defect.Status.closed));
         return defect;
     }
 
@@ -106,6 +125,7 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         defect.setStatus(Defect.Status.reopened);
         em.merge(defect);
         recordHistory(defect, previous, Defect.Status.reopened, actor, comment);
+        audit.record("status_changed", defect, AuditService.transition(previous, Defect.Status.reopened));
         return defect;
     }
 

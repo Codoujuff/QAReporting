@@ -131,6 +131,11 @@ public class ReportingService {
                 .build();
     }
 
+    /** Activités déclarées entre deux dates (incluses), dans la portée du rôle — pour les rapports JSF. */
+    public List<Activity> activitiesBetween(User viewer, LocalDate start, LocalDate end) {
+        return scopedActivities(viewer, start, end);
+    }
+
     private List<Activity> scopedActivities(User viewer, LocalDate start, LocalDate end) {
         String scopeClause = isGlobal(viewer) ? ""
                 : isTeamScoped(viewer) ? " AND a.user.team = :team"

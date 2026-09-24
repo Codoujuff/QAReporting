@@ -19,6 +19,7 @@ public class Attachment {
     private String filename;
 
     @Column(name = "file_path")
+    @jakarta.json.bind.annotation.JsonbTransient // chemin disque du serveur : jamais exposé par l'API
     private String path;
 
     @Column(name = "mime_type")

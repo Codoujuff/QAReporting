@@ -101,10 +101,12 @@ L'interface est disponible en français (par défaut) et en anglais. Le sélecte
 
 | Rôle | Périmètre |
 |---|---|
-| QA | Saisie de l'activité, tests, anomalies et reporting personnel |
-| QA Lead | Suivi de l'équipe, campagnes et anomalies du périmètre |
-| Manager | Vision synthétique de l'avancement et des risques |
-| Admin | Gestion des utilisateurs, projets, équipes et paramètres |
+| QA | Rédige et exécute ses tests, déclare son activité, crée des anomalies (avec pièces jointes) |
+| QA Lead | Son équipe : campagnes, répartition des tests, assignation des anomalies, rapports par testeur |
+| Manager | Consultation de tous les projets : vue d'ensemble et rapports |
+| Admin | Tout, plus l'administration (utilisateurs, projets, équipes, paramètres) et le journal d'audit |
+
+Les droits sont définis en un seul endroit, `security/Permissions.java`, et appliqués à la fois par l'API REST et par l'interface. Le guide d'utilisation par rôle est dans [docs/GUIDE-INSTALLATION.md](docs/GUIDE-INSTALLATION.md#utiliser-lapplication-selon-son-rôle).
 
 ## Dépannage
 

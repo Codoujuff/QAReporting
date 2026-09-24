@@ -126,6 +126,9 @@
                 <h:link outcome="/app/admin/settings/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/settings') ? 'active' : ''}">
                     <span class="nav-dot"></span>#{msg['nav.appSettings']}
                 </h:link>
+                <h:link outcome="/app/admin/audit/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/audit') ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.audit']}
+                </h:link>
                 <div class="nav-section">#{msg['nav.section.account']}</div>
                 <h:link outcome="/app/notifications" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/notifications.xhtml' ? 'active' : ''}">
                     <span class="nav-dot"></span>#{msg['nav.notifications']}

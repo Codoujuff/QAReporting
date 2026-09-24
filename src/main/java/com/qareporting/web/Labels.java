@@ -59,6 +59,20 @@ public class Labels {
         return stored;
     }
 
+    /** Taille lisible : 830 o, 12,4 Ko, 3,1 Mo. */
+    public String fileSize(long bytes) {
+        java.text.NumberFormat nf = java.text.NumberFormat.getNumberInstance(I18n.locale());
+        nf.setMaximumFractionDigits(1);
+        boolean en = "en".equals(I18n.locale().getLanguage());
+        if (bytes < 1024) {
+            return bytes + (en ? " B" : " o");
+        }
+        if (bytes < 1024 * 1024) {
+            return nf.format(bytes / 1024.0) + (en ? " KB" : " Ko");
+        }
+        return nf.format(bytes / (1024.0 * 1024)) + (en ? " MB" : " Mo");
+    }
+
     /** Date du jour, affichée dans l'en-tête. */
     public LocalDate getToday() {
         return LocalDate.now();
