@@ -1,0 +1,38 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{teamFormBean.id}"/>
+        <f:viewAction action="#{teamFormBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h1>#{teamFormBean.id != null ? 'Modifier l\'équipe' : 'Nouvelle équipe'}</h1>
+
+        <div class="card">
+            <h:form>
+                <div class="form-row">
+                    <label for="name">Nom</label>
+                    <h:inputText id="name" value="#{teamFormBean.team.name}" required="true"/>
+                </div>
+                <div class="form-row">
+                    <label for="description">Description</label>
+                    <h:inputTextarea id="description" value="#{teamFormBean.team.description}"/>
+                </div>
+                <div class="form-row">
+                    <label for="lead">Responsable</label>
+                    <h:selectOneMenu id="lead" value="#{teamFormBean.leadId}">
+                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{teamFormBean.leadOptions}" var="u"
+                                       itemValue="#{u.id}" itemLabel="#{u.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <h:commandButton styleClass="btn" value="Enregistrer" action="#{teamFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/teams/list"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

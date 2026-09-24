@@ -1,0 +1,43 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Projets</h1>
+            <h:link styleClass="btn" value="Nouveau projet" outcome="/app/admin/projects/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{projectListBean.projects}" var="p" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Nom</f:facet>
+                    #{p.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Statut</f:facet>
+                    <span class="badge status-#{p.status}"><span class="dot"></span>#{p.status}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Équipe</f:facet>
+                    #{p.team != null ? p.team.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <div class="table-actions">
+                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/projects/form">
+                            <f:param name="id" value="#{p.id}"/>
+                        </h:link>
+                        <h:form style="display:inline">
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{projectListBean.delete(p)}"
+                                             onclick="return confirm('Supprimer ce projet ?');"/>
+                        </h:form>
+                    </div>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

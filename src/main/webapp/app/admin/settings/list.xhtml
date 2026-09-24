@@ -1,0 +1,47 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Paramètres</h1>
+            <h:link styleClass="btn" value="Nouveau réglage" outcome="/app/admin/settings/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{appSettingListBean.settings}" var="s" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Clé</f:facet>
+                    #{s.settingKey}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Valeur</f:facet>
+                    #{s.settingValue}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Description</f:facet>
+                    #{s.description}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <div class="table-actions">
+                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/settings/form">
+                            <f:param name="id" value="#{s.id}"/>
+                        </h:link>
+                        <h:form style="display:inline">
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{appSettingListBean.delete(s)}"
+                                             onclick="return confirm('Supprimer ce réglage ?');"/>
+                        </h:form>
+                    </div>
+                </h:column>
+            </h:dataTable>
+
+            <h:panelGroup rendered="#{empty appSettingListBean.settings}">
+                <p style="color:#5B6472;font-size:13px;">Aucun réglage enregistré pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

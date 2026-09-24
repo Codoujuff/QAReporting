@@ -1,0 +1,100 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{testDetailBean.id}"/>
+        <f:viewAction action="#{testDetailBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h1>#{testDetailBean.test.title}</h1>
+
+        <div class="card">
+            <p><strong>Projet :</strong> #{testDetailBean.test.project.name}</p>
+            <p><strong>Campagne :</strong> #{testDetailBean.test.campaign != null ? testDetailBean.test.campaign.name : '—'}</p>
+            <p><strong>Type :</strong> #{testDetailBean.test.type}</p>
+            <p><strong>Statut actuel :</strong>
+                <span class="badge status-#{testDetailBean.test.status}"><span class="dot"></span>#{testDetailBean.test.status}</span>
+            </p>
+            <p><strong>Description :</strong> #{testDetailBean.test.description}</p>
+            <p><strong>Préconditions :</strong> #{testDetailBean.test.preconditions}</p>
+            <h:panelGroup rendered="#{not empty testDetailBean.test.steps}">
+                <p><strong>Étapes :</strong></p>
+                <ol>
+                    <ui:repeat value="#{testDetailBean.test.steps}" var="s">
+                        <li>#{s}</li>
+                    </ui:repeat>
+                </ol>
+            </h:panelGroup>
+            <p><strong>Résultat attendu :</strong> #{testDetailBean.test.expectedResult}</p>
+        </div>
+
+        <div class="card">
+            <h2>Exécuter ce test</h2>
+            <h:form>
+                <div class="form-row">
+                    <label for="result">Résultat</label>
+                    <h:selectOneMenu id="result" value="#{testDetailBean.resultStatus}">
+                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testDetailBean.statusOptions}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="environment">Environnement</label>
+                    <h:selectOneMenu id="environment" value="#{testDetailBean.environmentId}">
+                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testDetailBean.environmentOptions}" var="e"
+                                       itemValue="#{e.id}" itemLabel="#{e.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="actualResult">Résultat obtenu</label>
+                    <h:inputTextarea id="actualResult" value="#{testDetailBean.actualResult}"/>
+                </div>
+                <div class="form-row">
+                    <label for="duration">Durée</label>
+                    <h:inputText id="duration" value="#{testDetailBean.duration}"/>
+                </div>
+                <h:commandButton styleClass="btn" value="Enregistrer le résultat" action="#{testDetailBean.execute}"/>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h2>Historique des exécutions</h2>
+            <h:dataTable value="#{testDetailBean.executions}" var="e" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Date</f:facet>
+                    <h:outputText value="#{e.executedAt}">
+                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Résultat</f:facet>
+                    <span class="badge status-#{e.status}"><span class="dot"></span>#{e.status}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Résultat obtenu</f:facet>
+                    #{e.actualResult}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Exécuté par</f:facet>
+                    #{e.executedBy != null ? e.executedBy.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Environnement</f:facet>
+                    #{e.environment != null ? e.environment.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Durée</f:facet>
+                    #{e.duration}
+                </h:column>
+            </h:dataTable>
+            <h:panelGroup rendered="#{empty testDetailBean.executions}">
+                <p style="color:#5B6472;font-size:13px;">Aucune exécution enregistrée pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

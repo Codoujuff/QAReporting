@@ -1,0 +1,53 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Utilisateurs</h1>
+            <h:link styleClass="btn" value="Nouvel utilisateur" outcome="/app/admin/users/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{userListBean.users}" var="u" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Nom</f:facet>
+                    #{u.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Email</f:facet>
+                    #{u.email}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Rôle</f:facet>
+                    <span class="badge">#{u.role.name}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Équipe</f:facet>
+                    #{u.team != null ? u.team.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actif</f:facet>
+                    <span class="badge status-#{u.active ? 'active' : 'inactive'}">
+                        <span class="dot"></span>#{u.active ? 'Actif' : 'Inactif'}
+                    </span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <div class="table-actions">
+                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/users/form">
+                            <f:param name="id" value="#{u.id}"/>
+                        </h:link>
+                        <h:form style="display:inline" rendered="#{u.id != sessionAuth.userId}">
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{userListBean.delete(u)}"
+                                             onclick="return confirm('Supprimer cet utilisateur ?');"/>
+                        </h:form>
+                    </div>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,44 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{projectFormBean.id}"/>
+        <f:viewAction action="#{projectFormBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h1>#{projectFormBean.id != null ? 'Modifier le projet' : 'Nouveau projet'}</h1>
+
+        <div class="card">
+            <h:form>
+                <div class="form-row">
+                    <label for="name">Nom</label>
+                    <h:inputText id="name" value="#{projectFormBean.project.name}" required="true"/>
+                </div>
+                <div class="form-row">
+                    <label for="description">Description</label>
+                    <h:inputTextarea id="description" value="#{projectFormBean.project.description}"/>
+                </div>
+                <div class="form-row">
+                    <label for="status">Statut</label>
+                    <h:selectOneMenu id="status" value="#{projectFormBean.project.status}">
+                        <f:selectItems value="#{projectFormBean.statusOptions}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="team">Équipe</label>
+                    <h:selectOneMenu id="team" value="#{projectFormBean.teamId}">
+                        <f:selectItem itemLabel="-- Aucune --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{projectFormBean.teamOptions}" var="t"
+                                       itemValue="#{t.id}" itemLabel="#{t.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <h:commandButton styleClass="btn" value="Enregistrer" action="#{projectFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/projects/list"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

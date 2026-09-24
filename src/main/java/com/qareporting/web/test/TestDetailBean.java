@@ -1,0 +1,131 @@
+package com.qareporting.web.test;
+
+import com.qareporting.entity.Environment;
+import com.qareporting.entity.Test;
+import com.qareporting.entity.TestExecution;
+import com.qareporting.service.EnvironmentService;
+import com.qareporting.service.TestService;
+import com.qareporting.web.auth.SessionAuth;
+import jakarta.annotation.PostConstruct;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * Détail d'un cas de test : informations, historique des exécutions et
+ * formulaire d'exécution. Même règle que TestResource.execute() : chaque
+ * exécution crée une ligne d'historique immuable et met à jour le statut
+ * courant du test — jamais d'écrasement du résultat précédent.
+ */
+@Named
+@ViewScoped
+public class TestDetailBean implements Serializable {
+
+    @Inject
+    private TestService testService;
+
+    @Inject
+    private EnvironmentService environmentService;
+
+    @Inject
+    private SessionAuth sessionAuth;
+
+    private Long id;
+    private Test test;
+    private List<TestExecution> executions;
+    private List<Environment> environmentOptions;
+
+    private Test.Status resultStatus;
+    private String actualResult;
+    private Long environmentId;
+    private String duration;
+
+    @PostConstruct
+    public void init() {
+        environmentOptions = environmentService.findAll();
+    }
+
+    public void load() {
+        test = testService.find(id);
+        executions = testService.executions(id);
+        environmentId = test.getEnvironment() != null ? test.getEnvironment().getId() : null;
+    }
+
+    public String execute() {
+        if (resultStatus == null) {
+            addError("Le résultat est obligatoire.");
+            return null;
+        }
+
+        Environment environment = environmentId != null ? environmentService.find(environmentId) : test.getEnvironment();
+        testService.execute(test, resultStatus, actualResult, sessionAuth.getCurrentUser(), environment, duration);
+
+        return "detail.xhtml?faces-redirect=true&id=" + id;
+    }
+
+    private void addError(String message) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, message, null));
+    }
+
+    public List<Test.Status> getStatusOptions() {
+        return List.of(Test.Status.values());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Test getTest() {
+        return test;
+    }
+
+    public List<TestExecution> getExecutions() {
+        return executions;
+    }
+
+    public List<Environment> getEnvironmentOptions() {
+        return environmentOptions;
+    }
+
+    public Test.Status getResultStatus() {
+        return resultStatus;
+    }
+
+    public void setResultStatus(Test.Status resultStatus) {
+        this.resultStatus = resultStatus;
+    }
+
+    public String getActualResult() {
+        return actualResult;
+    }
+
+    public void setActualResult(String actualResult) {
+        this.actualResult = actualResult;
+    }
+
+    public Long getEnvironmentId() {
+        return environmentId;
+    }
+
+    public void setEnvironmentId(Long environmentId) {
+        this.environmentId = environmentId;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+}

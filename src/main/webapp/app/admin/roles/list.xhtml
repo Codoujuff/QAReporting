@@ -1,0 +1,27 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Rôles</h1>
+
+        <div class="card">
+            <h:dataTable value="#{roleListBean.roles}" var="r" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Rôle</f:facet>
+                    #{r.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Description</f:facet>
+                    #{r.description}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Utilisateurs</f:facet>
+                    #{r.userCount}
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

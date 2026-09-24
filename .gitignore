@@ -1,0 +1,17 @@
+# Build Maven (contient aussi le serveur WildFly provisionné)
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Claude Code (réglages locaux)
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db

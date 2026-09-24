@@ -1,0 +1,33 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="next" value="#{loginBean.next}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <div class="login-wrapper">
+            <div class="card login-card">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+                    <span class="brand-dot"></span>
+                    <span style="font-size:16px;font-weight:700;">QA Reporting</span>
+                </div>
+                <h1>Connexion</h1>
+                <h:form>
+                    <div class="form-row">
+                        <label for="email">Email</label>
+                        <h:inputText id="email" value="#{loginBean.email}" required="true"/>
+                    </div>
+                    <div class="form-row">
+                        <label for="password">Mot de passe</label>
+                        <h:inputSecret id="password" value="#{loginBean.password}" required="true"/>
+                    </div>
+                    <h:commandButton styleClass="btn" value="Se connecter" action="#{loginBean.login}"/>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

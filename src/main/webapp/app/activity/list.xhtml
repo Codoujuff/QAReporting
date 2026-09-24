@@ -1,0 +1,66 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Mon activité</h1>
+        <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
+            Journal quotidien des tests exécutés.
+        </p>
+
+        <div class="card">
+            <h:link styleClass="btn" value="Nouvelle activité" outcome="/app/activity/form"/>
+
+            <h:dataTable value="#{activityListBean.activities}" var="a" styleClass="data-table" style="margin-top:16px;">
+                <h:column>
+                    <f:facet name="header">Date</f:facet>
+                    <h:outputText value="#{a.activityDate}">
+                        <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Projet</f:facet>
+                    #{a.project.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Campagne</f:facet>
+                    #{a.campaign != null ? a.campaign.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Type</f:facet>
+                    #{a.activityType}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Exécutés</f:facet>
+                    #{a.testsExecuted}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Réussis</f:facet>
+                    #{a.passed}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Échoués</f:facet>
+                    #{a.failed}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Bloqués</f:facet>
+                    #{activityListBean.blockedCountOf(a)}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Non exécutés</f:facet>
+                    #{a.notRun}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Anomalies</f:facet>
+                    #{a.defectsCount}
+                </h:column>
+            </h:dataTable>
+
+            <h:panelGroup rendered="#{empty activityListBean.activities}">
+                <p style="color:#5B6472;font-size:13px;">Aucune activité enregistrée pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,39 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Équipes</h1>
+            <h:link styleClass="btn" value="Nouvelle équipe" outcome="/app/admin/teams/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{teamListBean.teams}" var="t" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Nom</f:facet>
+                    #{t.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Responsable</f:facet>
+                    #{t.lead != null ? t.lead.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <div class="table-actions">
+                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/teams/form">
+                            <f:param name="id" value="#{t.id}"/>
+                        </h:link>
+                        <h:form style="display:inline">
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{teamListBean.delete(t)}"
+                                             onclick="return confirm('Supprimer cette équipe ?');"/>
+                        </h:form>
+                    </div>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

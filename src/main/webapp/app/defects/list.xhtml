@@ -1,0 +1,54 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Anomalies</h1>
+            <h:link styleClass="btn" value="Nouvelle anomalie" outcome="/app/defects/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{defectListBean.defects}" var="d" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">ID</f:facet>
+                    ANO-#{d.id}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Titre</f:facet>
+                    <h:link value="#{d.title}" outcome="/app/defects/detail">
+                        <f:param name="id" value="#{d.id}"/>
+                    </h:link>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Projet</f:facet>
+                    #{d.project.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Sévérité</f:facet>
+                    <span class="badge severity-#{d.severity}"><span class="dot"></span>#{d.severity}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Priorité</f:facet>
+                    <span class="badge">#{d.priority}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Statut</f:facet>
+                    <span class="badge status-#{d.status}"><span class="dot"></span>#{d.status}</span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Assignée à</f:facet>
+                    #{d.assignedTo != null ? d.assignedTo.name : '—'}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Créée le</f:facet>
+                    <h:outputText value="#{d.createdAt}">
+                        <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                    </h:outputText>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

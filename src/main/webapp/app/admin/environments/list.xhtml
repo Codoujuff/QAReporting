@@ -1,0 +1,45 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Environnements</h1>
+            <h:link styleClass="btn" value="Nouvel environnement" outcome="/app/admin/environments/form"/>
+        </div>
+
+        <div class="card">
+            <h:dataTable value="#{environmentListBean.environments}" var="e" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Nom</f:facet>
+                    #{e.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">URL</f:facet>
+                    #{e.url}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Statut</f:facet>
+                    <span class="badge status-#{e.status == 'available' ? 'active' : 'inactive'}">
+                        <span class="dot"></span>#{e.status == 'available' ? 'Disponible' : 'Indisponible'}
+                    </span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <div class="table-actions">
+                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/environments/form">
+                            <f:param name="id" value="#{e.id}"/>
+                        </h:link>
+                        <h:form style="display:inline">
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{environmentListBean.delete(e)}"
+                                             onclick="return confirm('Supprimer cet environnement ?');"/>
+                        </h:form>
+                    </div>
+                </h:column>
+            </h:dataTable>
+        </div>
+    </ui:define>
+</ui:composition>

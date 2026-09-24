@@ -1,0 +1,72 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="avatar" style="width:48px;height:48px;font-size:16px;">#{sessionAuth.userInitials}</div>
+            <div>
+                <div style="font-weight:700;font-size:18px;">#{profileBean.user.name}</div>
+                <div style="color:#5B6472;font-size:13px;">
+                    #{profileBean.user.role.name}#{profileBean.user.team != null ? ' · '.concat(profileBean.user.team.name) : ''}
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-tile">
+                <div class="value">#{profileBean.testsExecutedCount}</div>
+                <div class="label">Tests</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{profileBean.passedCount}</div>
+                <div class="label">Passed</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{profileBean.failedCount}</div>
+                <div class="label">Failed</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{profileBean.anomaliesCount}</div>
+                <div class="label">Anomalies</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">
+                    <h:outputText value="#{profileBean.successRate}">
+                        <f:convertNumber pattern="0.0"/>
+                    </h:outputText>%
+                </div>
+                <div class="label">Taux de réussite</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Activité récente</h2>
+            <h:dataTable value="#{profileBean.recentActivities}" var="a" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Date</f:facet>
+                    <h:outputText value="#{a.activityDate}">
+                        <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Projet</f:facet>
+                    #{a.project.name}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Type</f:facet>
+                    #{a.activityType}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Tests</f:facet>
+                    #{a.testsExecuted}
+                </h:column>
+            </h:dataTable>
+            <h:panelGroup rendered="#{empty profileBean.recentActivities}">
+                <p style="color:#5B6472;font-size:13px;">Aucune activité enregistrée pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

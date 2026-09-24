@@ -1,0 +1,40 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Mon équipe</h1>
+
+        <h:panelGroup rendered="#{!dashboardBean.hasTeam}">
+            <div class="card">
+                <p style="color:#5B6472;font-size:13px;">
+                    Votre compte n'est rattaché à aucune équipe — demandez à un administrateur de vous en assigner une.
+                </p>
+            </div>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{dashboardBean.hasTeam}">
+            <div class="card">
+                <h:dataTable value="#{dashboardBean.teamMembers}" var="m" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Membre</f:facet>
+                        #{m.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Anomalies assignées</f:facet>
+                        #{m.assignedCount}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Anomalies créées</f:facet>
+                        #{m.createdCount}
+                    </h:column>
+                </h:dataTable>
+                <h:panelGroup rendered="#{empty dashboardBean.teamMembers}">
+                    <p style="color:#5B6472;font-size:13px;">Aucun membre dans cette équipe pour l'instant.</p>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

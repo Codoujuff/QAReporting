@@ -1,0 +1,63 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{userFormBean.id}"/>
+        <f:viewAction action="#{userFormBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h1>#{userFormBean.id != null ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}</h1>
+
+        <div class="card">
+            <h:form>
+                <div class="form-row">
+                    <label for="name">Nom</label>
+                    <h:inputText id="name" value="#{userFormBean.user.name}" required="true"/>
+                </div>
+                <div class="form-row">
+                    <label for="initials">Initiales</label>
+                    <h:inputText id="initials" value="#{userFormBean.user.initials}"/>
+                </div>
+                <div class="form-row">
+                    <label for="email">Email</label>
+                    <h:inputText id="email" value="#{userFormBean.user.email}"
+                                 required="true" disabled="#{userFormBean.id != null}"/>
+                </div>
+                <div class="form-row">
+                    <label for="password">
+                        #{userFormBean.id != null ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
+                    </label>
+                    <h:inputSecret id="password" value="#{userFormBean.password}"/>
+                </div>
+                <div class="form-row">
+                    <label for="role">Rôle</label>
+                    <h:selectOneMenu id="role" value="#{userFormBean.roleId}">
+                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{userFormBean.roleOptions}" var="r"
+                                       itemValue="#{r.id}" itemLabel="#{r.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="team">Équipe</label>
+                    <h:selectOneMenu id="team" value="#{userFormBean.teamId}">
+                        <f:selectItem itemLabel="-- Aucune --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{userFormBean.teamOptions}" var="t"
+                                       itemValue="#{t.id}" itemLabel="#{t.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="active">
+                        <h:selectBooleanCheckbox id="active" value="#{userFormBean.user.active}"/>
+                        Compte actif
+                    </label>
+                </div>
+                <h:commandButton styleClass="btn" value="Enregistrer" action="#{userFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/users/list"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

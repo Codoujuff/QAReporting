@@ -1,0 +1,265 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <!-- ===================== QA ===================== -->
+        <h:panelGroup rendered="#{dashboardBean.qaView}">
+            <h1>Bonjour #{dashboardBean.greetingName}</h1>
+            <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">Voici votre activité QA.</p>
+
+            <div class="stat-row">
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.testsExecutedCount}</div>
+                    <div class="label">Tests réalisés</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.passedCount}</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.failedCount}</div>
+                    <div class="label">Failed</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.blockedCount}</div>
+                    <div class="label">Blocked</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.openDefectCount}</div>
+                    <div class="label">Anomalies ouvertes</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">
+                        <h:outputText value="#{dashboardBean.successRate}">
+                            <f:convertNumber pattern="0.0"/>
+                        </h:outputText>%
+                    </div>
+                    <div class="label">Taux de réussite</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h2>Mon activité aujourd'hui</h2>
+                    <h:panelGroup rendered="#{empty dashboardBean.todaysActivities}">
+                        <p style="color:#5B6472;font-size:13px;">Aucune activité déclarée aujourd'hui.</p>
+                    </h:panelGroup>
+                    <ui:repeat value="#{dashboardBean.todaysActivities}" var="a">
+                        <div style="padding:10px 0;border-top:1px solid var(--border-light);">
+                            <div style="font-weight:600;font-size:13px;">
+                                #{a.project.name}#{a.campaign != null ? ' · '.concat(a.campaign.name) : ''}
+                            </div>
+                            <div style="color:#5B6472;font-size:12px;margin-top:2px;">
+                                #{a.activityType}#{a.duration != null ? ' · '.concat(a.duration) : ''}
+                            </div>
+                            <div style="font-size:12px;margin-top:4px;">
+                                Tests #{a.testsExecuted} &#160; Passed #{a.passed} &#160; Failed #{a.failed} &#160; Blocked #{a.blocked}
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </div>
+                <div class="card">
+                    <h2>Actions rapides</h2>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <h:link styleClass="btn" style="text-align:center;" value="+ Déclarer une activité" outcome="/app/activity/form"/>
+                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Créer une anomalie" outcome="/app/defects/form"/>
+                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Ajouter un test" outcome="/app/tests/form"/>
+                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Démarrer une campagne" outcome="/app/campaigns/list"/>
+                        <h:link value="Voir mon reporting" outcome="/app/reporting" style="text-align:center;font-size:13px;"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h2>Tests par jour</h2>
+                    <h:outputText value="#{dashboardBean.testsByDaySvg}" escape="false"/>
+                </div>
+                <div class="card">
+                    <h2>Anomalies par sévérité</h2>
+                    <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
+                </div>
+                <div class="card">
+                    <h2>Avancement des campagnes</h2>
+                    <h:panelGroup rendered="#{empty dashboardBean.campaignProgress}">
+                        <p style="color:#5B6472;font-size:13px;">Aucune campagne pour l'instant.</p>
+                    </h:panelGroup>
+                    <ui:repeat value="#{dashboardBean.campaignProgress}" var="cp">
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:13px;margin-bottom:4px;">#{cp.name}</div>
+                            <div class="progress-track">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width:#{cp.percent}%"></div>
+                                </div>
+                                <span class="progress-percent">#{cp.percent}%</span>
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Mes anomalies récentes</h2>
+                <h:dataTable value="#{dashboardBean.recentDefects}" var="d" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Titre</f:facet>
+                        <h:link value="#{d.title}" outcome="/app/defects/detail">
+                            <f:param name="id" value="#{d.id}"/>
+                        </h:link>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Projet</f:facet>
+                        #{d.project.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Sévérité</f:facet>
+                        <span class="badge severity-#{d.severity}"><span class="dot"></span>#{d.severity}</span>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Statut</f:facet>
+                        <span class="badge status-#{d.status}"><span class="dot"></span>#{d.status}</span>
+                    </h:column>
+                </h:dataTable>
+                <h:panelGroup rendered="#{empty dashboardBean.recentDefects}">
+                    <p style="color:#5B6472;font-size:13px;">Aucune anomalie pour l'instant.</p>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+
+        <!-- ===================== QA LEAD ===================== -->
+        <h:panelGroup rendered="#{dashboardBean.leadView}">
+            <h1>Dashboard équipe</h1>
+            <div class="stat-row">
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.teamMembers.size()}</div>
+                    <div class="label">Membres de l'équipe</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.myDefectCount}</div>
+                    <div class="label">Anomalies de l'équipe</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.openDefectCount}</div>
+                    <div class="label">Anomalies ouvertes</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.criticalDefectCount}</div>
+                    <div class="label">Anomalies critiques</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h2>Anomalies par statut</h2>
+                    <h:outputText value="#{dashboardBean.defectsByStatusSvg}" escape="false"/>
+                </div>
+                <div class="card">
+                    <h2>Anomalies par sévérité</h2>
+                    <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Mon équipe</h2>
+                <h:panelGroup rendered="#{!dashboardBean.hasTeam}">
+                    <p style="color:#5B6472;font-size:13px;">
+                        Votre compte n'est rattaché à aucune équipe — demandez à un administrateur de vous en assigner une.
+                    </p>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{dashboardBean.hasTeam}">
+                    <h:dataTable value="#{dashboardBean.teamMembers}" var="m" styleClass="data-table">
+                        <h:column>
+                            <f:facet name="header">Membre</f:facet>
+                            #{m.name}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Anomalies assignées</f:facet>
+                            #{m.assignedCount}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Anomalies créées</f:facet>
+                            #{m.createdCount}
+                        </h:column>
+                    </h:dataTable>
+                    <h:panelGroup rendered="#{empty dashboardBean.teamMembers}">
+                        <p style="color:#5B6472;font-size:13px;">Aucun membre dans cette équipe pour l'instant.</p>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+
+        <!-- ===================== MANAGER ===================== -->
+        <h:panelGroup rendered="#{dashboardBean.managerView}">
+            <h1>Vue d'ensemble</h1>
+            <div class="stat-row">
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.projectCount}</div>
+                    <div class="label">Projets</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.teamCount}</div>
+                    <div class="label">Équipes</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.userCount}</div>
+                    <div class="label">Utilisateurs</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.myDefectCount}</div>
+                    <div class="label">Anomalies totales</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.openDefectCount}</div>
+                    <div class="label">Anomalies ouvertes</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="value">#{dashboardBean.criticalDefectCount}</div>
+                    <div class="label">Anomalies critiques</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h2>Anomalies par statut</h2>
+                    <h:outputText value="#{dashboardBean.defectsByStatusSvg}" escape="false"/>
+                </div>
+                <div class="card">
+                    <h2>Anomalies par sévérité</h2>
+                    <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
+                </div>
+                <div class="card">
+                    <h2>Projets par statut</h2>
+                    <h:outputText value="#{dashboardBean.projectsByStatusSvg}" escape="false"/>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Anomalies par projet</h2>
+                <h:dataTable value="#{dashboardBean.projectBreakdown}" var="pr" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Projet</f:facet>
+                        #{pr.projectName}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Total</f:facet>
+                        #{pr.total}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ouvertes</f:facet>
+                        #{pr.open}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Critiques</f:facet>
+                        #{pr.critical}
+                    </h:column>
+                </h:dataTable>
+                <h:panelGroup rendered="#{empty dashboardBean.projectBreakdown}">
+                    <p style="color:#5B6472;font-size:13px;">Aucune anomalie enregistrée pour l'instant.</p>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

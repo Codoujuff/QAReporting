@@ -1,0 +1,78 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Tests</h1>
+            <h:link styleClass="btn" value="Nouveau test" outcome="/app/tests/form"/>
+        </div>
+
+        <div class="card">
+            <h:form>
+                <h:dataTable value="#{testListBean.tests}" var="t" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+                        t#{t.id}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Titre</f:facet>
+                        <h:link value="#{t.title}" outcome="/app/tests/detail">
+                            <f:param name="id" value="#{t.id}"/>
+                        </h:link>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Projet</f:facet>
+                        #{t.project.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Campagne</f:facet>
+                        #{t.campaign != null ? t.campaign.name : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Type</f:facet>
+                        #{t.type}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Env.</f:facet>
+                        #{t.environment != null ? t.environment.name : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Assigné à</f:facet>
+                        #{t.assignedTo != null ? t.assignedTo.name : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Statut</f:facet>
+                        <span class="badge status-#{t.status}"><span class="dot"></span>#{t.status}</span>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Dernière exéc.</f:facet>
+                        <h:outputText value="#{testListBean.lastExecutionOf(t).executedAt}"
+                                      rendered="#{testListBean.lastExecutionOf(t) != null}">
+                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                        <h:outputText value="—" rendered="#{testListBean.lastExecutionOf(t) == null}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Actions</f:facet>
+                        <div class="table-actions">
+                            <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/tests/form">
+                                <f:param name="id" value="#{t.id}"/>
+                            </h:link>
+                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                                             action="#{testListBean.delete(t)}"
+                                             rendered="#{sessionAuth.hasRole('admin')}"
+                                             onclick="return confirm('Supprimer ce test ?');"/>
+                        </div>
+                    </h:column>
+                </h:dataTable>
+
+                <h:panelGroup rendered="#{empty testListBean.tests}">
+                    <p style="color:#5B6472;font-size:13px;">Aucun test enregistré pour l'instant.</p>
+                </h:panelGroup>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

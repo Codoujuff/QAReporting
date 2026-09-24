@@ -1,0 +1,41 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <div class="actions-bar">
+            <h1>Notifications</h1>
+            <h:form>
+                <h:commandButton styleClass="btn btn-secondary" value="Tout marquer comme lu"
+                                 action="#{notificationBean.markAllRead}"
+                                 rendered="#{notificationBean.unreadCount gt 0}"/>
+            </h:form>
+        </div>
+
+        <div class="card">
+            <h:form>
+                <ui:repeat value="#{notificationBean.notifications}" var="n">
+                    <div class="notification-item">
+                        <span class="notification-dot #{notificationBean.isUnread(n) ? 'unread' : 'read'}"></span>
+                        <div class="notification-body">
+                            <div class="notification-title">#{n.title}</div>
+                            <div class="notification-message">#{n.message}</div>
+                            <div class="notification-time">
+                                #{notificationBean.relativeTime(n)}
+                                <h:commandLink value=" · Marquer comme lue" styleClass="notification-time"
+                                               action="#{notificationBean.markRead(n.id)}"
+                                               rendered="#{notificationBean.isUnread(n)}"/>
+                            </div>
+                        </div>
+                    </div>
+                </ui:repeat>
+
+                <h:panelGroup rendered="#{empty notificationBean.notifications}">
+                    <p style="color:#5B6472;font-size:13px;">Aucune notification pour l'instant.</p>
+                </h:panelGroup>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

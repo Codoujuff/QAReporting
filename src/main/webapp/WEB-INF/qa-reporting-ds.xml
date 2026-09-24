@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources xmlns="http://www.jboss.org/ironjacamar/schema"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.jboss.org/ironjacamar/schema http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
+    <datasource jndi-name="java:/QaReportingJ2eeDS" pool-name="QaReportingJ2eeDS" enabled="true" use-java-context="true">
+        <connection-url>jdbc:mysql://127.0.0.1:3306/qa_reporting_j2ee?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8</connection-url>
+        <driver>qa-reporting-j2ee.war_com.mysql.cj.jdbc.Driver_8_4</driver>
+        <security>
+            <user-name>root</user-name>
+            <password></password>
+        </security>
+        <validation>
+            <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+            <background-validation>true</background-validation>
+        </validation>
+        <pool>
+            <min-pool-size>2</min-pool-size>
+            <max-pool-size>10</max-pool-size>
+        </pool>
+    </datasource>
+</datasources>

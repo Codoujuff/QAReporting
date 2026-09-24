@@ -1,0 +1,87 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Campagnes</h1>
+
+        <div class="card">
+            <h:link styleClass="btn" value="Nouvelle campagne" outcome="/app/campaigns/form"/>
+
+            <h:form>
+                <h:dataTable value="#{campaignListBean.campaigns}" var="c" styleClass="data-table" style="margin-top:16px;">
+                    <h:column>
+                        <f:facet name="header">Nom</f:facet>
+                        #{c.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Projet</f:facet>
+                        #{c.project.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Version</f:facet>
+                        #{c.version}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Environnement</f:facet>
+                        #{c.environment != null ? c.environment.name : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Responsable</f:facet>
+                        #{c.responsible != null ? c.responsible.name : '—'}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Début</f:facet>
+                        <h:outputText value="#{c.startDate}" rendered="#{c.startDate != null}">
+                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                        <h:outputText value="—" rendered="#{c.startDate == null}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Fin</f:facet>
+                        <h:outputText value="#{c.endDate}" rendered="#{c.endDate != null}">
+                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                        <h:outputText value="—" rendered="#{c.endDate == null}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Progression</f:facet>
+                        <div class="progress-track">
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width:#{campaignListBean.getProgress(c)}%"></div>
+                            </div>
+                            <span class="progress-percent">#{campaignListBean.getProgress(c)}%</span>
+                        </div>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Statut</f:facet>
+                        <span class="badge status-#{c.status}"><span class="dot"></span>#{c.status}</span>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Actions</f:facet>
+                        <div class="table-actions">
+                            <h:commandButton styleClass="btn btn-secondary" value="Démarrer"
+                                             action="#{campaignListBean.start(c)}"
+                                             rendered="#{campaignListBean.isStartable(c)}"/>
+                            <h:commandButton styleClass="btn btn-secondary" value="Terminer"
+                                             action="#{campaignListBean.complete(c)}"
+                                             rendered="#{campaignListBean.isCompletable(c)}"/>
+                            <h:commandButton styleClass="btn btn-secondary" value="Bloquer"
+                                             action="#{campaignListBean.block(c)}"
+                                             rendered="#{campaignListBean.isBlockable(c)}"/>
+                            <h:commandButton styleClass="btn btn-secondary" value="Reprendre"
+                                             action="#{campaignListBean.resume(c)}"
+                                             rendered="#{campaignListBean.isResumable(c)}"/>
+                        </div>
+                    </h:column>
+                </h:dataTable>
+
+                <h:panelGroup rendered="#{empty campaignListBean.campaigns}">
+                    <p style="color:#5B6472;font-size:13px;">Aucune campagne enregistrée pour l'instant.</p>
+                </h:panelGroup>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

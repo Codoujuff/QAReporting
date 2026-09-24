@@ -1,0 +1,117 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Reporting</h1>
+        <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
+            Synthèse des anomalies visibles pour votre rôle, exportable en CSV.
+        </p>
+
+        <div class="stat-row">
+            <div class="stat-tile">
+                <div class="value">#{reportingBean.totalCount}</div>
+                <div class="label">Anomalies au total</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{reportingBean.openCount}</div>
+                <div class="label">Ouvertes</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{reportingBean.closedCount}</div>
+                <div class="label">Fermées</div>
+            </div>
+            <div class="stat-tile">
+                <div class="value">#{reportingBean.criticalCount}</div>
+                <div class="label">Critiques</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h:form>
+                <h:commandButton styleClass="btn" value="Exporter en CSV" action="#{reportingBean.exportCsv}"/>
+            </h:form>
+        </div>
+
+        <div class="charts-row">
+            <div class="card">
+                <h2>Par statut</h2>
+                <h:dataTable value="#{reportingBean.byStatus}" var="row" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Statut</f:facet>
+                        #{row.label}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Total</f:facet>
+                        #{row.total}
+                    </h:column>
+                </h:dataTable>
+            </div>
+            <div class="card">
+                <h2>Par sévérité</h2>
+                <h:dataTable value="#{reportingBean.bySeverity}" var="row" styleClass="data-table">
+                    <h:column>
+                        <f:facet name="header">Sévérité</f:facet>
+                        #{row.label}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Total</f:facet>
+                        #{row.total}
+                    </h:column>
+                </h:dataTable>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Par projet</h2>
+            <h:dataTable value="#{reportingBean.byProject}" var="row" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Projet</f:facet>
+                    #{row.label}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Total</f:facet>
+                    #{row.total}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Ouvertes</f:facet>
+                    #{row.open}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Critiques</f:facet>
+                    #{row.critical}
+                </h:column>
+            </h:dataTable>
+            <h:panelGroup rendered="#{empty reportingBean.byProject}">
+                <p style="color:#5B6472;font-size:13px;">Aucune anomalie enregistrée pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+
+        <div class="card">
+            <h2>Par testeur assigné</h2>
+            <h:dataTable value="#{reportingBean.byAssignee}" var="row" styleClass="data-table">
+                <h:column>
+                    <f:facet name="header">Assignée à</f:facet>
+                    #{row.label}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Total</f:facet>
+                    #{row.total}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Ouvertes</f:facet>
+                    #{row.open}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Critiques</f:facet>
+                    #{row.critical}
+                </h:column>
+            </h:dataTable>
+            <h:panelGroup rendered="#{empty reportingBean.byAssignee}">
+                <p style="color:#5B6472;font-size:13px;">Aucune anomalie enregistrée pour l'instant.</p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>

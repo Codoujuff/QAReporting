@@ -1,0 +1,131 @@
+package com.qareporting.resource;
+
+import com.qareporting.dto.AssignRequest;
+import com.qareporting.dto.CommentRequest;
+import com.qareporting.dto.RetestRequest;
+import com.qareporting.entity.Defect;
+import com.qareporting.entity.Role;
+import com.qareporting.entity.User;
+import com.qareporting.security.CurrentUser;
+import com.qareporting.security.RequiresRole;
+import com.qareporting.service.DefectService;
+import com.qareporting.service.UserService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+@Path("/defects")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class DefectResource {
+
+    @Inject
+    DefectService defectService;
+
+    @Inject
+    UserService userService;
+
+    @Inject
+    CurrentUser currentUser;
+
+    @GET
+    public Response index() {
+        return Response.ok(defectService.findAll()).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response show(@PathParam("id") Long id) {
+        Defect defect = defectService.find(id);
+        return defect == null ? Response.status(404).build() : Response.ok(defect).build();
+    }
+
+    @GET
+    @Path("/{id}/history")
+    public Response history(@PathParam("id") Long id) {
+        return Response.ok(defectService.history(id)).build();
+    }
+
+    @POST
+    public Response store(Defect defect) {
+        return Response.status(201).entity(defectService.createWithHistory(defect, currentUser.get())).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") Long id, Defect incoming) {
+        Defect existing = defectService.find(id);
+        if (existing == null) {
+            return Response.status(404).build();
+        }
+        existing.setTitle(incoming.getTitle());
+        existing.setDescription(incoming.getDescription());
+        existing.setSeverity(incoming.getSeverity());
+        existing.setPriority(incoming.getPriority());
+        existing.setExpectedResult(incoming.getExpectedResult());
+        existing.setActualResult(incoming.getActualResult());
+        existing.setReproductionSteps(incoming.getReproductionSteps());
+        existing.setBrowser(incoming.getBrowser());
+        existing.setOs(incoming.getOs());
+        existing.setVersion(incoming.getVersion());
+        existing.setDevice(incoming.getDevice());
+        return Response.ok(defectService.update(existing)).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @RequiresRole({Role.ADMIN})
+    public Response destroy(@PathParam("id") Long id) {
+        return defectService.delete(id) ? Response.noContent().build() : Response.status(404).build();
+    }
+
+    @POST
+    @Path("/{id}/assign")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD})
+    public Response assign(@PathParam("id") Long id, AssignRequest request) {
+        Defect defect = defectService.find(id);
+        User assignee = request == null ? null : userService.find(request.getUserId());
+        if (defect == null || assignee == null) {
+            return Response.status(404).build();
+        }
+        return Response.ok(defectService.assign(defect, assignee, currentUser.get())).build();
+    }
+
+    @POST
+    @Path("/{id}/retest")
+    public Response retest(@PathParam("id") Long id, RetestRequest request) {
+        Defect defect = defectService.find(id);
+        if (defect == null) {
+            return Response.status(404).build();
+        }
+        try {
+            Defect updated = defectService.retest(defect, request.isPassed(), currentUser.get(), request.getComment());
+            return Response.ok(updated).build();
+        } catch (IllegalStateException e) {
+            return Response.status(422).entity("{\"message\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @POST
+    @Path("/{id}/close")
+    public Response close(@PathParam("id") Long id, CommentRequest request) {
+        Defect defect = defectService.find(id);
+        if (defect == null) {
+            return Response.status(404).build();
+        }
+        String comment = request == null ? null : request.getComment();
+        return Response.ok(defectService.close(defect, currentUser.get(), comment)).build();
+    }
+
+    @POST
+    @Path("/{id}/reopen")
+    public Response reopen(@PathParam("id") Long id, CommentRequest request) {
+        Defect defect = defectService.find(id);
+        if (defect == null) {
+            return Response.status(404).build();
+        }
+        String comment = request == null ? null : request.getComment();
+        return Response.ok(defectService.reopen(defect, currentUser.get(), comment)).build();
+    }
+}

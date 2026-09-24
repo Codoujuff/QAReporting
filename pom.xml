@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.qareporting</groupId>
+    <artifactId>qa-reporting-j2ee</artifactId>
+    <version>1.0.0</version>
+    <packaging>war</packaging>
+
+    <name>QA Reporting J2EE</name>
+    <description>
+        Portage Jakarta EE (J2EE) de l'application QA Reporting : mêmes règles métier et le
+        même périmètre fonctionnel que la version Laravel/React, réécrits avec JAX-RS, CDI,
+        JPA et Jakarta Security sur WildFly.
+    </description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jakartaee.version>10.0.0</jakartaee.version>
+        <wildfly.version>31.0.1.Final</wildfly.version>
+    </properties>
+
+    <dependencies>
+        <!-- Full Jakarta EE 10 API — provided by WildFly at runtime -->
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>${jakartaee.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Hibernate ORM — bundled by WildFly at runtime; needed here only so
+             Hibernate-specific annotations (e.g. @JdbcTypeCode for native JSON columns)
+             resolve at compile time. Version matches WildFly 31's bundled Hibernate. -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.4.4.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- BCrypt password hashing (equivalent to Laravel's Hash::make) -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!-- Multipart file upload (attachments) — RESTEasy extension bundled by WildFly,
+             not part of the base Jakarta EE API, so it's needed here for compilation. -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-multipart-provider</artifactId>
+            <version>6.2.9.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Excel exports (equivalent to Laravel's maatwebsite/excel) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- Forces a newer commons-io than the 2.11.0 that resteasy-multipart-provider
+             pulls transitively — POI 5.2.5 calls a commons-io API
+             (UnsynchronizedByteArrayOutputStream.builder()) added in 2.13.0. Without this,
+             Maven's "nearest wins" rule keeps the older transitive version, which compiles
+             fine (no direct reference to the missing method in our own code) but throws
+             NoSuchMethodError at runtime deep inside POI. Found only by actually calling
+             the Excel export endpoint. -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
+        <!-- MySQL JDBC driver, deployed alongside the app as a WildFly module dependency -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.4.0</version>
+        </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>qa-reporting-j2ee</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+
+            <!-- Auto-provisions a local WildFly server, deploys and runs the app: `mvn wildfly:run` -->
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>5.1.1.Final</version>
+                <configuration>
+                    <provisioningDir>${project.build.directory}/server</provisioningDir>
+                    <feature-packs>
+                        <feature-pack>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-ee-galleon-pack</artifactId>
+                            <version>${wildfly.version}</version>
+                        </feature-pack>
+                    </feature-packs>
+                    <layers>
+                        <layer>jaxrs-server</layer>
+                        <layer>cdi</layer>
+                        <layer>jpa</layer>
+                    </layers>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

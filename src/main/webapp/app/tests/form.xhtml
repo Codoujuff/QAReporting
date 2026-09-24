@@ -1,0 +1,79 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{testFormBean.id}"/>
+        <f:viewAction action="#{testFormBean.load}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <h1>#{testFormBean.id != null ? 'Modifier le test' : 'Nouveau test'}</h1>
+
+        <div class="card">
+            <h:form>
+                <div class="form-row">
+                    <label for="project">Projet</label>
+                    <h:selectOneMenu id="project" value="#{testFormBean.projectId}">
+                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testFormBean.projectOptions}" var="p"
+                                       itemValue="#{p.id}" itemLabel="#{p.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="title">Titre</label>
+                    <h:inputText id="title" value="#{testFormBean.test.title}" required="true"/>
+                </div>
+                <div class="form-row">
+                    <label for="type">Type</label>
+                    <h:inputText id="type" value="#{testFormBean.test.type}"/>
+                </div>
+                <div class="form-row">
+                    <label for="campaign">Campagne</label>
+                    <h:selectOneMenu id="campaign" value="#{testFormBean.campaignId}">
+                        <f:selectItem itemLabel="-- Aucune --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testFormBean.campaignOptions}" var="c"
+                                       itemValue="#{c.id}" itemLabel="#{c.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="environment">Environnement</label>
+                    <h:selectOneMenu id="environment" value="#{testFormBean.environmentId}">
+                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testFormBean.environmentOptions}" var="e"
+                                       itemValue="#{e.id}" itemLabel="#{e.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="assignedTo">Assigné à</label>
+                    <h:selectOneMenu id="assignedTo" value="#{testFormBean.assignedToId}">
+                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{testFormBean.userOptions}" var="u"
+                                       itemValue="#{u.id}" itemLabel="#{u.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="description">Description</label>
+                    <h:inputTextarea id="description" value="#{testFormBean.test.description}"/>
+                </div>
+                <div class="form-row">
+                    <label for="preconditions">Préconditions</label>
+                    <h:inputTextarea id="preconditions" value="#{testFormBean.test.preconditions}"/>
+                </div>
+                <div class="form-row">
+                    <label for="steps">Étapes (une par ligne)</label>
+                    <h:inputTextarea id="steps" value="#{testFormBean.stepsText}" rows="6"/>
+                </div>
+                <div class="form-row">
+                    <label for="expectedResult">Résultat attendu</label>
+                    <h:inputTextarea id="expectedResult" value="#{testFormBean.test.expectedResult}"/>
+                </div>
+
+                <h:commandButton styleClass="btn" value="Enregistrer" action="#{testFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/tests/list"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

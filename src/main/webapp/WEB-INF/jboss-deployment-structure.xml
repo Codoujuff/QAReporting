@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
+    <deployment>
+        <!-- WildFly implicitly wires in its own (older) commons-io module for
+             some deployments, which shadows the newer commons-io that Apache
+             POI needs (e.g. UnsynchronizedByteArrayOutputStream.builder(),
+             added in a later commons-io than WildFly ships). Excluding it
+             forces the app's own WEB-INF/lib copy — the one POI was actually
+             compiled and tested against — to be used instead. Found by
+             actually calling the Excel export endpoint, which failed with
+             NoSuchMethodError; not caught by compilation or code review. -->
+        <exclusions>
+            <module name="org.apache.commons.io"/>
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>

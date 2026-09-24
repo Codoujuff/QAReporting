@@ -1,0 +1,57 @@
+<ui:composition template="/WEB-INF/templates/layout.xhtml"
+                 xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="jakarta.faces.html"
+                 xmlns:f="jakarta.faces.core"
+                 xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+        <h1>Nouvelle anomalie</h1>
+
+        <div class="card">
+            <h:form>
+                <div class="form-row">
+                    <label for="title">Titre</label>
+                    <h:inputText id="title" value="#{defectFormBean.defect.title}" required="true"/>
+                </div>
+                <div class="form-row">
+                    <label for="project">Projet</label>
+                    <h:selectOneMenu id="project" value="#{defectFormBean.projectId}">
+                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{defectFormBean.projectOptions}" var="p"
+                                       itemValue="#{p.id}" itemLabel="#{p.name}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="severity">Sévérité</label>
+                    <h:selectOneMenu id="severity" value="#{defectFormBean.defect.severity}">
+                        <f:selectItems value="#{defectFormBean.severityOptions}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="priority">Priorité</label>
+                    <h:selectOneMenu id="priority" value="#{defectFormBean.defect.priority}">
+                        <f:selectItems value="#{defectFormBean.priorityOptions}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="form-row">
+                    <label for="description">Description</label>
+                    <h:inputTextarea id="description" value="#{defectFormBean.defect.description}"/>
+                </div>
+                <div class="form-row">
+                    <label for="expected">Résultat attendu</label>
+                    <h:inputTextarea id="expected" value="#{defectFormBean.defect.expectedResult}"/>
+                </div>
+                <div class="form-row">
+                    <label for="actual">Résultat obtenu</label>
+                    <h:inputTextarea id="actual" value="#{defectFormBean.defect.actualResult}"/>
+                </div>
+                <div class="form-row">
+                    <label for="steps">Étapes de reproduction</label>
+                    <h:inputTextarea id="steps" value="#{defectFormBean.defect.reproductionSteps}"/>
+                </div>
+                <h:commandButton styleClass="btn" value="Créer" action="#{defectFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/defects/list"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>
