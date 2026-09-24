@@ -90,7 +90,7 @@ Vous n'avez **rien d'autre à faire** : les tables et les données de départ so
 Dans le terminal, placez-vous dans le dossier du projet (celui qui contient `pom.xml`) :
 
 ```bash
-mvn wildfly:run -Dwildfly.startupTimeout=300
+mvn wildfly:run
 ```
 
 - **Le premier lancement est long (5 à 15 minutes)** : Maven télécharge le serveur WildFly et toutes les dépendances. Il faut une connexion internet.
@@ -100,7 +100,7 @@ mvn wildfly:run -Dwildfly.startupTimeout=300
 Pour les lancements suivants, vous pouvez travailler sans internet, ce qui est plus rapide :
 
 ```bash
-mvn -o wildfly:run -Dwildfly.startupTimeout=300
+mvn -o wildfly:run
 ```
 
 ---
@@ -122,7 +122,7 @@ Depuis ce compte, vous pouvez créer d'autres utilisateurs (QA, QA Lead, Manager
 ## Récapitulatif : à chaque fois que vous voulez relancer le site
 
 1. XAMPP : **MySQL**, puis **Start**.
-2. Terminal dans le dossier du projet : `mvn -o wildfly:run -Dwildfly.startupTimeout=300`
+2. Terminal dans le dossier du projet : `mvn -o wildfly:run`
 3. Navigateur : http://127.0.0.1:8080/qa-reporting-j2ee/
 
 ## Récupérer les dernières modifications
@@ -144,7 +144,6 @@ Relancez ensuite l'application (étape 4). Si de nouvelles dépendances ont ét�
 | `Unknown database 'qa_reporting_j2ee'` | La base n'a pas été créée (voir l'étape 3). |
 | `Communications link failure` ou WildFly reste bloqué | MySQL n'est pas démarré dans XAMPP. |
 | MySQL ne démarre pas dans XAMPP (port 3306) | Un autre MySQL tourne déjà sur le PC. Arrêtez-le dans les Services Windows. |
-| Le serveur s'arrête tout seul au bout d'environ 60 s | Vous avez oublié `-Dwildfly.startupTimeout=300`. |
 | `Address already in use` ou port 8080 occupé | Un autre serveur (Tomcat, un autre WildFly, etc.) utilise le port 8080. Arrêtez-le. |
 | Erreur de téléchargement avec `-o` | Au tout premier lancement, retirez `-o` : il faut internet. |
 | La page affiche 404 | Vérifiez l'URL : elle doit se terminer par `/qa-reporting-j2ee/`. |
@@ -155,5 +154,5 @@ Relancez ensuite l'application (étape 4). Si de nouvelles dépendances ont ét�
 
 - **Tests unitaires** : `mvn test`
 - **Produire le fichier `.war`** : `mvn package`. Le fichier est créé dans `target/qa-reporting-j2ee.war`.
-- **API REST** : disponible sous http://127.0.0.1:8080/qa-reporting-j2ee/api/
+- **API REST** : endpoints sous `http://127.0.0.1:8080/qa-reporting-j2ee/api/…` (ex. `/api/projects`). Ce n'est pas une page web : `/api/` seul renvoie 404, et les endpoints demandent un jeton (obtenu via `POST /api/login`).
 - **Cahier des charges** : `docs/Cahier-des-charges-QA-Reporting-J2EE-NOUVEAU.docx`

@@ -10,30 +10,30 @@
     </f:metadata>
 
     <ui:define name="content">
-        <h1>#{environmentFormBean.id != null ? 'Modifier l\'environnement' : 'Nouvel environnement'}</h1>
+        <h1>#{environmentFormBean.id != null ? msg['env.edit'] : msg['env.new']}</h1>
 
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">Nom</label>
+                    <label for="name">#{msg['common.name']}</label>
                     <h:inputText id="name" value="#{environmentFormBean.environment.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">Description</label>
+                    <label for="description">#{msg['common.description']}</label>
                     <h:inputTextarea id="description" value="#{environmentFormBean.environment.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="url">URL</label>
+                    <label for="url">#{msg['common.url']}</label>
                     <h:inputText id="url" value="#{environmentFormBean.environment.url}"/>
                 </div>
                 <div class="form-row">
-                    <label for="status">Statut</label>
+                    <label for="status">#{msg['common.status']}</label>
                     <h:selectOneMenu id="status" value="#{environmentFormBean.environment.status}">
-                        <f:selectItems value="#{environmentFormBean.statusOptions}"/>
+                        <f:selectItems value="#{environmentFormBean.statusOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>
                 </div>
-                <h:commandButton styleClass="btn" value="Enregistrer" action="#{environmentFormBean.save}"/>
-                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/environments/list"/>
+                <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{environmentFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/admin/environments/list"/>
             </h:form>
         </div>
     </ui:define>

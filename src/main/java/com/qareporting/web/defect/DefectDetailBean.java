@@ -1,6 +1,7 @@
 package com.qareporting.web.defect;
 
 import com.qareporting.entity.Defect;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.DefectHistory;
 import com.qareporting.entity.User;
 import com.qareporting.service.DefectService;
@@ -65,7 +66,7 @@ public class DefectDetailBean implements Serializable {
     public String assign() {
         if (assigneeId == null) {
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Choisissez un utilisateur à assigner.", null));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.assigneeRequired"), null));
             return null;
         }
         defectService.assign(defect, userService.find(assigneeId), sessionAuth.getCurrentUser());
@@ -82,7 +83,7 @@ public class DefectDetailBean implements Serializable {
             defectService.retest(defect, passed, sessionAuth.getCurrentUser(), actionComment);
         } catch (IllegalStateException e) {
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.retestOnlyFixed"), null));
             return null;
         }
         return refresh();

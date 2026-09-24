@@ -10,41 +10,41 @@
     </f:metadata>
 
     <ui:define name="content">
-        <h1>#{userFormBean.id != null ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}</h1>
+        <h1>#{userFormBean.id != null ? msg['user.edit'] : msg['user.new']}</h1>
 
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">Nom</label>
+                    <label for="name">#{msg['common.name']}</label>
                     <h:inputText id="name" value="#{userFormBean.user.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="initials">Initiales</label>
+                    <label for="initials">#{msg['user.initials']}</label>
                     <h:inputText id="initials" value="#{userFormBean.user.initials}"/>
                 </div>
                 <div class="form-row">
-                    <label for="email">Email</label>
+                    <label for="email">#{msg['common.email']}</label>
                     <h:inputText id="email" value="#{userFormBean.user.email}"
                                  required="true" disabled="#{userFormBean.id != null}"/>
                 </div>
                 <div class="form-row">
                     <label for="password">
-                        #{userFormBean.id != null ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
+                        #{userFormBean.id != null ? msg['user.newPassword'] : msg['common.password']}
                     </label>
                     <h:inputSecret id="password" value="#{userFormBean.password}"/>
                 </div>
                 <div class="form-row">
-                    <label for="role">Rôle</label>
+                    <label for="role">#{msg['common.role']}</label>
                     <h:selectOneMenu id="role" value="#{userFormBean.roleId}">
-                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{userFormBean.roleOptions}" var="r"
-                                       itemValue="#{r.id}" itemLabel="#{r.name}"/>
+                                       itemValue="#{r.id}" itemLabel="#{labels.role(r.name)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="team">Équipe</label>
+                    <label for="team">#{msg['common.team']}</label>
                     <h:selectOneMenu id="team" value="#{userFormBean.teamId}">
-                        <f:selectItem itemLabel="-- Aucune --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneF']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{userFormBean.teamOptions}" var="t"
                                        itemValue="#{t.id}" itemLabel="#{t.name}"/>
                     </h:selectOneMenu>
@@ -52,11 +52,11 @@
                 <div class="form-row">
                     <label for="active">
                         <h:selectBooleanCheckbox id="active" value="#{userFormBean.user.active}"/>
-                        Compte actif
+                        #{msg['user.activeAccount']}
                     </label>
                 </div>
-                <h:commandButton styleClass="btn" value="Enregistrer" action="#{userFormBean.save}"/>
-                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/users/list"/>
+                <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{userFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/admin/users/list"/>
             </h:form>
         </div>
     </ui:define>

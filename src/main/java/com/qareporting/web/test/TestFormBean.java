@@ -1,6 +1,7 @@
 package com.qareporting.web.test;
 
 import com.qareporting.entity.Campaign;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Environment;
 import com.qareporting.entity.Project;
 import com.qareporting.entity.Test;
@@ -98,11 +99,11 @@ public class TestFormBean implements Serializable {
             return "list.xhtml?faces-redirect=true";
         }
         if (projectId == null) {
-            addError("Le projet est obligatoire.");
+            addError(I18n.t("err.projectRequired"));
             return null;
         }
         if (test.getTitle() == null || test.getTitle().isBlank()) {
-            addError("Le titre est obligatoire.");
+            addError(I18n.t("err.titleRequired"));
             return null;
         }
 

@@ -1,6 +1,7 @@
 package com.qareporting.web;
 
 import com.qareporting.entity.Activity;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Campaign;
 import com.qareporting.entity.Defect;
 import com.qareporting.entity.Project;
@@ -189,25 +190,25 @@ public class DashboardBean implements Serializable {
         }
 
         defectsByStatusSvg = buildChart(List.of(
-                new ChartRow("Ouverte", byStatus.get(Defect.Status.open), "bar-default"),
-                new ChartRow("En cours", byStatus.get(Defect.Status.in_progress), "bar-default"),
-                new ChartRow("Corrigée", byStatus.get(Defect.Status.fixed), "bar-default"),
-                new ChartRow("En retest", byStatus.get(Defect.Status.retest), "bar-default"),
-                new ChartRow("Fermée", byStatus.get(Defect.Status.closed), "bar-default"),
-                new ChartRow("Réouverte", byStatus.get(Defect.Status.reopened), "bar-default")
+                new ChartRow(I18n.t("enum.Defect.Status.open"), byStatus.get(Defect.Status.open), "bar-default"),
+                new ChartRow(I18n.t("enum.Defect.Status.in_progress"), byStatus.get(Defect.Status.in_progress), "bar-default"),
+                new ChartRow(I18n.t("enum.Defect.Status.fixed"), byStatus.get(Defect.Status.fixed), "bar-default"),
+                new ChartRow(I18n.t("enum.Defect.Status.retest"), byStatus.get(Defect.Status.retest), "bar-default"),
+                new ChartRow(I18n.t("enum.Defect.Status.closed"), byStatus.get(Defect.Status.closed), "bar-default"),
+                new ChartRow(I18n.t("enum.Defect.Status.reopened"), byStatus.get(Defect.Status.reopened), "bar-default")
         ));
 
         defectsBySeveritySvg = buildChart(List.of(
-                new ChartRow("Critique", bySeverity.get(Defect.Severity.critical), "bar-critical"),
-                new ChartRow("Élevée", bySeverity.get(Defect.Severity.high), "bar-serious"),
-                new ChartRow("Moyenne", bySeverity.get(Defect.Severity.medium), "bar-warning"),
-                new ChartRow("Faible", bySeverity.get(Defect.Severity.low), "bar-good")
+                new ChartRow(I18n.t("enum.Defect.Severity.critical"), bySeverity.get(Defect.Severity.critical), "bar-critical"),
+                new ChartRow(I18n.t("enum.Defect.Severity.high"), bySeverity.get(Defect.Severity.high), "bar-serious"),
+                new ChartRow(I18n.t("enum.Defect.Severity.medium"), bySeverity.get(Defect.Severity.medium), "bar-warning"),
+                new ChartRow(I18n.t("enum.Defect.Severity.low"), bySeverity.get(Defect.Severity.low), "bar-good")
         ));
 
         projectsByStatusSvg = buildChart(List.of(
-                new ChartRow("Actif", byProjectStatus.get(Project.Status.active), "bar-default"),
-                new ChartRow("Inactif", byProjectStatus.get(Project.Status.inactive), "bar-default"),
-                new ChartRow("Archivé", byProjectStatus.get(Project.Status.archived), "bar-default")
+                new ChartRow(I18n.t("enum.Project.Status.active"), byProjectStatus.get(Project.Status.active), "bar-default"),
+                new ChartRow(I18n.t("enum.Project.Status.inactive"), byProjectStatus.get(Project.Status.inactive), "bar-default"),
+                new ChartRow(I18n.t("enum.Project.Status.archived"), byProjectStatus.get(Project.Status.archived), "bar-default")
         ));
 
         if (qaView) {

@@ -1,31 +1,50 @@
 <!DOCTYPE html>
-<html lang="fr"
+<html lang="#{localeBean.language}"
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
+<f:view locale="#{localeBean.locale}">
 <h:head>
     <meta charset="UTF-8"/>
-    <title><ui:insert name="title">QA Reporting</ui:insert></title>
+    <title><ui:insert name="title">#{msg['app.name']}</ui:insert></title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap"
           rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232C4A7C'/%3E%3Cpath d='M10 16.5l4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
     <h:outputStylesheet library="css" name="style.css"/>
 </h:head>
 <h:body>
     <h:panelGroup rendered="#{sessionAuth.loggedIn}">
+        <a class="skip-link" href="#contenu">#{msg['layout.skip']}</a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true" tabindex="-1"/>
         <div class="app-shell">
             <ui:include src="/WEB-INF/templates/nav.xhtml"/>
+            <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
 
             <div class="app-main">
-                <div class="app-header">
-                    <div class="app-search">
-                        <span class="search-dot"></span>
-                        <span class="search-placeholder">Rechercher un projet, une équipe, une anomalie...</span>
+                <header class="app-header">
+                    <label for="nav-toggle" class="nav-burger" aria-label="#{msg['layout.openMenu']}">
+                        <span></span><span></span><span></span>
+                    </label>
+                    <div class="app-header-date">
+                        <h:outputText value="#{labels.today}">
+                            <f:convertDateTime type="localDate" pattern="#{localeBean.english ? 'EEEE, MMMM d, yyyy' : 'EEEE d MMMM yyyy'}"
+                                              locale="#{localeBean.locale}"/>
+                        </h:outputText>
                     </div>
                     <div class="header-right">
-                        <h:link styleClass="notif-bell" outcome="/app/notifications">
-                            &#128276;
+                        <ui:include src="/WEB-INF/templates/langSwitch.xhtml"/>
+                        <h:link styleClass="notif-bell" outcome="/app/notifications"
+                                title="#{msg['nav.notifications']}" pt:aria-label="#{msg['nav.notifications']}">
+                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
+                                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
                             <h:panelGroup styleClass="notif-badge" layout="block"
                                           rendered="#{sessionAuth.unreadNotificationCount gt 0}">
                                 #{sessionAuth.unreadNotificationCount}
@@ -35,19 +54,19 @@
                             <div class="avatar">#{sessionAuth.userInitials}</div>
                             <div class="app-user-text">
                                 <div class="app-user-name">#{sessionAuth.userName}</div>
-                                <div class="app-user-role">#{sessionAuth.roleName}</div>
+                                <div class="app-user-role">#{labels.role(sessionAuth.roleName)}</div>
                             </div>
                         </h:link>
                     </div>
-                </div>
+                </header>
 
                 <div class="messages">
                     <h:messages globalOnly="false" layout="table" errorClass="msg-error" infoClass="msg-info"/>
                 </div>
 
-                <div class="content">
+                <main class="content" id="contenu">
                     <ui:insert name="content"/>
-                </div>
+                </main>
             </div>
         </div>
     </h:panelGroup>
@@ -61,4 +80,5 @@
         </div>
     </h:panelGroup>
 </h:body>
+</f:view>
 </html>

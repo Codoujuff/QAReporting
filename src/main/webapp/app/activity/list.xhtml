@@ -5,61 +5,61 @@
                  xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
-        <h1>Mon activité</h1>
+        <h1>#{msg['nav.myActivity']}</h1>
         <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
-            Journal quotidien des tests exécutés.
+            #{msg['activity.intro']}
         </p>
 
         <div class="card">
-            <h:link styleClass="btn" value="Nouvelle activité" outcome="/app/activity/form"/>
+            <h:link styleClass="btn" value="#{msg['activity.new']}" outcome="/app/activity/form"/>
 
             <h:dataTable value="#{activityListBean.activities}" var="a" styleClass="data-table" style="margin-top:16px;">
                 <h:column>
-                    <f:facet name="header">Date</f:facet>
+                    <f:facet name="header">#{msg['common.date']}</f:facet>
                     <h:outputText value="#{a.activityDate}">
                         <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
                     </h:outputText>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Projet</f:facet>
+                    <f:facet name="header">#{msg['common.project']}</f:facet>
                     #{a.project.name}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Campagne</f:facet>
+                    <f:facet name="header">#{msg['common.campaign']}</f:facet>
                     #{a.campaign != null ? a.campaign.name : '—'}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Type</f:facet>
-                    #{a.activityType}
+                    <f:facet name="header">#{msg['common.type']}</f:facet>
+                    #{labels.activityType(a.activityType)}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Exécutés</f:facet>
+                    <f:facet name="header">#{msg['common.executed']}</f:facet>
                     #{a.testsExecuted}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Réussis</f:facet>
+                    <f:facet name="header">#{msg['common.passedPl']}</f:facet>
                     #{a.passed}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Échoués</f:facet>
+                    <f:facet name="header">#{msg['common.failedPl']}</f:facet>
                     #{a.failed}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Bloqués</f:facet>
+                    <f:facet name="header">#{msg['common.blockedPl']}</f:facet>
                     #{activityListBean.blockedCountOf(a)}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Non exécutés</f:facet>
+                    <f:facet name="header">#{msg['common.notRunPl']}</f:facet>
                     #{a.notRun}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Anomalies</f:facet>
+                    <f:facet name="header">#{msg['common.defects']}</f:facet>
                     #{a.defectsCount}
                 </h:column>
             </h:dataTable>
 
             <h:panelGroup rendered="#{empty activityListBean.activities}">
-                <p style="color:#5B6472;font-size:13px;">Aucune activité enregistrée pour l'instant.</p>
+                <p style="color:#5B6472;font-size:13px;">#{msg['common.noActivityYet']}</p>
             </h:panelGroup>
         </div>
     </ui:define>

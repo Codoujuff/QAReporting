@@ -11,21 +11,23 @@
     <ui:define name="content">
         <div class="login-wrapper">
             <div class="card login-card">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+                <div class="login-brand">
                     <span class="brand-dot"></span>
-                    <span style="font-size:16px;font-weight:700;">QA Reporting</span>
+                    <span class="login-brand-name">#{msg['app.name']}</span>
+                    <ui:include src="/WEB-INF/templates/langSwitch.xhtml"/>
                 </div>
-                <h1>Connexion</h1>
+                <h1>#{msg['login.title']}</h1>
+                <p class="subtitle">#{msg['login.tagline']}</p>
                 <h:form>
                     <div class="form-row">
-                        <label for="email">Email</label>
+                        <label for="email">#{msg['common.email']}</label>
                         <h:inputText id="email" value="#{loginBean.email}" required="true"/>
                     </div>
                     <div class="form-row">
-                        <label for="password">Mot de passe</label>
+                        <label for="password">#{msg['common.password']}</label>
                         <h:inputSecret id="password" value="#{loginBean.password}" required="true"/>
                     </div>
-                    <h:commandButton styleClass="btn" value="Se connecter" action="#{loginBean.login}"/>
+                    <h:commandButton styleClass="btn" value="#{msg['login.submit']}" action="#{loginBean.login}"/>
                 </h:form>
             </div>
         </div>

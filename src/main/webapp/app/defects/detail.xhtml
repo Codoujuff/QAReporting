@@ -13,87 +13,87 @@
         <h1>#{defectDetailBean.defect.title}</h1>
 
         <div class="card">
-            <p><strong>Projet :</strong> #{defectDetailBean.defect.project.name}</p>
-            <p><strong>Statut :</strong>
-                <span class="badge status-#{defectDetailBean.defect.status}"><span class="dot"></span>#{defectDetailBean.defect.status}</span></p>
-            <p><strong>Sévérité :</strong>
-                <span class="badge severity-#{defectDetailBean.defect.severity}"><span class="dot"></span>#{defectDetailBean.defect.severity}</span>
-                &#160;&#160;<strong>Priorité :</strong> #{defectDetailBean.defect.priority}</p>
-            <p><strong>Assignée à :</strong>
+            <p><strong>#{msg['defect.projectLbl']}</strong> #{defectDetailBean.defect.project.name}</p>
+            <p><strong>#{msg['defect.statusLbl']}</strong>
+                <span class="badge status-#{defectDetailBean.defect.status}"><span class="dot"></span>#{labels.of(defectDetailBean.defect.status)}</span></p>
+            <p><strong>#{msg['defect.severityLbl']}</strong>
+                <span class="badge severity-#{defectDetailBean.defect.severity}"><span class="dot"></span>#{labels.of(defectDetailBean.defect.severity)}</span>
+                &#160;&#160;<strong>#{msg['defect.priorityLbl']}</strong> #{labels.of(defectDetailBean.defect.priority)}</p>
+            <p><strong>#{msg['defect.assignedLbl']}</strong>
                 #{defectDetailBean.defect.assignedTo != null ? defectDetailBean.defect.assignedTo.name : '—'}</p>
-            <p><strong>Créée par :</strong> #{defectDetailBean.defect.createdBy.name}</p>
-            <p><strong>Description :</strong> #{defectDetailBean.defect.description}</p>
+            <p><strong>#{msg['defect.createdByLbl']}</strong> #{defectDetailBean.defect.createdBy.name}</p>
+            <p><strong>#{msg['defect.descriptionLbl']}</strong> #{defectDetailBean.defect.description}</p>
         </div>
 
         <div class="card">
-            <h2>Actions</h2>
+            <h2>#{msg['common.actions']}</h2>
             <h:form>
                 <div class="form-row">
-                    <label for="comment">Commentaire</label>
+                    <label for="comment">#{msg['common.comment']}</label>
                     <h:inputTextarea id="comment" value="#{defectDetailBean.actionComment}"/>
                 </div>
 
                 <h:panelGroup rendered="#{defectDetailBean.markFixedAvailable}">
-                    <h:commandButton styleClass="btn" value="Marquer corrigée"
+                    <h:commandButton styleClass="btn" value="#{msg['defect.markFixed']}"
                                      action="#{defectDetailBean.markFixed}"/>
                 </h:panelGroup>
 
                 <h:panelGroup rendered="#{defectDetailBean.retestable}">
-                    <h:commandButton styleClass="btn" value="Retest : réussi"
+                    <h:commandButton styleClass="btn" value="#{msg['defect.retestPassed']}"
                                      action="#{defectDetailBean.retest(true)}"/>
-                    <h:commandButton styleClass="btn btn-danger" value="Retest : échec"
+                    <h:commandButton styleClass="btn btn-danger" value="#{msg['defect.retestFailed']}"
                                      action="#{defectDetailBean.retest(false)}"/>
                 </h:panelGroup>
 
                 <h:panelGroup rendered="#{defectDetailBean.closeable}">
-                    <h:commandButton styleClass="btn btn-secondary" value="Fermer"
+                    <h:commandButton styleClass="btn btn-secondary" value="#{msg['defect.close']}"
                                      action="#{defectDetailBean.close}"/>
                 </h:panelGroup>
 
                 <h:panelGroup rendered="#{defectDetailBean.reopenable}">
-                    <h:commandButton styleClass="btn btn-secondary" value="Réouvrir"
+                    <h:commandButton styleClass="btn btn-secondary" value="#{msg['defect.reopen']}"
                                      action="#{defectDetailBean.reopen}"/>
                 </h:panelGroup>
 
                 <div class="form-row" style="margin-top:1rem">
-                    <label for="assignee">Assigner à</label>
+                    <label for="assignee">#{msg['defect.assignTo']}</label>
                     <h:selectOneMenu id="assignee" value="#{defectDetailBean.assigneeId}">
-                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{defectDetailBean.assigneeOptions}" var="u"
                                        itemValue="#{u.id}" itemLabel="#{u.name}"/>
                     </h:selectOneMenu>
-                    <h:commandButton styleClass="btn" value="Assigner" action="#{defectDetailBean.assign}"/>
+                    <h:commandButton styleClass="btn" value="#{msg['defect.assign']}" action="#{defectDetailBean.assign}"/>
                 </div>
             </h:form>
         </div>
 
         <div class="card">
-            <h2>Historique</h2>
+            <h2>#{msg['common.history']}</h2>
             <h:dataTable value="#{defectDetailBean.history}" var="h" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Date</f:facet>
+                    <f:facet name="header">#{msg['common.date']}</f:facet>
                     <h:outputText value="#{h.createdAt}">
                         <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/>
                     </h:outputText>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Utilisateur</f:facet>
+                    <f:facet name="header">#{msg['common.user']}</f:facet>
                     #{h.user.name}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Ancien statut</f:facet>
+                    <f:facet name="header">#{msg['defect.oldStatus']}</f:facet>
                     <h:panelGroup rendered="#{h.oldStatus == null}">—</h:panelGroup>
                     <span class="badge status-#{h.oldStatus}" style="#{h.oldStatus == null ? 'display:none' : ''}">
-                        <span class="dot"></span>#{h.oldStatus}
+                        <span class="dot"></span>#{labels.of(h.oldStatus)}
                     </span>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Nouveau statut</f:facet>
-                    <span class="badge status-#{h.newStatus}"><span class="dot"></span>#{h.newStatus}</span>
+                    <f:facet name="header">#{msg['defect.newStatus']}</f:facet>
+                    <span class="badge status-#{h.newStatus}"><span class="dot"></span>#{labels.of(h.newStatus)}</span>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Commentaire</f:facet>
-                    #{h.comment != null ? h.comment : '—'}
+                    <f:facet name="header">#{msg['common.comment']}</f:facet>
+                    #{labels.historyComment(h.comment)}
                 </h:column>
             </h:dataTable>
         </div>

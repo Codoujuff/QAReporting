@@ -1,9 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Accès refusé</title></head>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Accès refusé · Access denied — QA Reporting</title>
+    <!-- Chemins absolus : la page d'erreur est servie à l'URL qui a échoué
+         (ex. /app/admin/users/list.xhtml), un chemin relatif n'y mènerait nulle part. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap"/>
+    <link rel="stylesheet" href="/qa-reporting-j2ee/jakarta.faces.resource/style.css.xhtml?ln=css"/>
+</head>
 <body>
-<h1>403 — Accès refusé</h1>
-<p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
-<p><a href="../app/dashboard.xhtml">Retour au tableau de bord</a></p>
+<div class="login-wrapper">
+    <div class="card login-card">
+        <div class="error-code">403</div>
+        <h1>Accès refusé</h1>
+        <p class="error-text" lang="fr">Votre rôle ne donne pas accès à cette page. Si vous pensez que c'est une erreur, contactez un administrateur.</p>
+        <h2 lang="en">Access denied</h2>
+        <p class="error-text" lang="en">Your role does not give access to this page. If you think this is a mistake, contact an administrator.</p>
+        <a class="btn" href="/qa-reporting-j2ee/app/dashboard.xhtml">Retour au tableau de bord · Back to dashboard</a>
+    </div>
+</div>
 </body>
 </html>

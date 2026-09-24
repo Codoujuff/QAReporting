@@ -6,34 +6,34 @@
 
     <ui:define name="content">
         <div class="actions-bar">
-            <h1>Projets</h1>
-            <h:link styleClass="btn" value="Nouveau projet" outcome="/app/admin/projects/form"/>
+            <h1>#{msg['common.projects']}</h1>
+            <h:link styleClass="btn" value="#{msg['project.new']}" outcome="/app/admin/projects/form"/>
         </div>
 
         <div class="card">
             <h:dataTable value="#{projectListBean.projects}" var="p" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Nom</f:facet>
+                    <f:facet name="header">#{msg['common.name']}</f:facet>
                     #{p.name}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Statut</f:facet>
-                    <span class="badge status-#{p.status}"><span class="dot"></span>#{p.status}</span>
+                    <f:facet name="header">#{msg['common.status']}</f:facet>
+                    <span class="badge status-#{p.status}"><span class="dot"></span>#{labels.of(p.status)}</span>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Équipe</f:facet>
+                    <f:facet name="header">#{msg['common.team']}</f:facet>
                     #{p.team != null ? p.team.name : '—'}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Actions</f:facet>
+                    <f:facet name="header">#{msg['common.actions']}</f:facet>
                     <div class="table-actions">
-                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/projects/form">
+                        <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/projects/form">
                             <f:param name="id" value="#{p.id}"/>
                         </h:link>
                         <h:form style="display:inline">
-                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{projectListBean.delete(p)}"
-                                             onclick="return confirm('Supprimer ce projet ?');"/>
+                                             onclick="return confirm('#{msg['project.deleteConfirm']}');"/>
                         </h:form>
                     </div>
                 </h:column>

@@ -6,30 +6,30 @@
 
     <ui:define name="content">
         <div class="actions-bar">
-            <h1>Équipes</h1>
-            <h:link styleClass="btn" value="Nouvelle équipe" outcome="/app/admin/teams/form"/>
+            <h1>#{msg['common.teams']}</h1>
+            <h:link styleClass="btn" value="#{msg['team.new']}" outcome="/app/admin/teams/form"/>
         </div>
 
         <div class="card">
             <h:dataTable value="#{teamListBean.teams}" var="t" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Nom</f:facet>
+                    <f:facet name="header">#{msg['common.name']}</f:facet>
                     #{t.name}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Responsable</f:facet>
+                    <f:facet name="header">#{msg['common.owner']}</f:facet>
                     #{t.lead != null ? t.lead.name : '—'}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Actions</f:facet>
+                    <f:facet name="header">#{msg['common.actions']}</f:facet>
                     <div class="table-actions">
-                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/teams/form">
+                        <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/teams/form">
                             <f:param name="id" value="#{t.id}"/>
                         </h:link>
                         <h:form style="display:inline">
-                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{teamListBean.delete(t)}"
-                                             onclick="return confirm('Supprimer cette équipe ?');"/>
+                                             onclick="return confirm('#{msg['team.deleteConfirm']}');"/>
                         </h:form>
                     </div>
                 </h:column>

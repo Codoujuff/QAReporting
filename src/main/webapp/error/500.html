@@ -1,8 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Erreur serveur</title></head>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Erreur interne · Internal error — QA Reporting</title>
+    <!-- Chemins absolus : la page d'erreur est servie à l'URL qui a échoué
+         (ex. /app/admin/users/list.xhtml), un chemin relatif n'y mènerait nulle part. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap"/>
+    <link rel="stylesheet" href="/qa-reporting-j2ee/jakarta.faces.resource/style.css.xhtml?ln=css"/>
+</head>
 <body>
-<h1>500 — Une erreur est survenue</h1>
-<p>Veuillez réessayer, ou contacter l'administrateur si le problème persiste.</p>
+<div class="login-wrapper">
+    <div class="card login-card">
+        <div class="error-code">500</div>
+        <h1>Erreur interne</h1>
+        <p class="error-text" lang="fr">Le serveur n'a pas pu traiter la demande. Réessayez ; si le problème persiste, vérifiez que la base de données est démarrée.</p>
+        <h2 lang="en">Internal error</h2>
+        <p class="error-text" lang="en">The server could not process the request. Try again; if the problem persists, check that the database is running.</p>
+        <a class="btn" href="/qa-reporting-j2ee/app/dashboard.xhtml">Retour au tableau de bord · Back to dashboard</a>
+    </div>
+</div>
 </body>
 </html>

@@ -5,20 +5,20 @@
                  xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
-        <h1>Rôles</h1>
+        <h1>#{msg['nav.roles']}</h1>
 
         <div class="card">
             <h:dataTable value="#{roleListBean.roles}" var="r" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Rôle</f:facet>
-                    #{r.name}
+                    <f:facet name="header">#{msg['common.role']}</f:facet>
+                    #{labels.role(r.name)}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Description</f:facet>
-                    #{r.description}
+                    <f:facet name="header">#{msg['common.description']}</f:facet>
+                    #{labels.roleDescription(r.name, r.description)}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Utilisateurs</f:facet>
+                    <f:facet name="header">#{msg['common.users']}</f:facet>
                     #{r.userCount}
                 </h:column>
             </h:dataTable>

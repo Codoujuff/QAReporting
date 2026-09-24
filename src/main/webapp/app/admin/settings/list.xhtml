@@ -6,41 +6,41 @@
 
     <ui:define name="content">
         <div class="actions-bar">
-            <h1>Paramètres</h1>
-            <h:link styleClass="btn" value="Nouveau réglage" outcome="/app/admin/settings/form"/>
+            <h1>#{msg['nav.appSettings']}</h1>
+            <h:link styleClass="btn" value="#{msg['setting.new']}" outcome="/app/admin/settings/form"/>
         </div>
 
         <div class="card">
             <h:dataTable value="#{appSettingListBean.settings}" var="s" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Clé</f:facet>
+                    <f:facet name="header">#{msg['setting.key']}</f:facet>
                     #{s.settingKey}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Valeur</f:facet>
+                    <f:facet name="header">#{msg['setting.value']}</f:facet>
                     #{s.settingValue}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Description</f:facet>
+                    <f:facet name="header">#{msg['common.description']}</f:facet>
                     #{s.description}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Actions</f:facet>
+                    <f:facet name="header">#{msg['common.actions']}</f:facet>
                     <div class="table-actions">
-                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/settings/form">
+                        <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/settings/form">
                             <f:param name="id" value="#{s.id}"/>
                         </h:link>
                         <h:form style="display:inline">
-                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{appSettingListBean.delete(s)}"
-                                             onclick="return confirm('Supprimer ce réglage ?');"/>
+                                             onclick="return confirm('#{msg['setting.deleteConfirm']}');"/>
                         </h:form>
                     </div>
                 </h:column>
             </h:dataTable>
 
             <h:panelGroup rendered="#{empty appSettingListBean.settings}">
-                <p style="color:#5B6472;font-size:13px;">Aucun réglage enregistré pour l'instant.</p>
+                <p style="color:#5B6472;font-size:13px;">#{msg['setting.none']}</p>
             </h:panelGroup>
         </div>
     </ui:define>

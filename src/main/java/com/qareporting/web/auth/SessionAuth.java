@@ -1,6 +1,7 @@
 package com.qareporting.web.auth;
 
 import com.qareporting.entity.User;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.security.PasswordHasher;
 import com.qareporting.service.NotificationService;
 import com.qareporting.service.UserService;
@@ -44,21 +45,21 @@ public class SessionAuth implements Serializable {
         errorMessage = null;
 
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
-            errorMessage = "Email et mot de passe requis.";
+            errorMessage = I18n.t("err.credentialsRequired");
             return false;
         }
 
         User user = userService.findByEmail(email);
         if (user == null) {
-            errorMessage = "Identifiants invalides.";
+            errorMessage = I18n.t("err.invalidCredentials");
             return false;
         }
         if (!user.isActive()) {
-            errorMessage = "Ce compte a été désactivé.";
+            errorMessage = I18n.t("err.accountDisabled");
             return false;
         }
         if (!passwordHasher.matches(password, user.getPasswordHash())) {
-            errorMessage = "Identifiants invalides.";
+            errorMessage = I18n.t("err.invalidCredentials");
             return false;
         }
 

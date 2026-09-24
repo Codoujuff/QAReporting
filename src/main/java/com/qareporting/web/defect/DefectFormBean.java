@@ -1,6 +1,7 @@
 package com.qareporting.web.defect;
 
 import com.qareporting.entity.Defect;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Project;
 import com.qareporting.service.DefectService;
 import com.qareporting.service.ProjectService;
@@ -40,7 +41,7 @@ public class DefectFormBean implements Serializable {
     public String save() {
         if (projectId == null) {
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Le projet est obligatoire.", null));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.projectRequired"), null));
             return null;
         }
         defect.setProject(projectService.find(projectId));

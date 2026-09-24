@@ -48,7 +48,13 @@ public class CampaignService extends AbstractCrudService<Campaign, Long> {
                 case blocked -> "Blocage";
                 case planned -> "Campagne planifiée";
             };
-            String message = saved.getName() + " est passée à \"" + newStatus + "\".";
+            String statusLabel = switch (newStatus) {
+                case in_progress -> "en cours";
+                case completed -> "terminée";
+                case blocked -> "bloquée";
+                case planned -> "planifiée";
+            };
+            String message = saved.getName() + " est passée à \"" + statusLabel + "\".";
             notificationService.notifyTeam(saved.getProject().getTeam(),
                     "campaign_" + newStatus, title, message);
         }

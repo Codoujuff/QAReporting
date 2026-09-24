@@ -7,29 +7,29 @@
     <ui:define name="content">
         <!-- ===================== QA ===================== -->
         <h:panelGroup rendered="#{dashboardBean.qaView}">
-            <h1>Bonjour #{dashboardBean.greetingName}</h1>
-            <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">Voici votre activité QA.</p>
+            <h1>#{msg['dashboard.hello']} #{dashboardBean.greetingName}</h1>
+            <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">#{msg['dashboard.qaIntro']}</p>
 
             <div class="stat-row">
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.testsExecutedCount}</div>
-                    <div class="label">Tests réalisés</div>
+                    <div class="label">#{msg['dashboard.testsDone']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.passedCount}</div>
-                    <div class="label">Passed</div>
+                    <div class="label">#{msg['common.passedPl']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.failedCount}</div>
-                    <div class="label">Failed</div>
+                    <div class="label">#{msg['common.failedPl']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.blockedCount}</div>
-                    <div class="label">Blocked</div>
+                    <div class="label">#{msg['common.blockedPl']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.openDefectCount}</div>
-                    <div class="label">Anomalies ouvertes</div>
+                    <div class="label">#{msg['common.openDefects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">
@@ -37,15 +37,15 @@
                             <f:convertNumber pattern="0.0"/>
                         </h:outputText>%
                     </div>
-                    <div class="label">Taux de réussite</div>
+                    <div class="label">#{msg['common.successRate']}</div>
                 </div>
             </div>
 
             <div class="charts-row">
                 <div class="card">
-                    <h2>Mon activité aujourd'hui</h2>
+                    <h2>#{msg['dashboard.todayActivity']}</h2>
                     <h:panelGroup rendered="#{empty dashboardBean.todaysActivities}">
-                        <p style="color:#5B6472;font-size:13px;">Aucune activité déclarée aujourd'hui.</p>
+                        <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noActivityToday']}</p>
                     </h:panelGroup>
                     <ui:repeat value="#{dashboardBean.todaysActivities}" var="a">
                         <div style="padding:10px 0;border-top:1px solid var(--border-light);">
@@ -53,39 +53,39 @@
                                 #{a.project.name}#{a.campaign != null ? ' · '.concat(a.campaign.name) : ''}
                             </div>
                             <div style="color:#5B6472;font-size:12px;margin-top:2px;">
-                                #{a.activityType}#{a.duration != null ? ' · '.concat(a.duration) : ''}
+                                #{labels.activityType(a.activityType)}#{a.duration != null ? ' · '.concat(a.duration) : ''}
                             </div>
                             <div style="font-size:12px;margin-top:4px;">
-                                Tests #{a.testsExecuted} &#160; Passed #{a.passed} &#160; Failed #{a.failed} &#160; Blocked #{a.blocked}
+                                #{msg['common.tests']} #{a.testsExecuted} &#160;·&#160; #{msg['common.passedPl']} #{a.passed} &#160;·&#160; #{msg['common.failedPl']} #{a.failed} &#160;·&#160; #{msg['common.blockedPl']} #{a.blocked}
                             </div>
                         </div>
                     </ui:repeat>
                 </div>
                 <div class="card">
-                    <h2>Actions rapides</h2>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <h:link styleClass="btn" style="text-align:center;" value="+ Déclarer une activité" outcome="/app/activity/form"/>
-                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Créer une anomalie" outcome="/app/defects/form"/>
-                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Ajouter un test" outcome="/app/tests/form"/>
-                        <h:link styleClass="btn btn-secondary" style="text-align:center;" value="+ Démarrer une campagne" outcome="/app/campaigns/list"/>
-                        <h:link value="Voir mon reporting" outcome="/app/reporting" style="text-align:center;font-size:13px;"/>
+                    <h2>#{msg['dashboard.quickActions']}</h2>
+                    <div class="quick-actions">
+                        <h:link styleClass="btn" value="#{msg['dashboard.qaLogActivity']}" outcome="/app/activity/form"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewDefect']}" outcome="/app/defects/form"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewTest']}" outcome="/app/tests/form"/>
+                        <h:link styleClass="btn btn-secondary" value="#{msg['dashboard.qaNewCampaign']}" outcome="/app/campaigns/form"/>
+                        <h:link value="#{msg['dashboard.qaSeeReports']}" outcome="/app/reporting"/>
                     </div>
                 </div>
             </div>
 
             <div class="charts-row">
                 <div class="card">
-                    <h2>Tests par jour</h2>
+                    <h2>#{msg['dashboard.testsPerDay']}</h2>
                     <h:outputText value="#{dashboardBean.testsByDaySvg}" escape="false"/>
                 </div>
                 <div class="card">
-                    <h2>Anomalies par sévérité</h2>
+                    <h2>#{msg['common.defectsBySeverity']}</h2>
                     <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
                 </div>
                 <div class="card">
-                    <h2>Avancement des campagnes</h2>
+                    <h2>#{msg['dashboard.campaignProgress']}</h2>
                     <h:panelGroup rendered="#{empty dashboardBean.campaignProgress}">
-                        <p style="color:#5B6472;font-size:13px;">Aucune campagne pour l'instant.</p>
+                        <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noCampaign']}</p>
                     </h:panelGroup>
                     <ui:repeat value="#{dashboardBean.campaignProgress}" var="cp">
                         <div style="margin-bottom:12px;">
@@ -102,90 +102,90 @@
             </div>
 
             <div class="card">
-                <h2>Mes anomalies récentes</h2>
+                <h2>#{msg['dashboard.recentDefects']}</h2>
                 <h:dataTable value="#{dashboardBean.recentDefects}" var="d" styleClass="data-table">
                     <h:column>
-                        <f:facet name="header">Titre</f:facet>
+                        <f:facet name="header">#{msg['common.title']}</f:facet>
                         <h:link value="#{d.title}" outcome="/app/defects/detail">
                             <f:param name="id" value="#{d.id}"/>
                         </h:link>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Projet</f:facet>
+                        <f:facet name="header">#{msg['common.project']}</f:facet>
                         #{d.project.name}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Sévérité</f:facet>
-                        <span class="badge severity-#{d.severity}"><span class="dot"></span>#{d.severity}</span>
+                        <f:facet name="header">#{msg['common.severity']}</f:facet>
+                        <span class="badge severity-#{d.severity}"><span class="dot"></span>#{labels.of(d.severity)}</span>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Statut</f:facet>
-                        <span class="badge status-#{d.status}"><span class="dot"></span>#{d.status}</span>
+                        <f:facet name="header">#{msg['common.status']}</f:facet>
+                        <span class="badge status-#{d.status}"><span class="dot"></span>#{labels.of(d.status)}</span>
                     </h:column>
                 </h:dataTable>
                 <h:panelGroup rendered="#{empty dashboardBean.recentDefects}">
-                    <p style="color:#5B6472;font-size:13px;">Aucune anomalie pour l'instant.</p>
+                    <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noDefect']}</p>
                 </h:panelGroup>
             </div>
         </h:panelGroup>
 
         <!-- ===================== QA LEAD ===================== -->
         <h:panelGroup rendered="#{dashboardBean.leadView}">
-            <h1>Dashboard équipe</h1>
+            <h1>#{msg['nav.teamDashboard']}</h1>
             <div class="stat-row">
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.teamMembers.size()}</div>
-                    <div class="label">Membres de l'équipe</div>
+                    <div class="label">#{msg['dashboard.teamMembers']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.myDefectCount}</div>
-                    <div class="label">Anomalies de l'équipe</div>
+                    <div class="label">#{msg['dashboard.teamDefects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.openDefectCount}</div>
-                    <div class="label">Anomalies ouvertes</div>
+                    <div class="label">#{msg['common.openDefects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.criticalDefectCount}</div>
-                    <div class="label">Anomalies critiques</div>
+                    <div class="label">#{msg['common.criticalDefects']}</div>
                 </div>
             </div>
 
             <div class="charts-row">
                 <div class="card">
-                    <h2>Anomalies par statut</h2>
+                    <h2>#{msg['common.defectsByStatus']}</h2>
                     <h:outputText value="#{dashboardBean.defectsByStatusSvg}" escape="false"/>
                 </div>
                 <div class="card">
-                    <h2>Anomalies par sévérité</h2>
+                    <h2>#{msg['common.defectsBySeverity']}</h2>
                     <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
                 </div>
             </div>
 
             <div class="card">
-                <h2>Mon équipe</h2>
+                <h2>#{msg['nav.myTeam']}</h2>
                 <h:panelGroup rendered="#{!dashboardBean.hasTeam}">
                     <p style="color:#5B6472;font-size:13px;">
-                        Votre compte n'est rattaché à aucune équipe — demandez à un administrateur de vous en assigner une.
+                        #{msg['common.noTeam']}
                     </p>
                 </h:panelGroup>
                 <h:panelGroup rendered="#{dashboardBean.hasTeam}">
                     <h:dataTable value="#{dashboardBean.teamMembers}" var="m" styleClass="data-table">
                         <h:column>
-                            <f:facet name="header">Membre</f:facet>
+                            <f:facet name="header">#{msg['common.member']}</f:facet>
                             #{m.name}
                         </h:column>
                         <h:column>
-                            <f:facet name="header">Anomalies assignées</f:facet>
+                            <f:facet name="header">#{msg['common.assignedDefects']}</f:facet>
                             #{m.assignedCount}
                         </h:column>
                         <h:column>
-                            <f:facet name="header">Anomalies créées</f:facet>
+                            <f:facet name="header">#{msg['common.createdDefects']}</f:facet>
                             #{m.createdCount}
                         </h:column>
                     </h:dataTable>
                     <h:panelGroup rendered="#{empty dashboardBean.teamMembers}">
-                        <p style="color:#5B6472;font-size:13px;">Aucun membre dans cette équipe pour l'instant.</p>
+                        <p style="color:#5B6472;font-size:13px;">#{msg['common.noMemberYet']}</p>
                     </h:panelGroup>
                 </h:panelGroup>
             </div>
@@ -193,71 +193,71 @@
 
         <!-- ===================== MANAGER ===================== -->
         <h:panelGroup rendered="#{dashboardBean.managerView}">
-            <h1>Vue d'ensemble</h1>
+            <h1>#{msg['nav.overview']}</h1>
             <div class="stat-row">
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.projectCount}</div>
-                    <div class="label">Projets</div>
+                    <div class="label">#{msg['common.projects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.teamCount}</div>
-                    <div class="label">Équipes</div>
+                    <div class="label">#{msg['common.teams']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.userCount}</div>
-                    <div class="label">Utilisateurs</div>
+                    <div class="label">#{msg['common.users']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.myDefectCount}</div>
-                    <div class="label">Anomalies totales</div>
+                    <div class="label">#{msg['dashboard.totalDefects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.openDefectCount}</div>
-                    <div class="label">Anomalies ouvertes</div>
+                    <div class="label">#{msg['common.openDefects']}</div>
                 </div>
                 <div class="stat-tile">
                     <div class="value">#{dashboardBean.criticalDefectCount}</div>
-                    <div class="label">Anomalies critiques</div>
+                    <div class="label">#{msg['common.criticalDefects']}</div>
                 </div>
             </div>
 
             <div class="charts-row">
                 <div class="card">
-                    <h2>Anomalies par statut</h2>
+                    <h2>#{msg['common.defectsByStatus']}</h2>
                     <h:outputText value="#{dashboardBean.defectsByStatusSvg}" escape="false"/>
                 </div>
                 <div class="card">
-                    <h2>Anomalies par sévérité</h2>
+                    <h2>#{msg['common.defectsBySeverity']}</h2>
                     <h:outputText value="#{dashboardBean.defectsBySeveritySvg}" escape="false"/>
                 </div>
                 <div class="card">
-                    <h2>Projets par statut</h2>
+                    <h2>#{msg['dashboard.projectsByStatus']}</h2>
                     <h:outputText value="#{dashboardBean.projectsByStatusSvg}" escape="false"/>
                 </div>
             </div>
 
             <div class="card">
-                <h2>Anomalies par projet</h2>
+                <h2>#{msg['dashboard.defectsByProject']}</h2>
                 <h:dataTable value="#{dashboardBean.projectBreakdown}" var="pr" styleClass="data-table">
                     <h:column>
-                        <f:facet name="header">Projet</f:facet>
+                        <f:facet name="header">#{msg['common.project']}</f:facet>
                         #{pr.projectName}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Total</f:facet>
+                        <f:facet name="header">#{msg['common.total']}</f:facet>
                         #{pr.total}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Ouvertes</f:facet>
+                        <f:facet name="header">#{msg['common.openPl']}</f:facet>
                         #{pr.open}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Critiques</f:facet>
+                        <f:facet name="header">#{msg['common.criticalPl']}</f:facet>
                         #{pr.critical}
                     </h:column>
                 </h:dataTable>
                 <h:panelGroup rendered="#{empty dashboardBean.projectBreakdown}">
-                    <p style="color:#5B6472;font-size:13px;">Aucune anomalie enregistrée pour l'instant.</p>
+                    <p style="color:#5B6472;font-size:13px;">#{msg['common.noDefectYet']}</p>
                 </h:panelGroup>
             </div>
         </h:panelGroup>

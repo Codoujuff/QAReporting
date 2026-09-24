@@ -1,0 +1,20 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:pt="jakarta.faces.passthrough">
+    <!-- Sélecteur de langue : simples liens GET vers la page courante (paramètres de vue
+         conservés, ex. ?id=12) + ?lang=xx, traité par LocaleFilter. -->
+    <nav class="lang-switch" aria-label="#{msg['layout.language']}">
+        <h:link outcome="#{view.viewId}" includeViewParams="true" value="FR"
+                styleClass="#{localeBean.english ? '' : 'current'}" pt:lang="fr" pt:hreflang="fr"
+                pt:aria-current="#{localeBean.english ? 'false' : 'true'}" title="Français">
+            <f:param name="lang" value="fr"/>
+        </h:link>
+        <h:link outcome="#{view.viewId}" includeViewParams="true" value="EN"
+                styleClass="#{localeBean.english ? 'current' : ''}" pt:lang="en" pt:hreflang="en"
+                pt:aria-current="#{localeBean.english ? 'true' : 'false'}" title="English">
+            <f:param name="lang" value="en"/>
+        </h:link>
+    </nav>
+</ui:composition>

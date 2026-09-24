@@ -114,6 +114,9 @@
                 <version>5.1.1.Final</version>
                 <configuration>
                     <provisioningDir>${project.build.directory}/server</provisioningDir>
+                    <!-- Défaut du plugin : 60 s, trop court pour l'init Hibernate + mise à jour
+                         du schéma — Maven tuerait le serveur en plein déploiement. -->
+                    <startupTimeout>300</startupTimeout>
                     <feature-packs>
                         <feature-pack>
                             <groupId>org.wildfly</groupId>

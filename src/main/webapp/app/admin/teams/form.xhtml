@@ -10,28 +10,28 @@
     </f:metadata>
 
     <ui:define name="content">
-        <h1>#{teamFormBean.id != null ? 'Modifier l\'équipe' : 'Nouvelle équipe'}</h1>
+        <h1>#{teamFormBean.id != null ? msg['team.edit'] : msg['team.new']}</h1>
 
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">Nom</label>
+                    <label for="name">#{msg['common.name']}</label>
                     <h:inputText id="name" value="#{teamFormBean.team.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">Description</label>
+                    <label for="description">#{msg['common.description']}</label>
                     <h:inputTextarea id="description" value="#{teamFormBean.team.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="lead">Responsable</label>
+                    <label for="lead">#{msg['common.owner']}</label>
                     <h:selectOneMenu id="lead" value="#{teamFormBean.leadId}">
-                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{teamFormBean.leadOptions}" var="u"
                                        itemValue="#{u.id}" itemLabel="#{u.name}"/>
                     </h:selectOneMenu>
                 </div>
-                <h:commandButton styleClass="btn" value="Enregistrer" action="#{teamFormBean.save}"/>
-                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/admin/teams/list"/>
+                <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{teamFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/admin/teams/list"/>
             </h:form>
         </div>
     </ui:define>

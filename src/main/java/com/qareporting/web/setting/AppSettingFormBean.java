@@ -1,6 +1,7 @@
 package com.qareporting.web.setting;
 
 import com.qareporting.entity.AppSetting;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.service.AppSettingService;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -26,13 +27,13 @@ public class AppSettingFormBean implements Serializable {
 
     public String save() {
         if (setting.getSettingKey() == null || setting.getSettingKey().isBlank()) {
-            addError("La clé est obligatoire.");
+            addError(I18n.t("err.keyRequired"));
             return null;
         }
 
         AppSetting existing = appSettingService.findByKey(setting.getSettingKey());
         if (existing != null && !existing.getId().equals(setting.getId())) {
-            addError("Cette clé est déjà utilisée par un autre réglage.");
+            addError(I18n.t("err.keyTaken"));
             return null;
         }
 

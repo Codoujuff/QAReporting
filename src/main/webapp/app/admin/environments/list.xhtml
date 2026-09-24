@@ -6,36 +6,36 @@
 
     <ui:define name="content">
         <div class="actions-bar">
-            <h1>Environnements</h1>
-            <h:link styleClass="btn" value="Nouvel environnement" outcome="/app/admin/environments/form"/>
+            <h1>#{msg['nav.environments']}</h1>
+            <h:link styleClass="btn" value="#{msg['env.new']}" outcome="/app/admin/environments/form"/>
         </div>
 
         <div class="card">
             <h:dataTable value="#{environmentListBean.environments}" var="e" styleClass="data-table">
                 <h:column>
-                    <f:facet name="header">Nom</f:facet>
+                    <f:facet name="header">#{msg['common.name']}</f:facet>
                     #{e.name}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">URL</f:facet>
+                    <f:facet name="header">#{msg['common.url']}</f:facet>
                     #{e.url}
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Statut</f:facet>
+                    <f:facet name="header">#{msg['common.status']}</f:facet>
                     <span class="badge status-#{e.status == 'available' ? 'active' : 'inactive'}">
-                        <span class="dot"></span>#{e.status == 'available' ? 'Disponible' : 'Indisponible'}
+                        <span class="dot"></span>#{labels.of(e.status)}
                     </span>
                 </h:column>
                 <h:column>
-                    <f:facet name="header">Actions</f:facet>
+                    <f:facet name="header">#{msg['common.actions']}</f:facet>
                     <div class="table-actions">
-                        <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/admin/environments/form">
+                        <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/environments/form">
                             <f:param name="id" value="#{e.id}"/>
                         </h:link>
                         <h:form style="display:inline">
-                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{environmentListBean.delete(e)}"
-                                             onclick="return confirm('Supprimer cet environnement ?');"/>
+                                             onclick="return confirm('#{msg['env.deleteConfirm']}');"/>
                         </h:form>
                     </div>
                 </h:column>

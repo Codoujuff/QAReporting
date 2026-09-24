@@ -1,6 +1,7 @@
 package com.qareporting.web.notification;
 
 import com.qareporting.entity.Notification;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.User;
 import com.qareporting.service.NotificationService;
 import com.qareporting.web.auth.SessionAuth;
@@ -14,6 +15,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Consomme le NotificationService existant (déjà alimenté par
@@ -44,6 +47,34 @@ public class NotificationBean implements Serializable {
         unreadCount = notifications.stream().filter(n -> n.getReadAt() == null).count();
     }
 
+    /*
+     * Les notifications sont stockées en base sous forme de texte français (partagé avec
+     * l'API REST). Pour les types générés par l'application, on retrouve le sujet
+     * (titre de l'anomalie, nom de la campagne) dans le texte et on reconstruit
+     * titre et message dans la langue de l'utilisateur ; sinon, on affiche le texte stocké.
+     */
+    private static final Pattern DEFECT_ASSIGNED = Pattern.compile("(?s)(.+) vous a été assignée\\.");
+    private static final Pattern STATUS_CHANGED = Pattern.compile("(?s)(.+) est passée à \"[^\"]*\"\\.");
+
+    public String title(Notification n) {
+        String label = n.getType() == null ? null : I18n.find("notif.type." + n.getType() + ".title");
+        return label != null ? label : n.getTitle();
+    }
+
+    public String message(Notification n) {
+        String type = n.getType();
+        String stored = n.getMessage();
+        if (type == null || stored == null) {
+            return stored;
+        }
+        Matcher m = ("defect_assigned".equals(type) ? DEFECT_ASSIGNED : STATUS_CHANGED).matcher(stored);
+        String key = "notif.type." + type + ".message";
+        if (m.matches() && I18n.find(key) != null) {
+            return I18n.t(key, m.group(1));
+        }
+        return stored;
+    }
+
     public boolean isUnread(Notification notification) {
         return notification.getReadAt() == null;
     }
@@ -60,18 +91,18 @@ public class NotificationBean implements Serializable {
             return "À l'instant";
         }
         if (minutes < 60) {
-            return "Il y a " + minutes + " min";
+            return I18n.t("time.minutesAgo", minutes);
         }
         long hours = elapsed.toHours();
         if (hours < 24) {
-            return "Il y a " + hours + " h";
+            return I18n.t("time.hoursAgo", hours);
         }
         long days = elapsed.toDays();
         if (days == 1) {
-            return "Hier";
+            return I18n.t("time.yesterday");
         }
         if (days < 7) {
-            return "Il y a " + days + " jours";
+            return I18n.t("time.daysAgo", days);
         }
         return createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }

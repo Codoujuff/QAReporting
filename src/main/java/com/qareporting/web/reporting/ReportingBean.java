@@ -1,6 +1,7 @@
 package com.qareporting.web.reporting;
 
 import com.qareporting.entity.Defect;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.User;
 import com.qareporting.service.DefectService;
 import com.qareporting.web.auth.SessionAuth;
@@ -84,7 +85,7 @@ public class ReportingBean implements Serializable {
         byStatus = groupBy(defects, d -> statusLabel(d.getStatus()));
         bySeverity = groupBy(defects, d -> severityLabel(d.getSeverity()));
         byProject = groupBy(defects, d -> d.getProject().getName());
-        byAssignee = groupBy(defects, d -> d.getAssignedTo() != null ? d.getAssignedTo().getName() : "Non assignée");
+        byAssignee = groupBy(defects, d -> d.getAssignedTo() != null ? d.getAssignedTo().getName() : I18n.t("report.unassigned"));
     }
 
     private List<SummaryRow> groupBy(List<Defect> source, java.util.function.Function<Defect, String> keyFn) {
@@ -109,23 +110,11 @@ public class ReportingBean implements Serializable {
     }
 
     private String statusLabel(Defect.Status status) {
-        return switch (status) {
-            case open -> "Ouverte";
-            case in_progress -> "En cours";
-            case fixed -> "Corrigée";
-            case retest -> "En retest";
-            case closed -> "Fermée";
-            case reopened -> "Réouverte";
-        };
+        return I18n.t("enum.Defect.Status." + status.name());
     }
 
     private String severityLabel(Defect.Severity severity) {
-        return switch (severity) {
-            case critical -> "Critique";
-            case high -> "Élevée";
-            case medium -> "Moyenne";
-            case low -> "Faible";
-        };
+        return I18n.t("enum.Defect.Severity." + severity.name());
     }
 
     /** Génère et envoie un export CSV (compatible Excel, BOM UTF-8) des anomalies visibles. */
@@ -134,10 +123,10 @@ public class ReportingBean implements Serializable {
         ExternalContext ec = fc.getExternalContext();
         ec.responseReset();
         ec.setResponseContentType("text/csv; charset=UTF-8");
-        ec.setResponseHeader("Content-Disposition", "attachment; filename=\"rapport-anomalies.csv\"");
+        ec.setResponseHeader("Content-Disposition", "attachment; filename=\"" + I18n.t("report.csvFile") + "\"");
 
         StringBuilder csv = new StringBuilder();
-        csv.append("Titre;Projet;Sévérité;Statut;Assignée à;Créée par;Date de création\n");
+        csv.append(I18n.t("report.csvHeader")).append("\n");
         for (Defect d : defects) {
             csv.append(csvEscape(d.getTitle())).append(';')
                     .append(csvEscape(d.getProject().getName())).append(';')
@@ -154,7 +143,7 @@ public class ReportingBean implements Serializable {
             out.flush();
         } catch (java.io.IOException e) {
             fc.addMessage(null, new jakarta.faces.application.FacesMessage(
-                    jakarta.faces.application.FacesMessage.SEVERITY_ERROR, "Échec de l'export CSV.", null));
+                    jakarta.faces.application.FacesMessage.SEVERITY_ERROR, I18n.t("err.csvExport"), null));
             return;
         }
         fc.responseComplete();

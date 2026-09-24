@@ -1,6 +1,7 @@
 package com.qareporting.web.user;
 
 import com.qareporting.entity.Role;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Team;
 import com.qareporting.entity.User;
 import com.qareporting.security.PasswordHasher;
@@ -56,7 +57,7 @@ public class UserFormBean implements Serializable {
 
     public String save() {
         if (roleId == null) {
-            addError("Le rôle est obligatoire.");
+            addError(I18n.t("err.roleRequired"));
             return null;
         }
 
@@ -64,11 +65,11 @@ public class UserFormBean implements Serializable {
 
         if (isCreate) {
             if (userService.findByEmail(user.getEmail()) != null) {
-                addError("Cet email est déjà utilisé.");
+                addError(I18n.t("err.emailTaken"));
                 return null;
             }
             if (password == null || password.isBlank()) {
-                addError("Le mot de passe est requis.");
+                addError(I18n.t("err.passwordRequired"));
                 return null;
             }
             user.setPasswordHash(passwordHasher.hash(password));

@@ -1,6 +1,7 @@
 package com.qareporting.web.activity;
 
 import com.qareporting.entity.Activity;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Campaign;
 import com.qareporting.entity.Environment;
 import com.qareporting.entity.Project;
@@ -75,15 +76,15 @@ public class ActivityFormBean implements Serializable {
 
     public String save() {
         if (projectId == null) {
-            addError("Le projet est obligatoire.");
+            addError(I18n.t("err.projectRequired"));
             return null;
         }
         if (activity.getActivityDate() == null) {
-            addError("La date est obligatoire.");
+            addError(I18n.t("err.dateRequired"));
             return null;
         }
         if (activity.getActivityType() == null || activity.getActivityType().isBlank()) {
-            addError("Le type d'activité est obligatoire.");
+            addError(I18n.t("err.activityTypeRequired"));
             return null;
         }
 
@@ -94,6 +95,12 @@ public class ActivityFormBean implements Serializable {
         activity.setBlocked(blockedCount);
 
         String error = activityService.validate(activity);
+        if (error != null) {
+            int sum = activity.getPassed() + activity.getFailed() + activity.getBlocked() + activity.getNotRun();
+            error = sum != activity.getTestsExecuted()
+                    ? I18n.t("err.activitySum", sum, activity.getTestsExecuted())
+                    : I18n.t("err.blockedReasonRequired");
+        }
         if (error != null) {
             addError(error);
             return null;

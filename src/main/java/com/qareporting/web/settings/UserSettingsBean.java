@@ -1,6 +1,7 @@
 package com.qareporting.web.settings;
 
 import com.qareporting.entity.User;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.security.PasswordHasher;
 import com.qareporting.service.UserService;
 import com.qareporting.web.auth.SessionAuth;
@@ -55,7 +56,7 @@ public class UserSettingsBean implements Serializable {
 
     public String save() {
         if (user.getName() == null || user.getName().isBlank()) {
-            addError("Le nom est obligatoire.");
+            addError(I18n.t("err.nameRequired"));
             return null;
         }
 
@@ -63,11 +64,11 @@ public class UserSettingsBean implements Serializable {
         if (changingPassword) {
             if (currentPassword == null || currentPassword.isBlank()
                     || !passwordHasher.matches(currentPassword, user.getPasswordHash())) {
-                addError("Mot de passe actuel incorrect.");
+                addError(I18n.t("err.wrongPassword"));
                 return null;
             }
             if (!newPassword.equals(newPasswordConfirmation)) {
-                addError("La confirmation ne correspond pas au nouveau mot de passe.");
+                addError(I18n.t("err.passwordMismatch"));
                 return null;
             }
             user.setPasswordHash(passwordHasher.hash(newPassword));

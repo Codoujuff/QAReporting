@@ -5,61 +5,61 @@
                  xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
-        <h1>Nouvelle campagne</h1>
+        <h1>#{msg['campaign.new']}</h1>
 
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="project">Projet</label>
+                    <label for="project">#{msg['common.project']}</label>
                     <h:selectOneMenu id="project" value="#{campaignFormBean.projectId}">
-                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.projectOptions}" var="p"
                                        itemValue="#{p.id}" itemLabel="#{p.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="name">Nom</label>
+                    <label for="name">#{msg['common.name']}</label>
                     <h:inputText id="name" value="#{campaignFormBean.campaign.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="version">Version</label>
+                    <label for="version">#{msg['common.version']}</label>
                     <h:inputText id="version" value="#{campaignFormBean.campaign.version}"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">Description</label>
+                    <label for="description">#{msg['common.description']}</label>
                     <h:inputTextarea id="description" value="#{campaignFormBean.campaign.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="environment">Environnement</label>
+                    <label for="environment">#{msg['common.environment']}</label>
                     <h:selectOneMenu id="environment" value="#{campaignFormBean.environmentId}">
-                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.environmentOptions}" var="e"
                                        itemValue="#{e.id}" itemLabel="#{e.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="responsible">Responsable</label>
+                    <label for="responsible">#{msg['common.owner']}</label>
                     <h:selectOneMenu id="responsible" value="#{campaignFormBean.responsibleId}">
-                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.userOptions}" var="u"
                                        itemValue="#{u.id}" itemLabel="#{u.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="startDate">Date de début (aaaa-mm-jj)</label>
+                    <label for="startDate">#{msg['campaign.startIso']}</label>
                     <h:inputText id="startDate" value="#{campaignFormBean.campaign.startDate}">
                         <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
                     </h:inputText>
                 </div>
                 <div class="form-row">
-                    <label for="endDate">Date de fin (aaaa-mm-jj)</label>
+                    <label for="endDate">#{msg['campaign.endIso']}</label>
                     <h:inputText id="endDate" value="#{campaignFormBean.campaign.endDate}">
                         <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
                     </h:inputText>
                 </div>
 
-                <h:commandButton styleClass="btn" value="Enregistrer" action="#{campaignFormBean.save}"/>
-                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/campaigns/list"/>
+                <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{campaignFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/campaigns/list"/>
             </h:form>
         </div>
     </ui:define>

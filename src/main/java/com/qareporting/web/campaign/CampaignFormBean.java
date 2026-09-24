@@ -1,6 +1,7 @@
 package com.qareporting.web.campaign;
 
 import com.qareporting.entity.Campaign;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Environment;
 import com.qareporting.entity.Project;
 import com.qareporting.entity.User;
@@ -57,11 +58,11 @@ public class CampaignFormBean implements Serializable {
 
     public String save() {
         if (projectId == null) {
-            addError("Le projet est obligatoire.");
+            addError(I18n.t("err.projectRequired"));
             return null;
         }
         if (campaign.getName() == null || campaign.getName().isBlank()) {
-            addError("Le nom de la campagne est obligatoire.");
+            addError(I18n.t("err.campaignNameRequired"));
             return null;
         }
 

@@ -7,6 +7,8 @@ Portage Jakarta EE 10 de l'application **QA Reporting** (suivi d'activité QA, t
 - **Persistance** : JPA / Hibernate 6, sur MariaDB ou MySQL
 - **Serveur** : WildFly 31, installé automatiquement par le `wildfly-maven-plugin`
 
+> 📘 **Première installation ?** Suivez le guide pas à pas : [docs/GUIDE-INSTALLATION.md](docs/GUIDE-INSTALLATION.md)
+
 ## Prérequis
 
 | Outil | Version |
@@ -36,23 +38,23 @@ Par défaut, l'application se connecte avec l'utilisateur `root` sans mot de pas
 ### 3. Lancer l'application
 
 ```bash
-mvn wildfly:run -Dwildfly.startupTimeout=300
+mvn wildfly:run
 ```
 
 Le premier lancement télécharge WildFly et les dépendances, ce qui prend plusieurs minutes. Ensuite, vous pouvez travailler hors ligne :
 
 ```bash
-mvn -o wildfly:run -Dwildfly.startupTimeout=300
+mvn -o wildfly:run
 ```
 
-> **Pourquoi `startupTimeout=300` ?** Par défaut, le plugin attend le serveur 60 s. L'initialisation d'Hibernate et la mise à jour du schéma peuvent prendre plus longtemps. Maven arrête alors le serveur alors que le déploiement était en train de réussir.
+> Le délai de démarrage du serveur est fixé à 300 s dans le `pom.xml` (le défaut du plugin, 60 s, est trop court : Maven arrêterait le serveur en plein déploiement).
 
 ### 4. Ouvrir l'application
 
 | | URL |
 |---|---|
 | Interface web | http://127.0.0.1:8080/qa-reporting-j2ee/ |
-| API REST | http://127.0.0.1:8080/qa-reporting-j2ee/api/ |
+| API REST | préfixe `http://127.0.0.1:8080/qa-reporting-j2ee/api/…` (ex. `/api/projects`, jeton requis — `/api/` seul renvoie 404) |
 
 Au premier démarrage, la classe `StartupSeeder` crée les rôles, les environnements, les paramètres par défaut et un compte administrateur :
 
@@ -87,6 +89,14 @@ src/main/webapp/
 docs/                    Cahier des charges
 ```
 
+## Langues (français / anglais)
+
+L'interface est disponible en français (par défaut) et en anglais. Le sélecteur **FR | EN** se trouve dans l'en-tête et sur la page de connexion. Le choix est mémorisé dans un cookie.
+
+- Textes des pages : `src/main/resources/com/qareporting/i18n/messages_fr.properties` et `messages_en.properties`, utilisés dans les pages avec `#{msg['cle']}`.
+- Textes produits en Java (erreurs, libellés des graphiques) : `I18n.t("cle")`.
+- Les données saisies (noms de projets, descriptions…) ne sont pas traduites.
+
 ## Rôles
 
 | Rôle | Périmètre |
@@ -100,5 +110,4 @@ docs/                    Cahier des charges
 
 - **WildFly reste bloqué au démarrage** : MariaDB n'est pas lancé, ou il n'est pas encore prêt. Vérifiez le port 3306.
 - **`Unknown database 'qa_reporting_j2ee'`** : la base n'existe pas encore. Voir l'étape 2.
-- **Maven arrête le serveur après environ 60 s** : ajoutez `-Dwildfly.startupTimeout=300`.
 - **Port 8080 déjà utilisé** : arrêtez l'autre serveur (Tomcat, un autre WildFly…) qui utilise ce port.

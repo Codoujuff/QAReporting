@@ -1,122 +1,149 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
                 xmlns:ui="jakarta.faces.facelets">
-    <div class="sidebar">
+    <aside class="sidebar">
         <div class="sidebar-brand">
             <span class="brand-dot"></span>
-            <span class="brand-name">QA Reporting</span>
+            <span class="brand-name">#{msg['app.name']}</span>
         </div>
 
-        <div class="sidebar-nav">
+        <nav class="sidebar-nav" aria-label="#{msg['nav.main']}">
             <!-- QA -->
             <h:panelGroup rendered="#{sessionAuth.hasRole('qa')}">
+                <div class="nav-section">#{msg['nav.section.work']}</div>
                 <h:link outcome="/app/dashboard" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/dashboard.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Tableau de bord
+                    <span class="nav-dot"></span>#{msg['nav.dashboard']}
                 </h:link>
                 <h:link outcome="/app/activity/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/activity') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Mon activité
+                    <span class="nav-dot"></span>#{msg['nav.myActivity']}
                 </h:link>
                 <h:link outcome="/app/campaigns/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/campaigns') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Campagnes
+                    <span class="nav-dot"></span>#{msg['nav.campaigns']}
                 </h:link>
                 <h:link outcome="/app/tests/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/tests') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Tests
+                    <span class="nav-dot"></span>#{msg['nav.tests']}
                 </h:link>
                 <h:link outcome="/app/defects/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/defects') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Anomalies
+                    <span class="nav-dot"></span>#{msg['nav.defects']}
                 </h:link>
                 <h:link outcome="/app/reporting" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/reporting.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Reporting
+                    <span class="nav-dot"></span>#{msg['nav.reporting']}
                 </h:link>
+                <div class="nav-section">#{msg['nav.section.account']}</div>
                 <h:link outcome="/app/notifications" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/notifications.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Notifications
+                    <span class="nav-dot"></span>#{msg['nav.notifications']}
                 </h:link>
                 <h:link outcome="/app/profile" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/profile.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Profil
+                    <span class="nav-dot"></span>#{msg['nav.profile']}
                 </h:link>
                 <h:link outcome="/app/settings" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/settings.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Paramètres
+                    <span class="nav-dot"></span>#{msg['nav.settings']}
                 </h:link>
             </h:panelGroup>
 
             <!-- QA LEAD -->
             <h:panelGroup rendered="#{sessionAuth.hasRole('qa_lead')}">
+                <div class="nav-section">#{msg['nav.section.team']}</div>
                 <h:link outcome="/app/dashboard" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/dashboard.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Dashboard équipe
+                    <span class="nav-dot"></span>#{msg['nav.teamDashboard']}
                 </h:link>
                 <h:link outcome="/app/team" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/team.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Équipe
+                    <span class="nav-dot"></span>#{msg['nav.myTeam']}
                 </h:link>
                 <h:link outcome="/app/campaigns/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/campaigns') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Campagnes
+                    <span class="nav-dot"></span>#{msg['nav.campaigns']}
                 </h:link>
                 <h:link outcome="/app/tests/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/tests') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Tests
+                    <span class="nav-dot"></span>#{msg['nav.tests']}
                 </h:link>
                 <h:link outcome="/app/defects/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/defects') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Anomalies
+                    <span class="nav-dot"></span>#{msg['nav.defects']}
                 </h:link>
                 <h:link outcome="/app/reporting" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/reporting.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Reporting
+                    <span class="nav-dot"></span>#{msg['nav.reporting']}
                 </h:link>
+                <div class="nav-section">#{msg['nav.section.account']}</div>
                 <h:link outcome="/app/notifications" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/notifications.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Notifications
+                    <span class="nav-dot"></span>#{msg['nav.notifications']}
                 </h:link>
                 <h:link outcome="/app/profile" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/profile.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Profil
+                    <span class="nav-dot"></span>#{msg['nav.profile']}
                 </h:link>
                 <h:link outcome="/app/settings" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/settings.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Paramètres
+                    <span class="nav-dot"></span>#{msg['nav.settings']}
                 </h:link>
             </h:panelGroup>
 
             <!-- MANAGER -->
             <h:panelGroup rendered="#{sessionAuth.hasRole('manager')}">
+                <div class="nav-section">#{msg['nav.section.steering']}</div>
                 <h:link outcome="/app/dashboard" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/dashboard.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Vue d'ensemble
+                    <span class="nav-dot"></span>#{msg['nav.overview']}
                 </h:link>
                 <h:link outcome="/app/reporting" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/reporting.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Reporting
+                    <span class="nav-dot"></span>#{msg['nav.reporting']}
                 </h:link>
+                <div class="nav-section">#{msg['nav.section.account']}</div>
                 <h:link outcome="/app/notifications" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/notifications.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Notifications
+                    <span class="nav-dot"></span>#{msg['nav.notifications']}
                 </h:link>
                 <h:link outcome="/app/profile" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/profile.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Profil
+                    <span class="nav-dot"></span>#{msg['nav.profile']}
                 </h:link>
                 <h:link outcome="/app/settings" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/settings.xhtml' ? 'active' : ''}">
-                    <span class="nav-dot"></span>Paramètres
+                    <span class="nav-dot"></span>#{msg['nav.settings']}
                 </h:link>
             </h:panelGroup>
 
             <!-- ADMIN -->
             <h:panelGroup rendered="#{sessionAuth.hasRole('admin')}">
+                <div class="nav-section">#{msg['nav.section.steering']}</div>
+                <h:link outcome="/app/dashboard" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/dashboard.xhtml' ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.overview']}
+                </h:link>
+                <h:link outcome="/app/defects/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/defects') ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.defects']}
+                </h:link>
+                <h:link outcome="/app/reporting" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/reporting.xhtml' ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.reporting']}
+                </h:link>
+                <div class="nav-section">#{msg['nav.section.admin']}</div>
                 <h:link outcome="/app/admin/users/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/users') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Utilisateurs
+                    <span class="nav-dot"></span>#{msg['nav.users']}
                 </h:link>
                 <h:link outcome="/app/admin/roles/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/roles') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Rôles
+                    <span class="nav-dot"></span>#{msg['nav.roles']}
                 </h:link>
                 <h:link outcome="/app/admin/projects/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/projects') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Projets
+                    <span class="nav-dot"></span>#{msg['nav.projects']}
                 </h:link>
                 <h:link outcome="/app/admin/teams/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/teams') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Équipes
+                    <span class="nav-dot"></span>#{msg['nav.teams']}
                 </h:link>
                 <h:link outcome="/app/admin/environments/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/environments') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Environnements
+                    <span class="nav-dot"></span>#{msg['nav.environments']}
                 </h:link>
                 <h:link outcome="/app/admin/settings/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/admin/settings') ? 'active' : ''}">
-                    <span class="nav-dot"></span>Paramètres
+                    <span class="nav-dot"></span>#{msg['nav.appSettings']}
+                </h:link>
+                <div class="nav-section">#{msg['nav.section.account']}</div>
+                <h:link outcome="/app/notifications" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/notifications.xhtml' ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.notifications']}
+                </h:link>
+                <h:link outcome="/app/profile" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/profile.xhtml' ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.profile']}
+                </h:link>
+                <h:link outcome="/app/settings" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/settings.xhtml' ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.settings']}
                 </h:link>
             </h:panelGroup>
-        </div>
+        </nav>
 
         <div class="sidebar-footer">
             <h:form>
-                <h:commandButton styleClass="sidebar-logout" type="submit" value="Déconnexion"
+                <h:commandButton styleClass="sidebar-logout" type="submit" value="#{msg['nav.logout']}"
                                  action="#{sessionAuth.logout}"/>
             </h:form>
         </div>
-    </div>
+    </aside>
 </ui:composition>

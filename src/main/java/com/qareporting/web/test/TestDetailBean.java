@@ -1,6 +1,7 @@
 package com.qareporting.web.test;
 
 import com.qareporting.entity.Environment;
+import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Test;
 import com.qareporting.entity.TestExecution;
 import com.qareporting.service.EnvironmentService;
@@ -58,7 +59,7 @@ public class TestDetailBean implements Serializable {
 
     public String execute() {
         if (resultStatus == null) {
-            addError("Le résultat est obligatoire.");
+            addError(I18n.t("err.resultRequired"));
             return null;
         }
 

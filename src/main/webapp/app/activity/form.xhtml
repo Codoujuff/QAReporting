@@ -5,86 +5,86 @@
                  xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
-        <h1>Nouvelle activité</h1>
+        <h1>#{msg['activity.new']}</h1>
 
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="project">Projet</label>
+                    <label for="project">#{msg['common.project']}</label>
                     <h:selectOneMenu id="project" value="#{activityFormBean.projectId}">
-                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{activityFormBean.projectOptions}" var="p"
                                        itemValue="#{p.id}" itemLabel="#{p.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="campaign">Campagne</label>
+                    <label for="campaign">#{msg['common.campaign']}</label>
                     <h:selectOneMenu id="campaign" value="#{activityFormBean.campaignId}">
-                        <f:selectItem itemLabel="-- Aucune --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneF']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{activityFormBean.campaignOptions}" var="c"
                                        itemValue="#{c.id}" itemLabel="#{c.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="environment">Environnement</label>
+                    <label for="environment">#{msg['common.environment']}</label>
                     <h:selectOneMenu id="environment" value="#{activityFormBean.environmentId}">
-                        <f:selectItem itemLabel="-- Aucun --" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{activityFormBean.environmentOptions}" var="e"
                                        itemValue="#{e.id}" itemLabel="#{e.name}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="activityType">Type d'activité</label>
+                    <label for="activityType">#{msg['activity.type']}</label>
                     <h:selectOneMenu id="activityType" value="#{activityFormBean.activity.activityType}">
-                        <f:selectItem itemLabel="-- Choisir --" itemValue="#{null}" noSelectionOption="true"/>
-                        <f:selectItems value="#{activityFormBean.activityTypeOptions}"/>
+                        <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{activityFormBean.activityTypeOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.activityType(o)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="activityDate">Date (aaaa-mm-jj)</label>
+                    <label for="activityDate">#{msg['activity.dateIso']}</label>
                     <h:inputText id="activityDate" value="#{activityFormBean.activity.activityDate}">
                         <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
                     </h:inputText>
                 </div>
                 <div class="form-row">
-                    <label for="testsExecuted">Tests exécutés</label>
+                    <label for="testsExecuted">#{msg['common.testsExecuted']}</label>
                     <h:inputText id="testsExecuted" value="#{activityFormBean.activity.testsExecuted}"/>
                 </div>
                 <div class="form-row">
-                    <label for="passed">Réussis</label>
+                    <label for="passed">#{msg['common.passedPl']}</label>
                     <h:inputText id="passed" value="#{activityFormBean.activity.passed}"/>
                 </div>
                 <div class="form-row">
-                    <label for="failed">Échoués</label>
+                    <label for="failed">#{msg['common.failedPl']}</label>
                     <h:inputText id="failed" value="#{activityFormBean.activity.failed}"/>
                 </div>
                 <div class="form-row">
-                    <label for="blocked">Bloqués</label>
+                    <label for="blocked">#{msg['common.blockedPl']}</label>
                     <h:inputText id="blocked" value="#{activityFormBean.blockedCount}"/>
                 </div>
                 <div class="form-row">
-                    <label for="notRun">Non exécutés</label>
+                    <label for="notRun">#{msg['common.notRunPl']}</label>
                     <h:inputText id="notRun" value="#{activityFormBean.activity.notRun}"/>
                 </div>
                 <div class="form-row">
-                    <label for="defectsCount">Anomalies trouvées</label>
+                    <label for="defectsCount">#{msg['activity.defectsFound']}</label>
                     <h:inputText id="defectsCount" value="#{activityFormBean.activity.defectsCount}"/>
                 </div>
                 <div class="form-row">
-                    <label for="blockedReason">Motif de blocage (si des tests sont bloqués)</label>
+                    <label for="blockedReason">#{msg['activity.blockedReason']}</label>
                     <h:inputTextarea id="blockedReason" value="#{activityFormBean.activity.blockedReason}"/>
                 </div>
                 <div class="form-row">
-                    <label for="duration">Durée</label>
+                    <label for="duration">#{msg['common.duration']}</label>
                     <h:inputText id="duration" value="#{activityFormBean.activity.duration}"/>
                 </div>
                 <div class="form-row">
-                    <label for="comment">Commentaire</label>
+                    <label for="comment">#{msg['common.comment']}</label>
                     <h:inputTextarea id="comment" value="#{activityFormBean.activity.comment}"/>
                 </div>
 
-                <h:commandButton styleClass="btn" value="Enregistrer" action="#{activityFormBean.save}"/>
-                <h:link styleClass="btn btn-secondary" value="Annuler" outcome="/app/activity/list"/>
+                <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{activityFormBean.save}"/>
+                <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/activity/list"/>
             </h:form>
         </div>
     </ui:define>

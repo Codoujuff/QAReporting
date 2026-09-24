@@ -5,49 +5,50 @@
                  xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
-        <h1>Campagnes</h1>
+        <div class="actions-bar">
+            <h1>#{msg['nav.campaigns']}</h1>
+            <h:link styleClass="btn" value="#{msg['campaign.new']}" outcome="/app/campaigns/form"/>
+        </div>
 
         <div class="card">
-            <h:link styleClass="btn" value="Nouvelle campagne" outcome="/app/campaigns/form"/>
-
             <h:form>
-                <h:dataTable value="#{campaignListBean.campaigns}" var="c" styleClass="data-table" style="margin-top:16px;">
+                <h:dataTable value="#{campaignListBean.campaigns}" var="c" styleClass="data-table">
                     <h:column>
-                        <f:facet name="header">Nom</f:facet>
+                        <f:facet name="header">#{msg['common.name']}</f:facet>
                         #{c.name}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Projet</f:facet>
+                        <f:facet name="header">#{msg['common.project']}</f:facet>
                         #{c.project.name}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Version</f:facet>
+                        <f:facet name="header">#{msg['common.version']}</f:facet>
                         #{c.version}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Environnement</f:facet>
+                        <f:facet name="header">#{msg['common.environment']}</f:facet>
                         #{c.environment != null ? c.environment.name : '—'}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Responsable</f:facet>
+                        <f:facet name="header">#{msg['common.owner']}</f:facet>
                         #{c.responsible != null ? c.responsible.name : '—'}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Début</f:facet>
+                        <f:facet name="header">#{msg['campaign.start']}</f:facet>
                         <h:outputText value="#{c.startDate}" rendered="#{c.startDate != null}">
                             <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
                         </h:outputText>
                         <h:outputText value="—" rendered="#{c.startDate == null}"/>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Fin</f:facet>
+                        <f:facet name="header">#{msg['campaign.end']}</f:facet>
                         <h:outputText value="#{c.endDate}" rendered="#{c.endDate != null}">
                             <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
                         </h:outputText>
                         <h:outputText value="—" rendered="#{c.endDate == null}"/>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Progression</f:facet>
+                        <f:facet name="header">#{msg['campaign.progress']}</f:facet>
                         <div class="progress-track">
                             <div class="progress-bar">
                                 <div class="progress-bar-fill" style="width:#{campaignListBean.getProgress(c)}%"></div>
@@ -56,22 +57,22 @@
                         </div>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Statut</f:facet>
-                        <span class="badge status-#{c.status}"><span class="dot"></span>#{c.status}</span>
+                        <f:facet name="header">#{msg['common.status']}</f:facet>
+                        <span class="badge status-#{c.status}"><span class="dot"></span>#{labels.of(c.status)}</span>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Actions</f:facet>
+                        <f:facet name="header">#{msg['common.actions']}</f:facet>
                         <div class="table-actions">
-                            <h:commandButton styleClass="btn btn-secondary" value="Démarrer"
+                            <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doStart']}"
                                              action="#{campaignListBean.start(c)}"
                                              rendered="#{campaignListBean.isStartable(c)}"/>
-                            <h:commandButton styleClass="btn btn-secondary" value="Terminer"
+                            <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doComplete']}"
                                              action="#{campaignListBean.complete(c)}"
                                              rendered="#{campaignListBean.isCompletable(c)}"/>
-                            <h:commandButton styleClass="btn btn-secondary" value="Bloquer"
+                            <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doBlock']}"
                                              action="#{campaignListBean.block(c)}"
                                              rendered="#{campaignListBean.isBlockable(c)}"/>
-                            <h:commandButton styleClass="btn btn-secondary" value="Reprendre"
+                            <h:commandButton styleClass="btn btn-secondary" value="#{msg['campaign.doResume']}"
                                              action="#{campaignListBean.resume(c)}"
                                              rendered="#{campaignListBean.isResumable(c)}"/>
                         </div>
@@ -79,7 +80,7 @@
                 </h:dataTable>
 
                 <h:panelGroup rendered="#{empty campaignListBean.campaigns}">
-                    <p style="color:#5B6472;font-size:13px;">Aucune campagne enregistrée pour l'instant.</p>
+                    <p style="color:#5B6472;font-size:13px;">#{msg['campaign.none']}</p>
                 </h:panelGroup>
             </h:form>
         </div>

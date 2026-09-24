@@ -6,49 +6,49 @@
 
     <ui:define name="content">
         <div class="actions-bar">
-            <h1>Tests</h1>
-            <h:link styleClass="btn" value="Nouveau test" outcome="/app/tests/form"/>
+            <h1>#{msg['common.tests']}</h1>
+            <h:link styleClass="btn" value="#{msg['test.new']}" outcome="/app/tests/form"/>
         </div>
 
         <div class="card">
             <h:form>
                 <h:dataTable value="#{testListBean.tests}" var="t" styleClass="data-table">
                     <h:column>
-                        <f:facet name="header">ID</f:facet>
+                        <f:facet name="header">#{msg['common.id']}</f:facet>
                         t#{t.id}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Titre</f:facet>
+                        <f:facet name="header">#{msg['common.title']}</f:facet>
                         <h:link value="#{t.title}" outcome="/app/tests/detail">
                             <f:param name="id" value="#{t.id}"/>
                         </h:link>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Projet</f:facet>
+                        <f:facet name="header">#{msg['common.project']}</f:facet>
                         #{t.project.name}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Campagne</f:facet>
+                        <f:facet name="header">#{msg['common.campaign']}</f:facet>
                         #{t.campaign != null ? t.campaign.name : '—'}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Type</f:facet>
+                        <f:facet name="header">#{msg['common.type']}</f:facet>
                         #{t.type}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Env.</f:facet>
+                        <f:facet name="header">#{msg['test.envShort']}</f:facet>
                         #{t.environment != null ? t.environment.name : '—'}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Assigné à</f:facet>
+                        <f:facet name="header">#{msg['common.assignedToM']}</f:facet>
                         #{t.assignedTo != null ? t.assignedTo.name : '—'}
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Statut</f:facet>
-                        <span class="badge status-#{t.status}"><span class="dot"></span>#{t.status}</span>
+                        <f:facet name="header">#{msg['common.status']}</f:facet>
+                        <span class="badge status-#{t.status}"><span class="dot"></span>#{labels.of(t.status)}</span>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Dernière exéc.</f:facet>
+                        <f:facet name="header">#{msg['test.lastRun']}</f:facet>
                         <h:outputText value="#{testListBean.lastExecutionOf(t).executedAt}"
                                       rendered="#{testListBean.lastExecutionOf(t) != null}">
                             <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/>
@@ -56,21 +56,21 @@
                         <h:outputText value="—" rendered="#{testListBean.lastExecutionOf(t) == null}"/>
                     </h:column>
                     <h:column>
-                        <f:facet name="header">Actions</f:facet>
+                        <f:facet name="header">#{msg['common.actions']}</f:facet>
                         <div class="table-actions">
-                            <h:link styleClass="btn btn-secondary" value="Modifier" outcome="/app/tests/form">
+                            <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/tests/form">
                                 <f:param name="id" value="#{t.id}"/>
                             </h:link>
-                            <h:commandButton styleClass="btn btn-danger" value="Supprimer"
+                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{testListBean.delete(t)}"
                                              rendered="#{sessionAuth.hasRole('admin')}"
-                                             onclick="return confirm('Supprimer ce test ?');"/>
+                                             onclick="return confirm('#{msg['test.deleteConfirm']}');"/>
                         </div>
                     </h:column>
                 </h:dataTable>
 
                 <h:panelGroup rendered="#{empty testListBean.tests}">
-                    <p style="color:#5B6472;font-size:13px;">Aucun test enregistré pour l'instant.</p>
+                    <p style="color:#5B6472;font-size:13px;">#{msg['test.none']}</p>
                 </h:panelGroup>
             </h:form>
         </div>
