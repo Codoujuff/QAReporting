@@ -115,3 +115,8 @@ Les droits sont définis en un seul endroit, `security/Permissions.java`, et app
 - **WildFly reste bloqué au démarrage** : MariaDB n'est pas lancé, ou il n'est pas encore prêt. Vérifiez le port 3306.
 - **`Unknown database 'qa_reporting_j2ee'`** : la base n'existe pas encore. Voir l'étape 2.
 - **Port 8080 déjà utilisé** : arrêtez l'autre serveur (Tomcat, un autre WildFly…) qui utilise ce port.
+
+
+
+mvn -o wildfly:run
+http://127.0.0.1:8080/qa-reporting-j2ee/api/
