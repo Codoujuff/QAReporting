@@ -1,5 +1,7 @@
 package com.qareporting.resource;
 
+import java.time.LocalDateTime;
+import com.qareporting.security.LoginService;
 import com.qareporting.dto.LoginRequest;
 import com.qareporting.dto.LoginResponse;
 import com.qareporting.entity.AccessToken;
@@ -39,38 +41,45 @@ public class AuthResource {
     @Inject
     CurrentUser currentUser;
 
+    @Inject
+    LoginService loginService;
+
+    @jakarta.ws.rs.core.Context
+    jakarta.servlet.http.HttpServletRequest httpRequest;
+
     @POST
     @Path("/login")
     @Public
     @Transactional
     public Response login(LoginRequest request) {
         if (request == null || request.getEmail() == null || request.getPassword() == null) {
-            return Response.status(422)
-                    .entity("{\"message\":\"Email et mot de passe requis.\"}")
-                    .build();
+            return error(Response.Status.fromStatusCode(422), "Email et mot de passe requis.");
         }
-
-        User user;
-        try {
-            user = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
-                    .setParameter("email", request.getEmail())
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return error(Response.Status.UNAUTHORIZED, "Identifiants invalides.");
+        LoginService.Result result = loginService.authenticate(request.getEmail(), request.getPassword(),
+                httpRequest.getRemoteAddr());
+        switch (result.status()) {
+            case LOCKED:
+                return Response.status(429).header("Retry-After", result.minutesLocked() * 60)
+                        .entity("{\"message\":\"Trop de tentatives. Réessayez dans " + result.minutesLocked() + " min.\"}")
+                        .build();
+            case DISABLED:
+                return error(Response.Status.FORBIDDEN, "Ce compte a été désactivé.");
+            case INVALID:
+                return error(Response.Status.UNAUTHORIZED, "Identifiants invalides.");
+            default:
+                break;
         }
-
-        if (!user.isActive()) {
-            return error(Response.Status.FORBIDDEN, "Ce compte a été désactivé.");
-        }
-
-        if (!passwordHasher.matches(request.getPassword(), user.getPasswordHash())) {
-            return error(Response.Status.UNAUTHORIZED, "Identifiants invalides.");
+        User user = result.user();
+        if (user.isMustChangePassword()) {
+            return error(Response.Status.FORBIDDEN,
+                    "Mot de passe provisoire : changez-le d'abord depuis l'interface web (Paramètres).");
         }
 
         String plainToken = tokenService.generatePlainToken();
         AccessToken token = new AccessToken();
         token.setUser(user);
         token.setTokenHash(tokenService.hash(plainToken));
+        token.setExpiresAt(LocalDateTime.now().plus(TokenService.LIFETIME));
         em.persist(token);
 
         return Response.ok(new LoginResponse(plainToken, user)).build();
@@ -80,9 +89,13 @@ public class AuthResource {
     @Path("/logout")
     @Transactional
     public Response logout() {
-        // The current token was already resolved by AuthenticationFilter; a full
-        // implementation revokes it here. Left as a follow-up once token lookup
-        // is threaded through the filter into the request context.
+        // Révoque le jeton utilisé pour cet appel : il ne pourra plus servir.
+        if (currentUser.getTokenId() != null) {
+            AccessToken token = em.find(AccessToken.class, currentUser.getTokenId());
+            if (token != null) {
+                em.remove(token);
+            }
+        }
         return Response.noContent().build();
     }
 

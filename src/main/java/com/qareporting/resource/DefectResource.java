@@ -94,6 +94,9 @@ public class DefectResource {
         if (defect == null || !defectService.canView(currentUser.get(), defect) || assignee == null) {
             return Response.status(404).build();
         }
+        if (!defectService.canBeAssignedTo(defect, assignee)) {
+            return Response.status(422).entity("{\"message\":\"L'assignation est réservée aux testeurs de l'équipe du projet.\"}").build();
+        }
         return Response.ok(defectService.assign(defect, assignee, currentUser.get())).build();
     }
 
@@ -122,7 +125,37 @@ public class DefectResource {
             return Response.status(404).build();
         }
         String comment = request == null ? null : request.getComment();
-        return Response.ok(defectService.close(defect, currentUser.get(), comment)).build();
+        try {
+            return Response.ok(defectService.close(defect, currentUser.get(), comment)).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(422).entity("{\"message\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @POST
+    @Path("/{id}/start")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
+    public Response start(@PathParam("id") Long id, CommentRequest request) {
+        return transition(id, d -> defectService.startProgress(d, currentUser.get(), request == null ? null : request.getComment()));
+    }
+
+    @POST
+    @Path("/{id}/start-retest")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD, Role.QA})
+    public Response startRetest(@PathParam("id") Long id, CommentRequest request) {
+        return transition(id, d -> defectService.startRetest(d, currentUser.get(), request == null ? null : request.getComment()));
+    }
+
+    private Response transition(Long id, java.util.function.Function<Defect, Defect> action) {
+        Defect defect = defectService.find(id);
+        if (defect == null || !defectService.canView(currentUser.get(), defect)) {
+            return Response.status(404).build();
+        }
+        try {
+            return Response.ok(action.apply(defect)).build();
+        } catch (IllegalStateException e) {
+            return Response.status(422).entity("{\"message\":\"" + e.getMessage() + "\"}").build();
+        }
     }
 
     @POST

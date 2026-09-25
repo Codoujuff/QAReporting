@@ -248,7 +248,7 @@
                 </h:column>
             </h:dataTable>
             <h:panelGroup rendered="#{empty reportingBean.byProject}">
-                <p style="color:#5B6472;font-size:13px;">#{msg['common.noDefectYet']}</p>
+                <p class="empty-state">#{msg['common.noDefectYet']}</p>
             </h:panelGroup>
         </div>
 
@@ -273,7 +273,7 @@
                 </h:column>
             </h:dataTable>
             <h:panelGroup rendered="#{empty reportingBean.byAssignee}">
-                <p style="color:#5B6472;font-size:13px;">#{msg['common.noDefectYet']}</p>
+                <p class="empty-state">#{msg['common.noDefectYet']}</p>
             </h:panelGroup>
         </div>
     </ui:define>

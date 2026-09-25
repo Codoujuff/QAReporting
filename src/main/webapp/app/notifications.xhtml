@@ -33,7 +33,7 @@
                 </ui:repeat>
 
                 <h:panelGroup rendered="#{empty notificationBean.notifications}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['notif.none']}</p>
+                    <p class="empty-state">#{msg['notif.none']}</p>
                 </h:panelGroup>
             </h:form>
         </div>

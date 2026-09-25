@@ -67,8 +67,11 @@ public class NotificationBean implements Serializable {
         if (type == null || stored == null) {
             return stored;
         }
-        Matcher m = ("defect_assigned".equals(type) ? DEFECT_ASSIGNED : STATUS_CHANGED).matcher(stored);
         String key = "notif.type." + type + ".message";
+        if ("activity_reminder".equals(type)) {
+            return I18n.find(key) != null ? I18n.t(key) : stored; // message fixe, sans sujet
+        }
+        Matcher m = ("defect_assigned".equals(type) ? DEFECT_ASSIGNED : STATUS_CHANGED).matcher(stored);
         if (m.matches() && I18n.find(key) != null) {
             return I18n.t(key, m.group(1));
         }

@@ -12,6 +12,7 @@ import jakarta.enterprise.context.RequestScoped;
 public class CurrentUser {
 
     private User user;
+    private Long tokenId;
 
     public User get() {
         return user;
@@ -19,6 +20,15 @@ public class CurrentUser {
 
     public void set(User user) {
         this.user = user;
+    }
+
+    /** Jeton de l'appel API en cours (pour le révoquer à la déconnexion), null côté pages JSF. */
+    public Long getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(Long tokenId) {
+        this.tokenId = tokenId;
     }
 
     public boolean isAuthenticated() {

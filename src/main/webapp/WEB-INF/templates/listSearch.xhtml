@@ -1,0 +1,32 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets">
+    <!--
+        Barre de recherche d'une liste : simple formulaire GET (?q=…&status=…), donc une
+        recherche se partage par son URL. Paramètres : bean (le bean de la liste),
+        statusOptions (valeurs d'enum, facultatif), extraStatuses (true pour l'activité).
+    -->
+    <form method="get" class="list-search" role="search">
+        <input type="search" name="q" value="#{bean.q}" class="list-search-input"
+               placeholder="#{msg['list.searchPlaceholder']}" aria-label="#{msg['list.search']}"/>
+        <ui:fragment rendered="#{not empty statusOptions}">
+            <select name="status" aria-label="#{msg['common.status']}">
+                <option value="">#{msg['list.allStatuses']}</option>
+                <ui:repeat value="#{statusOptions}" var="s">
+                    <option value="#{s}" selected="#{bean.status eq s.toString() ? 'selected' : null}">#{labels.of(s)}</option>
+                </ui:repeat>
+            </select>
+        </ui:fragment>
+        <ui:fragment rendered="#{extraStatuses}">
+            <select name="status" aria-label="#{msg['common.status']}">
+                <option value="">#{msg['list.allStatuses']}</option>
+                <option value="toValidate" selected="#{bean.status eq 'toValidate' ? 'selected' : null}">#{msg['activity.toValidate']}</option>
+                <option value="validated" selected="#{bean.status eq 'validated' ? 'selected' : null}">#{msg['activity.validated']}</option>
+            </select>
+        </ui:fragment>
+        <button type="submit" class="btn btn-secondary">#{msg['list.search']}</button>
+        <h:link value="#{msg['list.reset']}" outcome="#{view.viewId}" styleClass="list-search-reset"
+                rendered="#{not empty bean.q or not empty bean.status}"/>
+    </form>
+</ui:composition>

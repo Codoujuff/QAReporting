@@ -7,15 +7,22 @@
     <ui:define name="content">
         <h1>#{msg['nav.settings']}</h1>
 
+        <h:panelGroup layout="block" styleClass="callout callout-danger" rendered="#{sessionAuth.mustChangePassword}">
+            <div>
+                <div class="callout-title">#{msg['settings.forcedTitle']}</div>
+                <div class="callout-text">#{msg['settings.forcedText']}</div>
+            </div>
+        </h:panelGroup>
+
         <h:form>
             <div class="card">
                 <h2>#{msg['settings.account']}</h2>
                 <div class="form-row">
-                    <label for="name">#{msg['common.name']}</label>
+                    <h:outputLabel for="name" value="#{msg['common.name']}"/>
                     <h:inputText id="name" value="#{userSettingsBean.user.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="email">#{msg['common.email']}</label>
+                    <h:outputLabel for="email" value="#{msg['common.email']}"/>
                     <h:inputText id="email" value="#{userSettingsBean.user.email}" disabled="true"/>
                 </div>
             </div>
@@ -23,38 +30,30 @@
             <div class="card">
                 <h2>#{msg['nav.notifications']}</h2>
                 <div class="form-row">
-                    <label for="notifyAssigned">
-                        <h:selectBooleanCheckbox id="notifyAssigned" value="#{userSettingsBean.user.notifyAssigned}"/>
-                        #{msg['settings.notifAssigned']}
-                    </label>
+                    <h:outputLabel for="notifyAssigned"><h:selectBooleanCheckbox id="notifyAssigned" value="#{userSettingsBean.user.notifyAssigned}"/>
+                        #{msg['settings.notifAssigned']}</h:outputLabel>
                 </div>
                 <div class="form-row">
-                    <label for="notifyFixed">
-                        <h:selectBooleanCheckbox id="notifyFixed" value="#{userSettingsBean.user.notifyFixed}"/>
-                        #{msg['settings.notifFixed']}
-                    </label>
+                    <h:outputLabel for="notifyFixed"><h:selectBooleanCheckbox id="notifyFixed" value="#{userSettingsBean.user.notifyFixed}"/>
+                        #{msg['settings.notifFixed']}</h:outputLabel>
                 </div>
                 <div class="form-row">
-                    <label for="notifyCampaign">
-                        <h:selectBooleanCheckbox id="notifyCampaign" value="#{userSettingsBean.user.notifyCampaign}"/>
-                        #{msg['settings.notifCampaign']}
-                    </label>
+                    <h:outputLabel for="notifyCampaign"><h:selectBooleanCheckbox id="notifyCampaign" value="#{userSettingsBean.user.notifyCampaign}"/>
+                        #{msg['settings.notifCampaign']}</h:outputLabel>
                 </div>
             </div>
 
             <div class="card">
                 <h2>#{msg['settings.reminder']}</h2>
-                <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
+                <p class="subtitle">
                     #{msg['settings.reminderIntro']}
                 </p>
                 <div class="form-row">
-                    <label for="reminderEnabled">
-                        <h:selectBooleanCheckbox id="reminderEnabled" value="#{userSettingsBean.reminderEnabled}"/>
-                        #{msg['settings.reminderEnable']}
-                    </label>
+                    <h:outputLabel for="reminderEnabled"><h:selectBooleanCheckbox id="reminderEnabled" value="#{userSettingsBean.reminderEnabled}"/>
+                        #{msg['settings.reminderEnable']}</h:outputLabel>
                 </div>
                 <div class="form-row">
-                    <label for="reminderTime">#{msg['settings.reminderTime']}</label>
+                    <h:outputLabel for="reminderTime" value="#{msg['settings.reminderTime']}"/>
                     <h:inputText id="reminderTime" value="#{userSettingsBean.reminderTime}">
                         <f:convertDateTime type="localTime" pattern="HH:mm"/>
                     </h:inputText>
@@ -63,19 +62,20 @@
 
             <div class="card">
                 <h2>#{msg['settings.security']}</h2>
-                <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
+                <p class="subtitle">
                     #{msg['settings.securityIntro']}
                 </p>
                 <div class="form-row">
-                    <label for="currentPassword">#{msg['settings.currentPassword']}</label>
+                    <h:outputLabel for="currentPassword" value="#{msg['settings.currentPassword']}"/>
                     <h:inputSecret id="currentPassword" value="#{userSettingsBean.currentPassword}"/>
                 </div>
                 <div class="form-row">
-                    <label for="newPassword">#{msg['settings.newPassword']}</label>
+                    <h:outputLabel for="newPassword" value="#{msg['settings.newPassword']}"/>
                     <h:inputSecret id="newPassword" value="#{userSettingsBean.newPassword}"/>
+                    <span class="field-hint">#{msg['settings.passwordRule']}</span>
                 </div>
                 <div class="form-row">
-                    <label for="newPasswordConfirmation">#{msg['settings.confirmPassword']}</label>
+                    <h:outputLabel for="newPasswordConfirmation" value="#{msg['settings.confirmPassword']}"/>
                     <h:inputSecret id="newPasswordConfirmation" value="#{userSettingsBean.newPasswordConfirmation}"/>
                 </div>
             </div>
@@ -83,7 +83,7 @@
             <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{userSettingsBean.save}"/>
         </h:form>
 
-        <div class="card" style="margin-top:16px;">
+        <div class="card">
             <h:form>
                 <h:commandButton styleClass="btn btn-danger" value="#{msg['nav.logout']}" action="#{sessionAuth.logout}"/>
             </h:form>

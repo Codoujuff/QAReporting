@@ -75,6 +75,21 @@ public class ActivityResource {
         return Response.ok(activityService.update(existing)).build();
     }
 
+    /** Validation d'une déclaration par le QA Lead de l'équipe (ou l'admin). */
+    @POST
+    @Path("/{id}/validate")
+    @RequiresRole({Role.ADMIN, Role.QA_LEAD})
+    public Response validate(@PathParam("id") Long id) {
+        Activity activity = activityService.find(id);
+        if (!activityService.canView(currentUser.get(), activity)) {
+            return Response.status(404).build();
+        }
+        if (!activityService.canValidate(currentUser.get(), activity)) {
+            return Response.status(403).build();
+        }
+        return Response.ok(activityService.validateByLead(activity, currentUser.get())).build();
+    }
+
     @DELETE
     @Path("/{id}")
     public Response destroy(@PathParam("id") Long id) {

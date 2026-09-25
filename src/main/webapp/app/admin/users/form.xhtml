@@ -15,26 +15,25 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">#{msg['common.name']}</label>
+                    <h:outputLabel for="name" value="#{msg['common.name']}"/>
                     <h:inputText id="name" value="#{userFormBean.user.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="initials">#{msg['user.initials']}</label>
+                    <h:outputLabel for="initials" value="#{msg['user.initials']}"/>
                     <h:inputText id="initials" value="#{userFormBean.user.initials}"/>
                 </div>
                 <div class="form-row">
-                    <label for="email">#{msg['common.email']}</label>
+                    <h:outputLabel for="email" value="#{msg['common.email']}"/>
                     <h:inputText id="email" value="#{userFormBean.user.email}"
                                  required="true" disabled="#{userFormBean.id != null}"/>
                 </div>
                 <div class="form-row">
-                    <label for="password">
-                        #{userFormBean.id != null ? msg['user.newPassword'] : msg['common.password']}
-                    </label>
+                    <h:outputLabel for="password" value="#{userFormBean.id != null ? msg['user.newPassword'] : msg['common.password']}"/>
                     <h:inputSecret id="password" value="#{userFormBean.password}"/>
+                    <span class="field-hint">#{msg['user.passwordHint']}</span>
                 </div>
                 <div class="form-row">
-                    <label for="role">#{msg['common.role']}</label>
+                    <h:outputLabel for="role" value="#{msg['common.role']}"/>
                     <h:selectOneMenu id="role" value="#{userFormBean.roleId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{userFormBean.roleOptions}" var="r"
@@ -42,7 +41,7 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="team">#{msg['common.team']}</label>
+                    <h:outputLabel for="team" value="#{msg['common.team']}"/>
                     <h:selectOneMenu id="team" value="#{userFormBean.teamId}">
                         <f:selectItem itemLabel="#{msg['common.noneF']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{userFormBean.teamOptions}" var="t"
@@ -50,10 +49,8 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="active">
-                        <h:selectBooleanCheckbox id="active" value="#{userFormBean.user.active}"/>
-                        #{msg['user.activeAccount']}
-                    </label>
+                    <h:outputLabel for="active"><h:selectBooleanCheckbox id="active" value="#{userFormBean.user.active}"/>
+                        #{msg['user.activeAccount']}</h:outputLabel>
                 </div>
                 <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{userFormBean.save}"/>
                 <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/admin/users/list"/>

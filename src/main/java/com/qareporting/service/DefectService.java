@@ -21,6 +21,26 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         return Defect.class;
     }
 
+    /**
+     * Testeurs à qui l'anomalie peut être assignée : les QA et QA Lead actifs de l'équipe
+     * du projet (tous les QA / QA Lead actifs si le projet n'a pas d'équipe). Ni le Manager
+     * ni l'Admin ne corrigent ou ne revérifient d'anomalie.
+     */
+    public List<User> assignableUsers(Defect defect) {
+        boolean teamless = defect == null || defect.getProject() == null || defect.getProject().getTeam() == null;
+        var query = em.createQuery("SELECT u FROM User u WHERE u.active = true AND u.role.name IN :roles"
+                        + (teamless ? "" : " AND u.team = :team") + " ORDER BY u.name", User.class)
+                .setParameter("roles", List.of(Role.QA, Role.QA_LEAD));
+        if (!teamless) {
+            query.setParameter("team", defect.getProject().getTeam());
+        }
+        return query.getResultList();
+    }
+
+    public boolean canBeAssignedTo(Defect defect, User assignee) {
+        return assignee != null && assignableUsers(defect).stream().anyMatch(u -> u.getId().equals(assignee.getId()));
+    }
+
     /** Même règle que listForUser, pour un seul objet (ouverture par id). */
     public boolean canView(User viewer, Defect defect) {
         if (viewer == null || defect == null) {
@@ -85,8 +105,8 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
      *  than trusted to the client, same guarantee as the Laravel version's controller check. */
     @Transactional
     public Defect retest(Defect defect, boolean passed, User actor, String comment) {
-        if (defect.getStatus() != Defect.Status.fixed) {
-            throw new IllegalStateException("Seule une anomalie au statut FIXED peut être retestée.");
+        if (defect.getStatus() != Defect.Status.fixed && defect.getStatus() != Defect.Status.retest) {
+            throw new IllegalStateException("Seule une anomalie corrigée (FIXED ou RETEST) peut être revérifiée.");
         }
         Defect.Status previous = defect.getStatus();
         Defect.Status next = passed ? Defect.Status.closed : Defect.Status.reopened;
@@ -97,8 +117,41 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         return defect;
     }
 
+    /** Ouverte / rouverte → en cours : quelqu'un (le développeur, via le testeur) s'en occupe. */
+    @Transactional
+    public Defect startProgress(Defect defect, User actor, String comment) {
+        requireStatus(defect, Defect.Status.open, Defect.Status.reopened);
+        return transition(defect, Defect.Status.in_progress, actor, comment);
+    }
+
+    /** Corrigée → à revérifier : un testeur a commencé la revérification. */
+    @Transactional
+    public Defect startRetest(Defect defect, User actor, String comment) {
+        requireStatus(defect, Defect.Status.fixed);
+        return transition(defect, Defect.Status.retest, actor, comment);
+    }
+
+    private Defect transition(Defect defect, Defect.Status next, User actor, String comment) {
+        Defect.Status previous = defect.getStatus();
+        defect.setStatus(next);
+        em.merge(defect);
+        recordHistory(defect, previous, next, actor, comment);
+        audit.record("status_changed", defect, AuditService.transition(previous, next));
+        return defect;
+    }
+
+    private static void requireStatus(Defect defect, Defect.Status... allowed) {
+        for (Defect.Status s : allowed) {
+            if (defect.getStatus() == s) {
+                return;
+            }
+        }
+        throw new IllegalStateException("Transition impossible depuis le statut " + defect.getStatus() + ".");
+    }
+
     @Transactional
     public Defect markFixed(Defect defect, User actor, String comment) {
+        requireStatus(defect, Defect.Status.open, Defect.Status.in_progress, Defect.Status.reopened);
         Defect.Status previous = defect.getStatus();
         defect.setStatus(Defect.Status.fixed);
         em.merge(defect);
@@ -111,6 +164,9 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
 
     @Transactional
     public Defect close(Defect defect, User actor, String comment) {
+        if (comment == null || comment.isBlank()) {
+            throw new IllegalArgumentException("Un commentaire est obligatoire pour fermer une anomalie sans revérification.");
+        }
         Defect.Status previous = defect.getStatus();
         defect.setStatus(Defect.Status.closed);
         em.merge(defect);

@@ -9,7 +9,7 @@
 
         <h:panelGroup rendered="#{!dashboardBean.hasTeam}">
             <div class="card">
-                <p style="color:#5B6472;font-size:13px;">
+                <p class="empty-state">
                     #{msg['common.noTeam']}
                 </p>
             </div>
@@ -32,7 +32,7 @@
                     </h:column>
                 </h:dataTable>
                 <h:panelGroup rendered="#{empty dashboardBean.teamMembers}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['common.noMemberYet']}</p>
+                    <p class="empty-state">#{msg['common.noMemberYet']}</p>
                 </h:panelGroup>
             </div>
         </h:panelGroup>

@@ -1,5 +1,6 @@
 package com.qareporting.service;
 
+import java.time.LocalDate;
 import com.qareporting.entity.Activity;
 import com.qareporting.entity.Role;
 import com.qareporting.entity.User;
@@ -56,9 +57,67 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
 
     /** Une déclaration d'activité ne se modifie / supprime que par son auteur (ou l'admin). */
     public boolean canEdit(User viewer, Activity activity) {
-        return activity != null && viewer != null
-                && (Scope.sameUser(activity.getUser(), viewer)
-                    || (viewer.getRole() != null && Role.ADMIN.equals(viewer.getRole().getName())));
+        if (activity == null || viewer == null) {
+            return false;
+        }
+        if (isAdmin(viewer)) {
+            return true;
+        }
+        // Une fois validée par le lead, la déclaration est figée pour son auteur.
+        return Scope.sameUser(activity.getUser(), viewer) && !activity.isValidated();
+    }
+
+    /**
+     * Le QA Lead valide les déclarations des membres de son équipe (pas les siennes : on ne
+     * valide pas son propre travail) ; l'admin peut tout valider.
+     */
+    public boolean canValidate(User viewer, Activity activity) {
+        if (viewer == null || activity == null || activity.isValidated() || activity.getUser() == null) {
+            return false;
+        }
+        if (isAdmin(viewer)) {
+            return true;
+        }
+        return Scope.isLeadWithTeam(viewer)
+                && !Scope.sameUser(activity.getUser(), viewer)
+                && activity.getUser().getTeam() != null
+                && viewer.getTeam().getId().equals(activity.getUser().getTeam().getId());
+    }
+
+    @Transactional
+    public Activity validateByLead(Activity activity, User lead) {
+        if (!canValidate(lead, activity)) {
+            throw new IllegalStateException("Validation non autorisée.");
+        }
+        activity.setValidatedBy(lead);
+        activity.setValidatedAt(java.time.LocalDateTime.now());
+        Activity merged = em.merge(activity);
+        audit.record("validated", merged);
+        return merged;
+    }
+
+    /** Déclarations de l'équipe du lead encore à valider (hors les siennes). */
+    public long countToValidate(User lead) {
+        if (!Scope.isLeadWithTeam(lead)) {
+            return 0;
+        }
+        return em.createQuery("SELECT COUNT(a) FROM Activity a WHERE a.user.team = :team "
+                        + "AND a.user <> :lead AND a.validatedAt IS NULL", Long.class)
+                .setParameter("team", lead.getTeam())
+                .setParameter("lead", lead)
+                .getSingleResult();
+    }
+
+    /** Déclaration du jour déjà faite ? (utilisé par le rappel quotidien) */
+    public boolean hasActivityOn(User user, LocalDate day) {
+        return em.createQuery("SELECT COUNT(a) FROM Activity a WHERE a.user = :user AND a.activityDate = :day", Long.class)
+                .setParameter("user", user)
+                .setParameter("day", day)
+                .getSingleResult() > 0;
+    }
+
+    private static boolean isAdmin(User user) {
+        return user.getRole() != null && Role.ADMIN.equals(user.getRole().getName());
     }
 
     /**

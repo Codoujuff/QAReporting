@@ -20,11 +20,11 @@
                 <p class="subtitle">#{msg['login.tagline']}</p>
                 <h:form>
                     <div class="form-row">
-                        <label for="email">#{msg['common.email']}</label>
+                        <h:outputLabel for="email" value="#{msg['common.email']}"/>
                         <h:inputText id="email" value="#{loginBean.email}" required="true"/>
                     </div>
                     <div class="form-row">
-                        <label for="password">#{msg['common.password']}</label>
+                        <h:outputLabel for="password" value="#{msg['common.password']}"/>
                         <h:inputSecret id="password" value="#{loginBean.password}" required="true"/>
                     </div>
                     <h:commandButton styleClass="btn" value="#{msg['login.submit']}" action="#{loginBean.login}"/>

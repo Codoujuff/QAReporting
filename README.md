@@ -8,6 +8,8 @@ Portage Jakarta EE 10 de l'application **QA Reporting** (suivi d'activité QA, t
 - **Serveur** : WildFly 31, installé automatiquement par le `wildfly-maven-plugin`
 
 > 📘 **Première installation ?** Suivez le guide pas à pas : [docs/GUIDE-INSTALLATION.md](docs/GUIDE-INSTALLATION.md)
+>
+> 🎬 **Présentation ?** Données de démonstration et déroulé minuté : [docs/SCENARIO-DEMO.md](docs/SCENARIO-DEMO.md)
 
 ## Prérequis
 
@@ -61,12 +63,12 @@ Au premier démarrage, la classe `StartupSeeder` crée les rôles, les environne
 - **Email** : `admin@qa-reporting-j2ee.local`
 - **Mot de passe** : `password`
 
-⚠️ Changez ce mot de passe dès la première connexion si l'application doit être exposée.
+Ce mot de passe est **provisoire** : l'application impose d'en choisir un nouveau à la première connexion. Pour un serveur réel (HTTPS, identifiants de la base, sauvegardes), voir la section « Mise en production » du [guide](docs/GUIDE-INSTALLATION.md#mise-en-production-serveur-dentreprise).
 
 ## Autres commandes
 
 ```bash
-mvn test       # tests unitaires (JUnit 5)
+mvn test       # 40 tests unitaires (JUnit 5)
 mvn package    # produit target/qa-reporting-j2ee.war, déployable sur un WildFly existant
 ```
 
@@ -102,7 +104,7 @@ L'interface est disponible en français (par défaut) et en anglais. Le sélecte
 | Rôle | Périmètre |
 |---|---|
 | QA | Rédige et exécute ses tests, déclare son activité, crée des anomalies (avec pièces jointes) |
-| QA Lead | Son équipe : campagnes, répartition des tests, assignation des anomalies, rapports par testeur |
+| QA Lead | Son équipe : campagnes, répartition des tests, assignation des anomalies, validation de l'activité, rapports par testeur |
 | Manager | Consultation de tous les projets : vue d'ensemble et rapports |
 | Admin | Tout, plus l'administration (utilisateurs, projets, équipes, paramètres) et le journal d'audit |
 

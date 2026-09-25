@@ -34,34 +34,33 @@
             <h2>#{msg['common.actions']}</h2>
             <h:form>
                 <div class="form-row">
-                    <label for="comment">#{msg['common.comment']}</label>
+                    <h:outputLabel for="comment" value="#{msg['common.comment']}"/>
                     <h:inputTextarea id="comment" value="#{defectDetailBean.actionComment}"/>
                 </div>
 
-                <h:panelGroup rendered="#{defectDetailBean.markFixedAvailable}">
+                <div class="button-row">
+                    <h:commandButton styleClass="btn" value="#{msg['defect.startProgress']}"
+                                     action="#{defectDetailBean.startProgress}" rendered="#{defectDetailBean.startable}"/>
                     <h:commandButton styleClass="btn" value="#{msg['defect.markFixed']}"
-                                     action="#{defectDetailBean.markFixed}"/>
-                </h:panelGroup>
-
-                <h:panelGroup rendered="#{defectDetailBean.retestable}">
+                                     action="#{defectDetailBean.markFixed}" rendered="#{defectDetailBean.markFixedAvailable}"/>
+                    <h:commandButton styleClass="btn btn-secondary" value="#{msg['defect.startRetest']}"
+                                     action="#{defectDetailBean.startRetest}" rendered="#{defectDetailBean.retestStartable}"/>
                     <h:commandButton styleClass="btn" value="#{msg['defect.retestPassed']}"
-                                     action="#{defectDetailBean.retest(true)}"/>
+                                     action="#{defectDetailBean.retest(true)}" rendered="#{defectDetailBean.retestable}"/>
                     <h:commandButton styleClass="btn btn-danger" value="#{msg['defect.retestFailed']}"
-                                     action="#{defectDetailBean.retest(false)}"/>
-                </h:panelGroup>
-
-                <h:panelGroup rendered="#{defectDetailBean.closeable}">
+                                     action="#{defectDetailBean.retest(false)}" rendered="#{defectDetailBean.retestable}"/>
                     <h:commandButton styleClass="btn btn-secondary" value="#{msg['defect.close']}"
-                                     action="#{defectDetailBean.close}"/>
-                </h:panelGroup>
-
-                <h:panelGroup rendered="#{defectDetailBean.reopenable}">
+                                     action="#{defectDetailBean.close}" rendered="#{defectDetailBean.closeable}"
+                                     title="#{msg['defect.closeHint']}"/>
                     <h:commandButton styleClass="btn btn-secondary" value="#{msg['defect.reopen']}"
-                                     action="#{defectDetailBean.reopen}"/>
+                                     action="#{defectDetailBean.reopen}" rendered="#{defectDetailBean.reopenable}"/>
+                </div>
+                <h:panelGroup layout="block" styleClass="field-hint" rendered="#{defectDetailBean.closeable}">
+                    #{msg['defect.closeHint']}
                 </h:panelGroup>
 
-                <h:panelGroup layout="block" styleClass="form-row" style="margin-top:1rem" rendered="#{perm.assignDefects}">
-                    <label for="assignee">#{msg['defect.assignTo']}</label>
+                <h:panelGroup layout="block" styleClass="form-row assign-row" rendered="#{perm.assignDefects}">
+                    <h:outputLabel for="assignee" value="#{msg['defect.assignTo']}"/>
                     <h:selectOneMenu id="assignee" value="#{defectDetailBean.assigneeId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{defectDetailBean.assigneeOptions}" var="u"
@@ -101,7 +100,7 @@
             </h:form>
 
             <h:form enctype="multipart/form-data" rendered="#{perm.workOnDefects}" styleClass="attachment-upload">
-                <label for="upload">#{msg['attachment.add']}</label>
+                <h:outputLabel for="upload" value="#{msg['attachment.add']}"/>
                 <div class="attachment-upload-row">
                     <h:inputFile id="upload" value="#{defectDetailBean.upload}"/>
                     <h:commandButton styleClass="btn" value="#{msg['attachment.send']}"
@@ -127,9 +126,9 @@
                 <h:column>
                     <f:facet name="header">#{msg['defect.oldStatus']}</f:facet>
                     <h:panelGroup rendered="#{h.oldStatus == null}">—</h:panelGroup>
-                    <span class="badge status-#{h.oldStatus}" style="#{h.oldStatus == null ? 'display:none' : ''}">
+                    <h:panelGroup styleClass="badge status-#{h.oldStatus}" rendered="#{h.oldStatus != null}">
                         <span class="dot"></span>#{labels.of(h.oldStatus)}
-                    </span>
+                    </h:panelGroup>
                 </h:column>
                 <h:column>
                     <f:facet name="header">#{msg['defect.newStatus']}</f:facet>

@@ -57,6 +57,11 @@ public class TestDetailBean implements Serializable {
         environmentOptions = environmentService.findAll();
     }
 
+    /** Clé du message qui explique pourquoi le test ne peut pas être exécuté, ou null. */
+    public String getExecutionBlocker() {
+        return testService.executionBlocker(test);
+    }
+
     public Long getFailedExecution() {
         return failedExecution;
     }
@@ -82,6 +87,11 @@ public class TestDetailBean implements Serializable {
         }
         if (!testService.canView(sessionAuth.getCurrentUser(), testService.find(id))) {
             PermissionBean.notFound();
+            return null;
+        }
+        String blocker = testService.executionBlocker(testService.find(id));
+        if (blocker != null) {
+            addError(I18n.t(blocker));
             return null;
         }
         if (resultStatus == null) {

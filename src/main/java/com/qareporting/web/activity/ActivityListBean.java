@@ -1,5 +1,6 @@
 package com.qareporting.web.activity;
 
+import com.qareporting.web.ListPage;
 import com.qareporting.entity.Activity;
 import com.qareporting.service.ActivityService;
 import com.qareporting.web.auth.SessionAuth;
@@ -33,9 +34,54 @@ public class ActivityListBean implements Serializable {
         activities = activityService.listForUser(sessionAuth.getCurrentUser());
     }
 
-    public List<Activity> getActivities() {
-        return activities;
+    public boolean canValidate(Activity activity) {
+        return activityService.canValidate(sessionAuth.getCurrentUser(), activity);
     }
+
+    /** Le lead valide la déclaration d'un membre de son équipe ; revérifié côté serveur. */
+    public String validate(Long activityId) {
+        Activity activity = activityService.find(activityId);
+        if (!activityService.canValidate(sessionAuth.getCurrentUser(), activity)) {
+            com.qareporting.web.auth.PermissionBean.forbidden();
+            return null;
+        }
+        activityService.validateByLead(activity, sessionAuth.getCurrentUser());
+        return "list.xhtml?faces-redirect=true";
+    }
+
+    public List<Activity> getActivities() {
+        return pageData.getItems();
+    }
+
+    // ---------- recherche + pagination (paramètres d'URL q, status, page) ----------
+
+    private final ListPage<Activity> pageData = new ListPage<>();
+    private String q;
+    private String status;
+    private Integer page;
+
+    /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
+    public void load() {
+        pageData.apply(activities, q, a -> (a.getUser() != null ? a.getUser().getName() : "") + " " + a.getProject().getName() + " " + (a.getCampaign() != null ? a.getCampaign().getName() : "") + " " + a.getActivityType(), activityFilter(), page);
+    }
+
+    private java.util.function.Predicate<Activity> activityFilter() {
+        if ("toValidate".equals(status)) {
+            return a -> !a.isValidated();
+        }
+        if ("validated".equals(status)) {
+            return Activity::isValidated;
+        }
+        return null;
+    }
+
+    public ListPage<Activity> getPageData() { return pageData; }
+    public String getQ() { return q; }
+    public void setQ(String q) { this.q = q; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public Integer getPage() { return page; }
+    public void setPage(Integer page) { this.page = page; }
 
     /**
      * Activity a un champ int "blocked" (compteur) ET un champ boolean "isBlocked"

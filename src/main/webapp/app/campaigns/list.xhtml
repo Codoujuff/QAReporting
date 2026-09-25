@@ -4,6 +4,13 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="q" value="#{campaignListBean.q}"/>
+        <f:viewParam name="status" value="#{campaignListBean.status}"/>
+        <f:viewParam name="page" value="#{campaignListBean.page}"/>
+        <f:viewAction action="#{campaignListBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['nav.campaigns']}</h1>
@@ -11,6 +18,10 @@
                     rendered="#{perm.manageCampaigns}"/>
         </div>
 
+        <ui:include src="/WEB-INF/templates/listSearch.xhtml">
+            <ui:param name="bean" value="#{campaignListBean}"/>
+            <ui:param name="statusOptions" value="#{campaignListBean.statusOptions}"/>
+        </ui:include>
         <div class="card">
             <h:form>
                 <h:dataTable value="#{campaignListBean.campaigns}" var="c" styleClass="data-table">
@@ -79,9 +90,12 @@
                         </div>
                     </h:column>
                 </h:dataTable>
+            <ui:include src="/WEB-INF/templates/pager.xhtml">
+                <ui:param name="bean" value="#{campaignListBean}"/>
+            </ui:include>
 
                 <h:panelGroup rendered="#{empty campaignListBean.campaigns}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['campaign.none']}</p>
+                    <p class="empty-state">#{msg['campaign.none']}</p>
                 </h:panelGroup>
             </h:form>
         </div>

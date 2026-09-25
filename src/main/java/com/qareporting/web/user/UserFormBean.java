@@ -1,5 +1,6 @@
 package com.qareporting.web.user;
 
+import com.qareporting.security.PasswordPolicy;
 import com.qareporting.entity.Role;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.entity.Team;
@@ -72,9 +73,16 @@ public class UserFormBean implements Serializable {
                 addError(I18n.t("err.passwordRequired"));
                 return null;
             }
+        }
+        if (password != null && !password.isBlank()) {
+            String weak = PasswordPolicy.check(password, user.getEmail());
+            if (weak != null) {
+                addError(I18n.t(weak));
+                return null;
+            }
+            // Mot de passe choisi par l'admin : provisoire, la personne le changera à sa connexion.
             user.setPasswordHash(passwordHasher.hash(password));
-        } else if (password != null && !password.isBlank()) {
-            user.setPasswordHash(passwordHasher.hash(password));
+            user.setMustChangePassword(true);
         }
 
         user.setRole(userService.findRole(roleId));

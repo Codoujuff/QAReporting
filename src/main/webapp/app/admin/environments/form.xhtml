@@ -15,19 +15,19 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">#{msg['common.name']}</label>
+                    <h:outputLabel for="name" value="#{msg['common.name']}"/>
                     <h:inputText id="name" value="#{environmentFormBean.environment.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{environmentFormBean.environment.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="url">#{msg['common.url']}</label>
+                    <h:outputLabel for="url" value="#{msg['common.url']}"/>
                     <h:inputText id="url" value="#{environmentFormBean.environment.url}"/>
                 </div>
                 <div class="form-row">
-                    <label for="status">#{msg['common.status']}</label>
+                    <h:outputLabel for="status" value="#{msg['common.status']}"/>
                     <h:selectOneMenu id="status" value="#{environmentFormBean.environment.status}">
                         <f:selectItems value="#{environmentFormBean.statusOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>

@@ -1,5 +1,6 @@
 package com.qareporting.web.test;
 
+import com.qareporting.web.ListPage;
 import com.qareporting.entity.Test;
 import com.qareporting.entity.TestExecution;
 import com.qareporting.service.TestService;
@@ -46,7 +47,31 @@ public class TestListBean implements Serializable {
     }
 
     public List<Test> getTests() {
-        return tests;
+        return pageData.getItems();
+    }
+
+    // ---------- recherche + pagination (paramètres d'URL q, status, page) ----------
+
+    private final ListPage<Test> pageData = new ListPage<>();
+    private String q;
+    private String status;
+    private Integer page;
+
+    /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
+    public void load() {
+        pageData.apply(tests, q, t -> "t" + t.getId() + " " + t.getTitle() + " " + t.getProject().getName() + " " + (t.getCampaign() != null ? t.getCampaign().getName() : "") + " " + (t.getAssignedTo() != null ? t.getAssignedTo().getName() : ""), status == null || status.isBlank() ? null : t -> t.getStatus().name().equals(status), page);
+    }
+
+    public ListPage<Test> getPageData() { return pageData; }
+    public String getQ() { return q; }
+    public void setQ(String q) { this.q = q; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public Integer getPage() { return page; }
+    public void setPage(Integer page) { this.page = page; }
+
+    public Test.Status[] getStatusOptions() {
+        return Test.Status.values();
     }
 
     public TestExecution lastExecutionOf(Test test) {

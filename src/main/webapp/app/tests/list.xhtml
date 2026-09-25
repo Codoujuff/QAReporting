@@ -4,6 +4,13 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="q" value="#{testListBean.q}"/>
+        <f:viewParam name="status" value="#{testListBean.status}"/>
+        <f:viewParam name="page" value="#{testListBean.page}"/>
+        <f:viewAction action="#{testListBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['common.tests']}</h1>
@@ -11,6 +18,10 @@
                     rendered="#{perm.manageTests}"/>
         </div>
 
+        <ui:include src="/WEB-INF/templates/listSearch.xhtml">
+            <ui:param name="bean" value="#{testListBean}"/>
+            <ui:param name="statusOptions" value="#{testListBean.statusOptions}"/>
+        </ui:include>
         <div class="card">
             <h:form>
                 <h:dataTable value="#{testListBean.tests}" var="t" styleClass="data-table">
@@ -70,9 +81,12 @@
                         </div>
                     </h:column>
                 </h:dataTable>
+            <ui:include src="/WEB-INF/templates/pager.xhtml">
+                <ui:param name="bean" value="#{testListBean}"/>
+            </ui:include>
 
                 <h:panelGroup rendered="#{empty testListBean.tests}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['test.none']}</p>
+                    <p class="empty-state">#{msg['test.none']}</p>
                 </h:panelGroup>
             </h:form>
         </div>

@@ -30,7 +30,7 @@
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/settings/form">
                             <f:param name="id" value="#{s.id}"/>
                         </h:link>
-                        <h:form style="display:inline">
+                        <h:form styleClass="inline-form">
                             <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{appSettingListBean.delete(s)}"
                                              onclick="return confirm('#{msg['setting.deleteConfirm']}');"/>
@@ -40,7 +40,32 @@
             </h:dataTable>
 
             <h:panelGroup rendered="#{empty appSettingListBean.settings}">
-                <p style="color:#5B6472;font-size:13px;">#{msg['setting.none']}</p>
+                <p class="empty-state">#{msg['setting.none']}</p>
+            </h:panelGroup>
+        </div>
+
+        <div class="card demo-card">
+            <h2>#{msg['demo.title']}</h2>
+            <h:panelGroup rendered="#{not demoDataBean.loaded}">
+                <p class="subtitle">#{msg['demo.intro']}</p>
+                <h:form>
+                    <h:commandButton styleClass="btn" value="#{msg['demo.load']}" action="#{demoDataBean.load}"
+                                     onclick="return confirm('#{msg['demo.confirm']}');"/>
+                </h:form>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{demoDataBean.loaded}">
+                <p class="subtitle">#{msg['demo.present']}</p>
+                <table class="data-table demo-accounts">
+                    <thead><tr><th>#{msg['common.role']}</th><th>#{msg['common.name']}</th><th>#{msg['common.email']}</th></tr></thead>
+                    <tbody>
+                        <tr><td>#{labels.role('qa_lead')}</td><td>Fatou Sarr</td><td>fatou.sarr#{demoDataBean.domain}</td></tr>
+                        <tr><td>#{labels.role('qa')}</td><td>Awa Ndiaye</td><td>awa.ndiaye#{demoDataBean.domain}</td></tr>
+                        <tr><td>#{labels.role('qa')}</td><td>Moussa Fall</td><td>moussa.fall#{demoDataBean.domain}</td></tr>
+                        <tr><td>#{labels.role('qa')}</td><td>Khadija Ba</td><td>khadija.ba#{demoDataBean.domain}</td></tr>
+                        <tr><td>#{labels.role('manager')}</td><td>Ibrahima Diallo</td><td>ibrahima.diallo#{demoDataBean.domain}</td></tr>
+                    </tbody>
+                </table>
+                <p class="field-hint">#{msg['demo.password']} <code>#{demoDataBean.password}</code></p>
             </h:panelGroup>
         </div>
     </ui:define>

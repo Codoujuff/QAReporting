@@ -15,7 +15,7 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="project">#{msg['common.project']}</label>
+                    <h:outputLabel for="project" value="#{msg['common.project']}"/>
                     <h:selectOneMenu id="project" value="#{testFormBean.projectId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testFormBean.projectOptions}" var="p"
@@ -23,15 +23,15 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="title">#{msg['common.title']}</label>
+                    <h:outputLabel for="title" value="#{msg['common.title']}"/>
                     <h:inputText id="title" value="#{testFormBean.test.title}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="type">#{msg['common.type']}</label>
+                    <h:outputLabel for="type" value="#{msg['common.type']}"/>
                     <h:inputText id="type" value="#{testFormBean.test.type}"/>
                 </div>
                 <div class="form-row">
-                    <label for="campaign">#{msg['common.campaign']}</label>
+                    <h:outputLabel for="campaign" value="#{msg['common.campaign']}"/>
                     <h:selectOneMenu id="campaign" value="#{testFormBean.campaignId}">
                         <f:selectItem itemLabel="#{msg['common.noneF']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testFormBean.campaignOptions}" var="c"
@@ -39,7 +39,7 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="environment">#{msg['common.environment']}</label>
+                    <h:outputLabel for="environment" value="#{msg['common.environment']}"/>
                     <h:selectOneMenu id="environment" value="#{testFormBean.environmentId}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testFormBean.environmentOptions}" var="e"
@@ -47,7 +47,7 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="assignedTo">#{msg['common.assignedToM']}</label>
+                    <h:outputLabel for="assignedTo" value="#{msg['common.assignedToM']}"/>
                     <h:selectOneMenu id="assignedTo" value="#{testFormBean.assignedToId}"
                                      disabled="#{not perm.assignTests}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
@@ -58,19 +58,19 @@
                                   rendered="#{not perm.assignTests}"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{testFormBean.test.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="preconditions">#{msg['test.preconditions']}</label>
+                    <h:outputLabel for="preconditions" value="#{msg['test.preconditions']}"/>
                     <h:inputTextarea id="preconditions" value="#{testFormBean.test.preconditions}"/>
                 </div>
                 <div class="form-row">
-                    <label for="steps">#{msg['test.stepsPerLine']}</label>
+                    <h:outputLabel for="steps" value="#{msg['test.stepsPerLine']}"/>
                     <h:inputTextarea id="steps" value="#{testFormBean.stepsText}" rows="6"/>
                 </div>
                 <div class="form-row">
-                    <label for="expectedResult">#{msg['common.expectedResult']}</label>
+                    <h:outputLabel for="expectedResult" value="#{msg['common.expectedResult']}"/>
                     <h:inputTextarea id="expectedResult" value="#{testFormBean.test.expectedResult}"/>
                 </div>
 

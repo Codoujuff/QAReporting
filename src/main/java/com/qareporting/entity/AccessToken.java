@@ -30,6 +30,10 @@ public class AccessToken {
     @Column(name = "last_used_at")
     private LocalDateTime lastUsedAt;
 
+    /** Fin de validité absolue ; un jeton sans date (émis avant cette règle) est considéré comme expiré. */
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
@@ -45,6 +49,8 @@ public class AccessToken {
     public void setTokenHash(String tokenHash) { this.tokenHash = tokenHash; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
     public LocalDateTime getLastUsedAt() { return lastUsedAt; }
     public void setLastUsedAt(LocalDateTime lastUsedAt) { this.lastUsedAt = lastUsedAt; }
 }

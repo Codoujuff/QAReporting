@@ -4,12 +4,22 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="q" value="#{userListBean.q}"/>
+        <f:viewParam name="status" value="#{userListBean.status}"/>
+        <f:viewParam name="page" value="#{userListBean.page}"/>
+        <f:viewAction action="#{userListBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['common.users']}</h1>
             <h:link styleClass="btn" value="#{msg['user.new']}" outcome="/app/admin/users/form"/>
         </div>
 
+        <ui:include src="/WEB-INF/templates/listSearch.xhtml">
+            <ui:param name="bean" value="#{userListBean}"/>
+        </ui:include>
         <div class="card">
             <h:dataTable value="#{userListBean.users}" var="u" styleClass="data-table">
                 <h:column>
@@ -40,14 +50,18 @@
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/users/form">
                             <f:param name="id" value="#{u.id}"/>
                         </h:link>
-                        <h:form style="display:inline" rendered="#{u.id != sessionAuth.userId}">
-                            <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
-                                             action="#{userListBean.delete(u)}"
-                                             onclick="return confirm('#{msg['user.deleteConfirm']}');"/>
+                        <h:form styleClass="inline-form" rendered="#{u.id != sessionAuth.userId}">
+                            <h:commandButton styleClass="btn #{u.active ? 'btn-danger' : 'btn-secondary'}"
+                                             value="#{u.active ? msg['user.deactivate'] : msg['user.reactivate']}"
+                                             action="#{userListBean.toggleActive(u)}"
+                                             onclick="return confirm('#{u.active ? msg['user.deactivateConfirm'] : msg['user.reactivateConfirm']}');"/>
                         </h:form>
                     </div>
                 </h:column>
             </h:dataTable>
+            <ui:include src="/WEB-INF/templates/pager.xhtml">
+                <ui:param name="bean" value="#{userListBean}"/>
+            </ui:include>
         </div>
     </ui:define>
 </ui:composition>

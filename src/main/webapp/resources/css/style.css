@@ -541,3 +541,64 @@ a:focus-visible, .btn:focus-visible, button:focus-visible, input[type=submit]:fo
 .stack-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-secondary); margin-bottom: 10px; }
 .stack-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .stack-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+
+/* ---------- recherche et pagination des listes ---------- */
+.list-search { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.list-search-input { flex: 1 1 240px; max-width: 360px; }
+.list-search select { max-width: 220px; }
+.list-search-reset { font-size: 13px; }
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin-top: 14px; font-size: 13px; color: var(--ink-secondary); }
+.pager-links { display: inline-flex; align-items: center; gap: 10px; }
+.pager-page { font-variant-numeric: tabular-nums; }
+.pager a[disabled], .pager span.btn { opacity: .45; pointer-events: none; }
+
+/* compteurs réussis / échoués / bloqués / non exécutés d'une déclaration */
+.result-counts { display: inline-flex; gap: 6px; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 12.5px; }
+.result-counts span { min-width: 26px; text-align: center; padding: 2px 6px; border-radius: 6px; }
+.rc-passed { background: #E4F3E9; color: #1E5B37; }
+.rc-failed { background: #FBEAE8; color: #8C2A22; }
+.rc-blocked { background: #FBF0D6; color: #7A5D08; }
+.rc-notrun { background: #F1F2F4; color: #4B5563; }
+.empty-state { color: var(--ink-secondary); font-size: 13px; margin: 4px 0; }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.button-row .btn + .btn { margin-left: 0; }
+
+.stat-tile-link { color: inherit !important; text-decoration: none !important; transition: border-color .15s ease; }
+.stat-tile-link:hover { border-color: var(--accent); }
+.stat-tile-attention { border-color: #E8C872; background: #FFFBEF; }
+
+/* ---------- anciens styles en ligne ---------- */
+.inline-form { display: inline; }
+.today-item { padding: 10px 0; border-top: 1px solid var(--border-light); }
+.today-item-title { font-weight: 600; font-size: 13px; }
+.today-item-meta { color: var(--ink-secondary); font-size: 12px; margin-top: 2px; }
+.today-item-counts { font-size: 12px; margin-top: 4px; }
+.progress-item { margin-bottom: 12px; }
+.progress-item-name { font-size: 13px; margin-bottom: 4px; }
+.assign-row { margin-top: 16px; }
+.profile-head { display: flex; align-items: center; gap: 14px; }
+.avatar.avatar-lg { width: 48px; height: 48px; font-size: 16px; }
+.profile-name { font-weight: 700; font-size: 18px; }
+.subtitle { margin-top: -2px; }
+
+/* ---------- graphiques en barres horizontales (tableau de bord) ---------- */
+.hbar-chart { display: grid; grid-template-columns: minmax(70px, max-content) 1fr 36px; gap: 10px 12px; align-items: center; }
+.hbar-row { display: contents; }
+.hbar-label { font-size: 13px; color: var(--ink-secondary); white-space: nowrap; }
+.hbar-track { height: 12px; background: #EEF0F2; border-radius: 6px; overflow: hidden; }
+.hbar-fill { display: block; height: 100%; border-radius: 6px; min-width: 0; }
+.hbar-value { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.hbar-fill.bar-default { background: var(--accent); }
+.hbar-fill.bar-good { background: #5B7083; }
+.hbar-fill.bar-warning { background: #B8860B; }
+.hbar-fill.bar-serious { background: #C2570B; }
+.hbar-fill.bar-critical { background: #9B1C1C; }
+.demo-accounts { margin: 8px 0 10px; } .demo-card code { font-family: "IBM Plex Mono", monospace; background: #F1F2F4; padding: 1px 6px; border-radius: 4px; }
+input[type=search] {
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13.5px; font-family: inherit; color: var(--ink-primary); background: var(--surface);
+}
+input[type=search]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.list-search select { padding: 10px 12px; }
+.list-search .btn { padding: 10px 16px; }

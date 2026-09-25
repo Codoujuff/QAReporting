@@ -54,10 +54,20 @@ public class AuditListBean {
             return "—";
         }
         if (changes.containsKey("from") || changes.containsKey("to")) {
-            return (changes.get("from") == null ? "∅" : changes.get("from")) + " → " + changes.get("to");
+            return statusLabel(log, changes.get("from")) + " → " + statusLabel(log, changes.get("to"));
         }
         return changes.entrySet().stream()
+                .filter(e -> e.getValue() != null)
                 .map(e -> e.getKey() + " : " + e.getValue())
                 .collect(Collectors.joining(", "));
+    }
+
+    /** « retest » → « À revérifier » : libellé du statut selon l'objet (anomalie, test, campagne). */
+    private static String statusLabel(AuditLog log, Object status) {
+        if (status == null) {
+            return "∅";
+        }
+        String label = I18n.find("enum." + log.getModelType() + ".Status." + status);
+        return label != null ? label : status.toString();
     }
 }

@@ -15,15 +15,15 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="settingKey">#{msg['setting.key']}</label>
+                    <h:outputLabel for="settingKey" value="#{msg['setting.key']}"/>
                     <h:inputText id="settingKey" value="#{appSettingFormBean.setting.settingKey}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="settingValue">#{msg['setting.value']}</label>
+                    <h:outputLabel for="settingValue" value="#{msg['setting.value']}"/>
                     <h:inputTextarea id="settingValue" value="#{appSettingFormBean.setting.settingValue}"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{appSettingFormBean.setting.description}"/>
                 </div>
                 <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{appSettingFormBean.save}"/>

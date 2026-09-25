@@ -1,5 +1,8 @@
 package com.qareporting.web.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.faces.context.ExternalContext;
+import com.qareporting.security.LoginService;
 import com.qareporting.entity.User;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.security.PasswordHasher;
@@ -40,34 +43,52 @@ public class SessionAuth implements Serializable {
     private String userInitials;
     private String roleName;
     private String errorMessage;
+    private boolean mustChangePassword;
 
+    @Inject
+    private LoginService loginService;
+
+    /**
+     * Connexion par la page JSF : mêmes vérifications que l'API (LoginService), puis
+     * nouvel identifiant de session — un identifiant fixé avant la connexion (fixation de
+     * session) ne donne ainsi jamais accès au compte.
+     */
     public boolean login(String email, String password) {
         errorMessage = null;
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             errorMessage = I18n.t("err.credentialsRequired");
             return false;
         }
-
-        User user = userService.findByEmail(email);
-        if (user == null) {
-            errorMessage = I18n.t("err.invalidCredentials");
-            return false;
+        LoginService.Result result = loginService.authenticate(email, password, request.getRemoteAddr());
+        switch (result.status()) {
+            case LOCKED -> errorMessage = I18n.t("err.tooManyAttempts", result.minutesLocked());
+            case DISABLED -> errorMessage = I18n.t("err.accountDisabled");
+            case INVALID -> errorMessage = I18n.t("err.invalidCredentials");
+            default -> { }
         }
-        if (!user.isActive()) {
-            errorMessage = I18n.t("err.accountDisabled");
-            return false;
-        }
-        if (!passwordHasher.matches(password, user.getPasswordHash())) {
-            errorMessage = I18n.t("err.invalidCredentials");
+        if (!result.ok()) {
             return false;
         }
 
+        request.changeSessionId();
+        User user = result.user();
         this.userId = user.getId();
         this.userName = user.getName();
         this.userInitials = user.getInitials();
         this.roleName = user.getRole().getName();
+        this.mustChangePassword = user.isMustChangePassword();
         return true;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void passwordChanged() {
+        this.mustChangePassword = false;
     }
 
     /** Refreshes the cached display name/initials after a self-service profile edit. */
@@ -81,6 +102,7 @@ public class SessionAuth implements Serializable {
         userName = null;
         userInitials = null;
         roleName = null;
+        mustChangePassword = false;
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
         return "/login.xhtml?faces-redirect=true";
     }

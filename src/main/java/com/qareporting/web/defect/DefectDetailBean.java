@@ -54,7 +54,6 @@ public class DefectDetailBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        assigneeOptions = userService.findAll();
     }
 
     /** Une anomalie hors du périmètre du rôle répond 404, comme si elle n'existait pas. */
@@ -67,6 +66,7 @@ public class DefectDetailBean implements Serializable {
         }
         history = defectService.history(id);
         attachments = attachmentService.listFor(defect);
+        assigneeOptions = defectService.assignableUsers(defect);
     }
 
     // ---------- pièces jointes ----------
@@ -166,20 +166,42 @@ public class DefectDetailBean implements Serializable {
         return true;
     }
 
+    // ---------- cycle de vie : ouverte → en cours → corrigée → à revérifier → fermée (ou rouverte) ----------
+
+    public boolean isStartable() {
+        return is(Defect.Status.open, Defect.Status.reopened);
+    }
+
     public boolean isMarkFixedAvailable() {
-        return defect.getStatus() != Defect.Status.fixed && defect.getStatus() != Defect.Status.closed;
+        return is(Defect.Status.open, Defect.Status.in_progress, Defect.Status.reopened);
+    }
+
+    public boolean isRetestStartable() {
+        return is(Defect.Status.fixed);
     }
 
     public boolean isRetestable() {
-        return defect.getStatus() == Defect.Status.fixed;
+        return is(Defect.Status.fixed, Defect.Status.retest);
     }
 
     public boolean isCloseable() {
-        return defect.getStatus() != Defect.Status.closed;
+        return !is(Defect.Status.closed);
     }
 
     public boolean isReopenable() {
-        return defect.getStatus() == Defect.Status.closed;
+        return is(Defect.Status.closed);
+    }
+
+    private boolean is(Defect.Status... statuses) {
+        if (defect == null) {
+            return false;
+        }
+        for (Defect.Status s : statuses) {
+            if (defect.getStatus() == s) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String assign() {
@@ -187,49 +209,64 @@ public class DefectDetailBean implements Serializable {
             return null;
         }
         if (assigneeId == null) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.assigneeRequired"), null));
+            addError(I18n.t("err.assigneeRequired"));
             return null;
         }
-        defectService.assign(defect, userService.find(assigneeId), sessionAuth.getCurrentUser());
+        Defect current = defectService.find(id);
+        User assignee = userService.find(assigneeId);
+        if (!defectService.canBeAssignedTo(current, assignee)) {
+            addError(I18n.t("err.assigneeOutsideTeam"));
+            return null;
+        }
+        defectService.assign(current, assignee, sessionAuth.getCurrentUser());
         return refresh();
+    }
+
+    public String startProgress() {
+        return apply(d -> defectService.startProgress(d, sessionAuth.getCurrentUser(), actionComment));
     }
 
     public String markFixed() {
-        if (!allowed(Permissions.WORK_ON_DEFECTS)) {
-            return null;
-        }
-        defectService.markFixed(defect, sessionAuth.getCurrentUser(), actionComment);
-        return refresh();
+        return apply(d -> defectService.markFixed(d, sessionAuth.getCurrentUser(), actionComment));
+    }
+
+    public String startRetest() {
+        return apply(d -> defectService.startRetest(d, sessionAuth.getCurrentUser(), actionComment));
     }
 
     public String retest(boolean passed) {
+        return apply(d -> defectService.retest(d, passed, sessionAuth.getCurrentUser(), actionComment));
+    }
+
+    /** Fermer sans revérification (doublon, non reproductible...) : le motif est obligatoire. */
+    public String close() {
+        if (actionComment == null || actionComment.isBlank()) {
+            if (allowed(Permissions.WORK_ON_DEFECTS)) {
+                addError(I18n.t("err.closeCommentRequired"));
+            }
+            return null;
+        }
+        return apply(d -> defectService.close(d, sessionAuth.getCurrentUser(), actionComment));
+    }
+
+    public String reopen() {
+        return apply(d -> defectService.reopen(d, sessionAuth.getCurrentUser(), actionComment));
+    }
+
+    /**
+     * Garde commune : rôle, périmètre, puis transition appliquée sur l'état ACTUEL en base
+     * (pas sur la copie de la vue, qu'un collègue a pu faire évoluer entre-temps).
+     */
+    private String apply(java.util.function.Consumer<Defect> transition) {
         if (!allowed(Permissions.WORK_ON_DEFECTS)) {
             return null;
         }
         try {
-            defectService.retest(defect, passed, sessionAuth.getCurrentUser(), actionComment);
-        } catch (IllegalStateException e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.retestOnlyFixed"), null));
+            transition.accept(defectService.find(id));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            addError(I18n.t("err.transitionImpossible"));
             return null;
         }
-        return refresh();
-    }
-
-    public String close() {
-        if (!allowed(Permissions.WORK_ON_DEFECTS)) {
-            return null;
-        }
-        defectService.close(defect, sessionAuth.getCurrentUser(), actionComment);
-        return refresh();
-    }
-
-    public String reopen() {
-        if (!allowed(Permissions.WORK_ON_DEFECTS)) {
-            return null;
-        }
-        defectService.reopen(defect, sessionAuth.getCurrentUser(), actionComment);
         return refresh();
     }
 

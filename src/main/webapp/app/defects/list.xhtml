@@ -4,6 +4,13 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="q" value="#{defectListBean.q}"/>
+        <f:viewParam name="status" value="#{defectListBean.status}"/>
+        <f:viewParam name="page" value="#{defectListBean.page}"/>
+        <f:viewAction action="#{defectListBean.load}"/>
+    </f:metadata>
+
     <ui:define name="content">
         <div class="actions-bar">
             <h1>#{msg['common.defects']}</h1>
@@ -11,6 +18,10 @@
                     rendered="#{perm.workOnDefects}"/>
         </div>
 
+        <ui:include src="/WEB-INF/templates/listSearch.xhtml">
+            <ui:param name="bean" value="#{defectListBean}"/>
+            <ui:param name="statusOptions" value="#{defectListBean.statusOptions}"/>
+        </ui:include>
         <div class="card">
             <h:dataTable value="#{defectListBean.defects}" var="d" styleClass="data-table">
                 <h:column>
@@ -50,6 +61,9 @@
                     </h:outputText>
                 </h:column>
             </h:dataTable>
+            <ui:include src="/WEB-INF/templates/pager.xhtml">
+                <ui:param name="bean" value="#{defectListBean}"/>
+            </ui:include>
         </div>
     </ui:define>
 </ui:composition>

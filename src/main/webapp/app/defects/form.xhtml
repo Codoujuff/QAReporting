@@ -24,11 +24,11 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="title">#{msg['common.title']}</label>
+                    <h:outputLabel for="title" value="#{msg['common.title']}"/>
                     <h:inputText id="title" value="#{defectFormBean.defect.title}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="project">#{msg['common.project']}</label>
+                    <h:outputLabel for="project" value="#{msg['common.project']}"/>
                     <h:selectOneMenu id="project" value="#{defectFormBean.projectId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{defectFormBean.projectOptions}" var="p"
@@ -36,31 +36,31 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="severity">#{msg['common.severity']}</label>
+                    <h:outputLabel for="severity" value="#{msg['common.severity']}"/>
                     <h:selectOneMenu id="severity" value="#{defectFormBean.defect.severity}">
                         <f:selectItems value="#{defectFormBean.severityOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="priority">#{msg['common.priority']}</label>
+                    <h:outputLabel for="priority" value="#{msg['common.priority']}"/>
                     <h:selectOneMenu id="priority" value="#{defectFormBean.defect.priority}">
                         <f:selectItems value="#{defectFormBean.priorityOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{defectFormBean.defect.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="expected">#{msg['common.expectedResult']}</label>
+                    <h:outputLabel for="expected" value="#{msg['common.expectedResult']}"/>
                     <h:inputTextarea id="expected" value="#{defectFormBean.defect.expectedResult}"/>
                 </div>
                 <div class="form-row">
-                    <label for="actual">#{msg['common.actualResult']}</label>
+                    <h:outputLabel for="actual" value="#{msg['common.actualResult']}"/>
                     <h:inputTextarea id="actual" value="#{defectFormBean.defect.actualResult}"/>
                 </div>
                 <div class="form-row">
-                    <label for="steps">#{msg['defect.steps']}</label>
+                    <h:outputLabel for="steps" value="#{msg['defect.steps']}"/>
                     <h:inputTextarea id="steps" value="#{defectFormBean.defect.reproductionSteps}"/>
                 </div>
                 <h:commandButton styleClass="btn" value="#{msg['common.create']}" action="#{defectFormBean.save}"/>

@@ -125,6 +125,7 @@ public class DashboardBean implements Serializable {
     private int teamCount;
     private int userCount;
     private int myDefectCount;
+    private long activitiesToValidate;
     private int openDefectCount;
     private long criticalDefectCount;
 
@@ -158,6 +159,7 @@ public class DashboardBean implements Serializable {
         userCount = userService.findAll().size();
 
         User viewer = sessionAuth.getCurrentUser();
+        activitiesToValidate = leadView ? activityService.countToValidate(viewer) : 0;
         List<Defect> visibleDefects = defectService.listForUser(viewer);
         myDefectCount = visibleDefects.size();
         openDefectCount = (int) visibleDefects.stream()
@@ -297,38 +299,31 @@ public class DashboardBean implements Serializable {
     }
 
     /** Renders a simple, dependency-free horizontal bar chart as an inline SVG string. */
+    /**
+     * Graphique en barres horizontales, en HTML/CSS plutôt qu'en SVG : le texte garde sa
+     * taille réelle quelle que soit la largeur de la carte (un SVG mis à l'échelle rendait
+     * les libellés illisibles), et chaque ligne est lisible par un lecteur d'écran.
+     */
     private String buildChart(List<ChartRow> rows) {
-        final int rowHeight = 44;
-        final int barAreaWidth = 350;
-        final int barHeight = 20;
-
         long max = rows.stream().mapToLong(ChartRow::value).max().orElse(0L);
-
-        StringBuilder svg = new StringBuilder();
-        svg.append("<svg viewBox=\"0 0 420 ").append(rows.size() * rowHeight)
-                .append("\" width=\"100%\" role=\"img\">");
-
-        int y = 0;
+        StringBuilder html = new StringBuilder("<div class=\"hbar-chart\" role=\"list\">");
         for (ChartRow row : rows) {
-            int barWidth = max == 0 ? 0 : (int) Math.round((double) row.value() / max * barAreaWidth);
-            int labelY = y + 12;
-            int barY = y + 16;
-
-            svg.append("<text x=\"0\" y=\"").append(labelY).append("\" class=\"chart-label\">")
-                    .append(row.label()).append("</text>");
-            svg.append("<rect x=\"0\" y=\"").append(barY).append("\" width=\"").append(barWidth)
-                    .append("\" height=\"").append(barHeight).append("\" rx=\"4\" class=\"")
-                    .append(row.colorClass()).append("\">");
-            svg.append("<title>").append(row.label()).append(" : ").append(row.value()).append("</title>");
-            svg.append("</rect>");
-            svg.append("<text x=\"").append(barWidth + 8).append("\" y=\"").append(barY + barHeight - 5)
-                    .append("\" class=\"chart-value\">").append(row.value()).append("</text>");
-
-            y += rowHeight;
+            double percent = max == 0 ? 0 : row.value() * 100.0 / max;
+            String label = escape(row.label());
+            html.append("<div class=\"hbar-row\" role=\"listitem\" aria-label=\"")
+                    .append(label).append(" : ").append(row.value()).append("\">")
+                    .append("<span class=\"hbar-label\">").append(label).append("</span>")
+                    .append("<span class=\"hbar-track\"><span class=\"hbar-fill ").append(row.colorClass())
+                    .append("\" style=\"width:").append(String.format(java.util.Locale.ROOT, "%.1f", percent))
+                    .append("%\"></span></span>")
+                    .append("<span class=\"hbar-value\">").append(row.value()).append("</span>")
+                    .append("</div>");
         }
+        return html.append("</div>").toString();
+    }
 
-        svg.append("</svg>");
-        return svg.toString();
+    private static String escape(String s) {
+        return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     public boolean isQaView() {
@@ -353,6 +348,10 @@ public class DashboardBean implements Serializable {
 
     public int getUserCount() {
         return userCount;
+    }
+
+    public long getActivitiesToValidate() {
+        return activitiesToValidate;
     }
 
     public int getMyDefectCount() {

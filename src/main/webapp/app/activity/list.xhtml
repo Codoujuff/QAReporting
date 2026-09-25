@@ -4,63 +4,90 @@
                  xmlns:f="jakarta.faces.core"
                  xmlns:ui="jakarta.faces.facelets">
 
-    <ui:define name="content">
-        <h1>#{msg['nav.myActivity']}</h1>
-        <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">
-            #{msg['activity.intro']}
-        </p>
+    <f:metadata>
+        <f:viewParam name="q" value="#{activityListBean.q}"/>
+        <f:viewParam name="status" value="#{activityListBean.status}"/>
+        <f:viewParam name="page" value="#{activityListBean.page}"/>
+        <f:viewAction action="#{activityListBean.load}"/>
+    </f:metadata>
 
-        <div class="card">
+    <ui:define name="content">
+        <div class="actions-bar">
+            <div>
+                <h1>#{sessionAuth.hasRole('qa') ? msg['nav.myActivity'] : msg['nav.teamActivity']}</h1>
+                <p class="subtitle">#{sessionAuth.hasRole('qa_lead') ? msg['activity.introLead'] : msg['activity.intro']}</p>
+            </div>
             <h:link styleClass="btn" value="#{msg['activity.new']}" outcome="/app/activity/form"
                     rendered="#{perm.logActivity}"/>
+        </div>
 
-            <h:dataTable value="#{activityListBean.activities}" var="a" styleClass="data-table" style="margin-top:16px;">
-                <h:column>
-                    <f:facet name="header">#{msg['common.date']}</f:facet>
-                    <h:outputText value="#{a.activityDate}">
-                        <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
-                    </h:outputText>
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.project']}</f:facet>
-                    #{a.project.name}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.campaign']}</f:facet>
-                    #{a.campaign != null ? a.campaign.name : '—'}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.type']}</f:facet>
-                    #{labels.activityType(a.activityType)}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.executed']}</f:facet>
-                    #{a.testsExecuted}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.passedPl']}</f:facet>
-                    #{a.passed}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.failedPl']}</f:facet>
-                    #{a.failed}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.blockedPl']}</f:facet>
-                    #{activityListBean.blockedCountOf(a)}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.notRunPl']}</f:facet>
-                    #{a.notRun}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">#{msg['common.defects']}</f:facet>
-                    #{a.defectsCount}
-                </h:column>
-            </h:dataTable>
+        <ui:include src="/WEB-INF/templates/listSearch.xhtml">
+            <ui:param name="bean" value="#{activityListBean}"/>
+            <ui:param name="extraStatuses" value="#{true}"/>
+        </ui:include>
+
+        <div class="card">
+            <h:form>
+                <h:dataTable value="#{activityListBean.activities}" var="a" styleClass="data-table"
+                             rendered="#{not empty activityListBean.activities}">
+                    <h:column>
+                        <f:facet name="header">#{msg['common.date']}</f:facet>
+                        <h:outputText value="#{a.activityDate}">
+                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </h:column>
+                    <h:column rendered="#{not sessionAuth.hasRole('qa')}">
+                        <f:facet name="header">#{msg['activity.author']}</f:facet>
+                        #{a.user.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.project']}</f:facet>
+                        #{a.project.name}#{a.campaign != null ? ' · '.concat(a.campaign.name) : ''}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.type']}</f:facet>
+                        #{labels.activityType(a.activityType)}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.executed']}</f:facet>
+                        #{a.testsExecuted}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['activity.results']}</f:facet>
+                        <span class="result-counts">
+                            <span class="rc-passed" title="#{msg['common.passedPl']}">#{a.passed}</span>
+                            <span class="rc-failed" title="#{msg['common.failedPl']}">#{a.failed}</span>
+                            <span class="rc-blocked" title="#{msg['common.blockedPl']}">#{activityListBean.blockedCountOf(a)}</span>
+                            <span class="rc-notrun" title="#{msg['common.notRunPl']}">#{a.notRun}</span>
+                        </span>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['common.defects']}</f:facet>
+                        #{a.defectsCount}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">#{msg['activity.validation']}</f:facet>
+                        <h:panelGroup rendered="#{a.validated}">
+                            <span class="badge status-closed" title="#{a.validatedBy.name}"><span class="dot"></span>#{msg['activity.validated']}</span>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{not a.validated}">
+                            <span class="badge status-retest"><span class="dot"></span>#{msg['activity.toValidate']}</span>
+                        </h:panelGroup>
+                    </h:column>
+                    <h:column rendered="#{sessionAuth.hasRole('qa_lead') or sessionAuth.hasRole('admin')}">
+                        <f:facet name="header">#{msg['common.actions']}</f:facet>
+                        <h:commandButton styleClass="btn btn-secondary btn-sm" value="#{msg['activity.validate']}"
+                                         action="#{activityListBean.validate(a.id)}"
+                                         rendered="#{activityListBean.canValidate(a)}"/>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+            <ui:include src="/WEB-INF/templates/pager.xhtml">
+                <ui:param name="bean" value="#{activityListBean}"/>
+            </ui:include>
 
             <h:panelGroup rendered="#{empty activityListBean.activities}">
-                <p style="color:#5B6472;font-size:13px;">#{msg['common.noActivityYet']}</p>
+                <p class="empty-state">#{msg['common.noActivityYet']}</p>
             </h:panelGroup>
         </div>
     </ui:define>

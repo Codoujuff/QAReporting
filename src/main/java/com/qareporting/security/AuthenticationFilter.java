@@ -72,13 +72,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     .setParameter("hash", hash)
                     .getSingleResult();
 
-            if (!token.getUser().isActive()) {
-                reject(requestContext, "Compte désactivé.");
+            if (!token.getUser().isActive() || TokenService.isExpired(token, LocalDateTime.now())) {
+                em.remove(token); // jeton expiré ou compte désactivé : on le supprime pour de bon
+                reject(requestContext, "Session invalide ou expirée.");
                 return;
             }
 
             touchLastUsed(token);
             currentUser.set(token.getUser());
+            currentUser.setTokenId(token.getId());
         } catch (NoResultException e) {
             reject(requestContext, "Session invalide ou expirée.");
         }

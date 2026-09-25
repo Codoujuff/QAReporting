@@ -10,7 +10,7 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="project">#{msg['common.project']}</label>
+                    <h:outputLabel for="project" value="#{msg['common.project']}"/>
                     <h:selectOneMenu id="project" value="#{campaignFormBean.projectId}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.projectOptions}" var="p"
@@ -18,19 +18,19 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="name">#{msg['common.name']}</label>
+                    <h:outputLabel for="name" value="#{msg['common.name']}"/>
                     <h:inputText id="name" value="#{campaignFormBean.campaign.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="version">#{msg['common.version']}</label>
+                    <h:outputLabel for="version" value="#{msg['common.version']}"/>
                     <h:inputText id="version" value="#{campaignFormBean.campaign.version}"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{campaignFormBean.campaign.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="environment">#{msg['common.environment']}</label>
+                    <h:outputLabel for="environment" value="#{msg['common.environment']}"/>
                     <h:selectOneMenu id="environment" value="#{campaignFormBean.environmentId}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.environmentOptions}" var="e"
@@ -38,7 +38,7 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="responsible">#{msg['common.owner']}</label>
+                    <h:outputLabel for="responsible" value="#{msg['common.owner']}"/>
                     <h:selectOneMenu id="responsible" value="#{campaignFormBean.responsibleId}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{campaignFormBean.userOptions}" var="u"
@@ -46,13 +46,13 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="startDate">#{msg['campaign.startIso']}</label>
+                    <h:outputLabel for="startDate" value="#{msg['campaign.startIso']}"/>
                     <h:inputText id="startDate" value="#{campaignFormBean.campaign.startDate}">
                         <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
                     </h:inputText>
                 </div>
                 <div class="form-row">
-                    <label for="endDate">#{msg['campaign.endIso']}</label>
+                    <h:outputLabel for="endDate" value="#{msg['campaign.endIso']}"/>
                     <h:inputText id="endDate" value="#{campaignFormBean.campaign.endDate}">
                         <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
                     </h:inputText>

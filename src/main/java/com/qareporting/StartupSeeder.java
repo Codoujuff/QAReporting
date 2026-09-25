@@ -52,7 +52,17 @@ public class StartupSeeder {
             initialAdmin.setPasswordHash(passwordHasher.hash("password"));
             initialAdmin.setRole(admin);
             initialAdmin.setActive(true);
+            initialAdmin.setMustChangePassword(true); // « password » : à changer dès la première connexion
             em.persist(initialAdmin);
+        }
+
+        // Base existante dont un admin a encore le mot de passe d'installation « password » :
+        // on le rend provisoire, pour qu'il soit changé à la prochaine connexion.
+        for (User u : em.createQuery("SELECT u FROM User u WHERE u.role.name = :admin AND u.mustChangePassword = false",
+                        User.class).setParameter("admin", Role.ADMIN).getResultList()) {
+            if (passwordHasher.matches("password", u.getPasswordHash())) {
+                u.setMustChangePassword(true);
+            }
         }
 
         // Gate indépendant du précédent : une base déjà en place (rôles déjà seedés

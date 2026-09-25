@@ -50,6 +50,9 @@
                 <h:link outcome="/app/team" styleClass="nav-item #{facesContext.viewRoot.viewId == '/app/team.xhtml' ? 'active' : ''}">
                     <span class="nav-dot"></span>#{msg['nav.myTeam']}
                 </h:link>
+                <h:link outcome="/app/activity/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/activity') ? 'active' : ''}">
+                    <span class="nav-dot"></span>#{msg['nav.teamActivity']}
+                </h:link>
                 <h:link outcome="/app/campaigns/list" styleClass="nav-item #{facesContext.viewRoot.viewId.startsWith('/app/campaigns') ? 'active' : ''}">
                     <span class="nav-dot"></span>#{msg['nav.campaigns']}
                 </h:link>

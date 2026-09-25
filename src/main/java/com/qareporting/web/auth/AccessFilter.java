@@ -70,7 +70,18 @@ public class AccessFilter extends HttpFilter {
             return;
         }
 
-        currentUser.set(sessionAuth.getCurrentUser());
+        com.qareporting.entity.User user = sessionAuth.getCurrentUser();
+        if (user == null || !user.isActive()) {
+            // Compte désactivé (ou supprimé) pendant la session : on coupe tout de suite.
+            request.getSession().invalidate();
+            response.sendRedirect(request.getContextPath() + "/login.xhtml");
+            return;
+        }
+        if (sessionAuth.isMustChangePassword() && !"/app/settings.xhtml".equals(request.getServletPath())) {
+            response.sendRedirect(request.getContextPath() + "/app/settings.xhtml");
+            return;
+        }
+        currentUser.set(user);
 
         chain.doFilter(request, response);
     }

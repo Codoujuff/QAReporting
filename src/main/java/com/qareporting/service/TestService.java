@@ -45,6 +45,24 @@ public class TestService extends AbstractCrudService<Test, Long> {
         return Scope.sameUser(test.getAssignedTo(), viewer);
     }
 
+    /**
+     * Pourquoi un test ne peut pas être exécuté maintenant, ou null s'il le peut. Un test
+     * rattaché à une campagne ne s'exécute que pendant la campagne (statut « en cours ») :
+     * une campagne terminée est figée, ses résultats ne doivent plus bouger.
+     * Renvoie une clé de traduction, utilisée par l'interface comme par l'API.
+     */
+    public String executionBlocker(Test test) {
+        if (test == null || test.getCampaign() == null) {
+            return null;
+        }
+        return switch (test.getCampaign().getStatus()) {
+            case in_progress -> null;
+            case planned -> "err.campaignNotStarted";
+            case blocked -> "err.campaignBlocked";
+            case completed -> "err.campaignCompleted";
+        };
+    }
+
     public TestExecution findExecution(Long executionId) {
         return executionId == null ? null : em.find(TestExecution.class, executionId);
     }

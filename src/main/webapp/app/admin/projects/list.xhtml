@@ -30,7 +30,7 @@
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/projects/form">
                             <f:param name="id" value="#{p.id}"/>
                         </h:link>
-                        <h:form style="display:inline">
+                        <h:form styleClass="inline-form">
                             <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{projectListBean.delete(p)}"
                                              onclick="return confirm('#{msg['project.deleteConfirm']}');"/>

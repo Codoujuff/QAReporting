@@ -8,7 +8,7 @@
         <!-- ===================== QA ===================== -->
         <h:panelGroup rendered="#{dashboardBean.qaView}">
             <h1>#{msg['dashboard.hello']} #{dashboardBean.greetingName}</h1>
-            <p style="color:#5B6472;font-size:13px;margin-top:-8px;margin-bottom:16px;">#{msg['dashboard.qaIntro']}</p>
+            <p class="subtitle">#{msg['dashboard.qaIntro']}</p>
 
             <div class="stat-row">
                 <div class="stat-tile">
@@ -45,17 +45,17 @@
                 <div class="card">
                     <h2>#{msg['dashboard.todayActivity']}</h2>
                     <h:panelGroup rendered="#{empty dashboardBean.todaysActivities}">
-                        <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noActivityToday']}</p>
+                        <p class="empty-state">#{msg['dashboard.noActivityToday']}</p>
                     </h:panelGroup>
                     <ui:repeat value="#{dashboardBean.todaysActivities}" var="a">
-                        <div style="padding:10px 0;border-top:1px solid var(--border-light);">
-                            <div style="font-weight:600;font-size:13px;">
+                        <div class="today-item">
+                            <div class="today-item-title">
                                 #{a.project.name}#{a.campaign != null ? ' · '.concat(a.campaign.name) : ''}
                             </div>
-                            <div style="color:#5B6472;font-size:12px;margin-top:2px;">
+                            <div class="today-item-meta">
                                 #{labels.activityType(a.activityType)}#{a.duration != null ? ' · '.concat(a.duration) : ''}
                             </div>
-                            <div style="font-size:12px;margin-top:4px;">
+                            <div class="today-item-counts">
                                 #{msg['common.tests']} #{a.testsExecuted} &#160;·&#160; #{msg['common.passedPl']} #{a.passed} &#160;·&#160; #{msg['common.failedPl']} #{a.failed} &#160;·&#160; #{msg['common.blockedPl']} #{a.blocked}
                             </div>
                         </div>
@@ -89,11 +89,11 @@
                 <div class="card">
                     <h2>#{msg['dashboard.campaignProgress']}</h2>
                     <h:panelGroup rendered="#{empty dashboardBean.campaignProgress}">
-                        <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noCampaign']}</p>
+                        <p class="empty-state">#{msg['dashboard.noCampaign']}</p>
                     </h:panelGroup>
                     <ui:repeat value="#{dashboardBean.campaignProgress}" var="cp">
-                        <div style="margin-bottom:12px;">
-                            <div style="font-size:13px;margin-bottom:4px;">#{cp.name}</div>
+                        <div class="progress-item">
+                            <div class="progress-item-name">#{cp.name}</div>
                             <div class="progress-track">
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width:#{cp.percent}%"></div>
@@ -128,7 +128,7 @@
                     </h:column>
                 </h:dataTable>
                 <h:panelGroup rendered="#{empty dashboardBean.recentDefects}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['dashboard.noDefect']}</p>
+                    <p class="empty-state">#{msg['dashboard.noDefect']}</p>
                 </h:panelGroup>
             </div>
         </h:panelGroup>
@@ -153,6 +153,11 @@
                     <div class="value">#{dashboardBean.criticalDefectCount}</div>
                     <div class="label">#{msg['common.criticalDefects']}</div>
                 </div>
+                <h:link outcome="/app/activity/list" styleClass="stat-tile stat-tile-link #{dashboardBean.activitiesToValidate gt 0 ? 'stat-tile-attention' : ''}">
+                    <f:param name="status" value="toValidate"/>
+                    <div class="value">#{dashboardBean.activitiesToValidate}</div>
+                    <div class="label">#{msg['dashboard.toValidate']}</div>
+                </h:link>
             </div>
 
             <div class="charts-row">
@@ -169,7 +174,7 @@
             <div class="card">
                 <h2>#{msg['nav.myTeam']}</h2>
                 <h:panelGroup rendered="#{!dashboardBean.hasTeam}">
-                    <p style="color:#5B6472;font-size:13px;">
+                    <p class="empty-state">
                         #{msg['common.noTeam']}
                     </p>
                 </h:panelGroup>
@@ -189,7 +194,7 @@
                         </h:column>
                     </h:dataTable>
                     <h:panelGroup rendered="#{empty dashboardBean.teamMembers}">
-                        <p style="color:#5B6472;font-size:13px;">#{msg['common.noMemberYet']}</p>
+                        <p class="empty-state">#{msg['common.noMemberYet']}</p>
                     </h:panelGroup>
                 </h:panelGroup>
             </div>
@@ -261,7 +266,7 @@
                     </h:column>
                 </h:dataTable>
                 <h:panelGroup rendered="#{empty dashboardBean.projectBreakdown}">
-                    <p style="color:#5B6472;font-size:13px;">#{msg['common.noDefectYet']}</p>
+                    <p class="empty-state">#{msg['common.noDefectYet']}</p>
                 </h:panelGroup>
             </div>
         </h:panelGroup>

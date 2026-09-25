@@ -64,6 +64,14 @@ public class Activity extends Timestamped {
     @Column(name = "activity_date", nullable = false)
     private LocalDate activityDate;
 
+    /** Validation par le QA Lead de l'équipe (ou l'admin) : une déclaration validée n'est plus modifiable. */
+    @ManyToOne
+    @JoinColumn(name = "validated_by")
+    private User validatedBy;
+
+    @Column(name = "validated_at")
+    private java.time.LocalDateTime validatedAt;
+
     /** Business rule (server-enforced, same as the Laravel ActivityRequest validator):
      *  passed + failed + blocked + not_run must always equal tests_executed. */
     public boolean isCounterSumValid() {
@@ -104,4 +112,9 @@ public class Activity extends Timestamped {
     public void setDuration(String duration) { this.duration = duration; }
     public LocalDate getActivityDate() { return activityDate; }
     public void setActivityDate(LocalDate activityDate) { this.activityDate = activityDate; }
+    public User getValidatedBy() { return validatedBy; }
+    public void setValidatedBy(User validatedBy) { this.validatedBy = validatedBy; }
+    public java.time.LocalDateTime getValidatedAt() { return validatedAt; }
+    public void setValidatedAt(java.time.LocalDateTime validatedAt) { this.validatedAt = validatedAt; }
+    public boolean isValidated() { return validatedAt != null; }
 }

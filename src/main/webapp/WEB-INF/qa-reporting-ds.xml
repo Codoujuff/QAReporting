@@ -2,12 +2,15 @@
 <datasources xmlns="http://www.jboss.org/ironjacamar/schema"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.jboss.org/ironjacamar/schema http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
+    <!-- Connexion configurable par variables d'environnement (QA_DB_HOST, QA_DB_PORT, QA_DB_NAME,
+         QA_DB_USER, QA_DB_PASSWORD) : aucun mot de passe de production dans le code. Sans elles,
+         valeurs de développement : MariaDB XAMPP locale, root sans mot de passe. -->
     <datasource jndi-name="java:/QaReportingJ2eeDS" pool-name="QaReportingJ2eeDS" enabled="true" use-java-context="true">
-        <connection-url>jdbc:mysql://127.0.0.1:3306/qa_reporting_j2ee?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8</connection-url>
+        <connection-url>jdbc:mysql://${env.QA_DB_HOST:127.0.0.1}:${env.QA_DB_PORT:3306}/${env.QA_DB_NAME:qa_reporting_j2ee}?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8</connection-url>
         <driver>qa-reporting-j2ee.war_com.mysql.cj.jdbc.Driver_8_4</driver>
         <security>
-            <user-name>root</user-name>
-            <password></password>
+            <user-name>${env.QA_DB_USER:root}</user-name>
+            <password>${env.QA_DB_PASSWORD:}</password>
         </security>
         <validation>
             <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>

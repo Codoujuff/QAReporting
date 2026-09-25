@@ -32,7 +32,7 @@
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/environments/form">
                             <f:param name="id" value="#{e.id}"/>
                         </h:link>
-                        <h:form style="display:inline">
+                        <h:form styleClass="inline-form">
                             <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{environmentListBean.delete(e)}"
                                              onclick="return confirm('#{msg['env.deleteConfirm']}');"/>

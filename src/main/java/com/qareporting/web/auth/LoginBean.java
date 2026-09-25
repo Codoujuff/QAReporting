@@ -21,6 +21,9 @@ public class LoginBean implements Serializable {
 
     public String login() {
         if (sessionAuth.login(email, password)) {
+            if (sessionAuth.isMustChangePassword()) {
+                return "/app/settings.xhtml?faces-redirect=true";
+            }
             if (next != null && next.startsWith("/app/")) {
                 return next + "?faces-redirect=true";
             }

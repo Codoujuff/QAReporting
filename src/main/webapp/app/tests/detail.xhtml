@@ -45,18 +45,27 @@
             <p><strong>#{msg['test.expectedLbl']}</strong> #{testDetailBean.test.expectedResult}</p>
         </div>
 
-        <h:panelGroup layout="block" styleClass="card" rendered="#{perm.executeTests}">
+        <h:panelGroup layout="block" styleClass="callout"
+                      rendered="#{perm.executeTests and testDetailBean.executionBlocker != null}">
+            <div>
+                <div class="callout-title">#{msg['test.cannotRun']}</div>
+                <div class="callout-text">#{msg[testDetailBean.executionBlocker]}</div>
+            </div>
+        </h:panelGroup>
+
+        <h:panelGroup layout="block" styleClass="card"
+                      rendered="#{perm.executeTests and testDetailBean.executionBlocker == null}">
             <h2>#{msg['test.execute']}</h2>
             <h:form>
                 <div class="form-row">
-                    <label for="result">#{msg['common.result']}</label>
+                    <h:outputLabel for="result" value="#{msg['common.result']}"/>
                     <h:selectOneMenu id="result" value="#{testDetailBean.resultStatus}">
                         <f:selectItem itemLabel="#{msg['common.choose']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testDetailBean.statusOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="environment">#{msg['common.environment']}</label>
+                    <h:outputLabel for="environment" value="#{msg['common.environment']}"/>
                     <h:selectOneMenu id="environment" value="#{testDetailBean.environmentId}">
                         <f:selectItem itemLabel="#{msg['common.noneM']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{testDetailBean.environmentOptions}" var="e"
@@ -64,11 +73,11 @@
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="actualResult">#{msg['common.actualResult']}</label>
+                    <h:outputLabel for="actualResult" value="#{msg['common.actualResult']}"/>
                     <h:inputTextarea id="actualResult" value="#{testDetailBean.actualResult}"/>
                 </div>
                 <div class="form-row">
-                    <label for="duration">#{msg['common.duration']}</label>
+                    <h:outputLabel for="duration" value="#{msg['common.duration']}"/>
                     <h:inputText id="duration" value="#{testDetailBean.duration}"/>
                 </div>
                 <h:commandButton styleClass="btn" value="#{msg['test.saveResult']}" action="#{testDetailBean.execute}"/>
@@ -114,7 +123,7 @@
                 </h:column>
             </h:dataTable>
             <h:panelGroup rendered="#{empty testDetailBean.executions}">
-                <p style="color:#5B6472;font-size:13px;">#{msg['test.noExecution']}</p>
+                <p class="empty-state">#{msg['test.noExecution']}</p>
             </h:panelGroup>
         </div>
     </ui:define>

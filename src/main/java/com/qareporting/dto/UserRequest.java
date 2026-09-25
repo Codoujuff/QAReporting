@@ -12,6 +12,11 @@ public class UserRequest {
     private String initials;
     private String email;
     private String password;
+    /** Obligatoire quand on change son propre mot de passe. */
+    private String currentPassword;
+
+    public String getCurrentPassword() { return currentPassword; }
+    public void setCurrentPassword(String currentPassword) { this.currentPassword = currentPassword; }
     private Long roleId;
     private Long teamId;
     private Boolean active;

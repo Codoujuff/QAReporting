@@ -1,5 +1,6 @@
 package com.qareporting.web.settings;
 
+import com.qareporting.security.PasswordPolicy;
 import com.qareporting.entity.User;
 import com.qareporting.web.i18n.I18n;
 import com.qareporting.security.PasswordHasher;
@@ -71,12 +72,29 @@ public class UserSettingsBean implements Serializable {
                 addError(I18n.t("err.passwordMismatch"));
                 return null;
             }
+            String weak = PasswordPolicy.check(newPassword, user.getEmail());
+            if (weak != null) {
+                addError(I18n.t(weak));
+                return null;
+            }
+            if (passwordHasher.matches(newPassword, user.getPasswordHash())) {
+                addError(I18n.t("err.passwordUnchanged"));
+                return null;
+            }
             user.setPasswordHash(passwordHasher.hash(newPassword));
+            user.setMustChangePassword(false);
         }
 
+        if (user.isMustChangePassword() && !changingPassword) {
+            addError(I18n.t("err.passwordChangeRequired"));
+            return null;
+        }
         user.setReminderTime(reminderEnabled ? reminderTime : null);
         userService.update(user);
         sessionAuth.syncDisplayName(user);
+        if (changingPassword) {
+            sessionAuth.passwordChanged();
+        }
 
         currentPassword = null;
         newPassword = null;

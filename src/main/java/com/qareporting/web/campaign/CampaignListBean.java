@@ -1,5 +1,6 @@
 package com.qareporting.web.campaign;
 
+import com.qareporting.web.ListPage;
 import com.qareporting.web.auth.PermissionBean;
 import com.qareporting.security.Permissions;
 import com.qareporting.entity.Campaign;
@@ -41,10 +42,10 @@ public class CampaignListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        load();
+        fetch();
     }
 
-    private void load() {
+    private void fetch() {
         campaigns = campaignService.listForUser(sessionAuth.getCurrentUser());
     }
 
@@ -109,6 +110,30 @@ public class CampaignListBean implements Serializable {
     }
 
     public List<Campaign> getCampaigns() {
-        return campaigns;
+        return pageData.getItems();
+    }
+
+    // ---------- recherche + pagination (paramètres d'URL q, status, page) ----------
+
+    private final ListPage<Campaign> pageData = new ListPage<>();
+    private String q;
+    private String status;
+    private Integer page;
+
+    /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
+    public void load() {
+        pageData.apply(campaigns, q, c -> c.getName() + " " + (c.getProject() != null ? c.getProject().getName() : "") + " " + (c.getVersion() != null ? c.getVersion() : ""), status == null || status.isBlank() ? null : c -> c.getStatus().name().equals(status), page);
+    }
+
+    public ListPage<Campaign> getPageData() { return pageData; }
+    public String getQ() { return q; }
+    public void setQ(String q) { this.q = q; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public Integer getPage() { return page; }
+    public void setPage(Integer page) { this.page = page; }
+
+    public Campaign.Status[] getStatusOptions() {
+        return Campaign.Status.values();
     }
 }

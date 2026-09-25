@@ -26,7 +26,7 @@
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/teams/form">
                             <f:param name="id" value="#{t.id}"/>
                         </h:link>
-                        <h:form style="display:inline">
+                        <h:form styleClass="inline-form">
                             <h:commandButton styleClass="btn btn-danger" value="#{msg['common.delete']}"
                                              action="#{teamListBean.delete(t)}"
                                              onclick="return confirm('#{msg['team.deleteConfirm']}');"/>

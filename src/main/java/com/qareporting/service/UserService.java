@@ -40,6 +40,20 @@ public class UserService extends AbstractCrudService<User, Long> {
     }
 
     /** Members of a team, for the QA Lead's team dashboard. */
+    /** Active / désactive un compte ; la désactivation révoque aussi tous ses jetons d'API. */
+    @jakarta.transaction.Transactional
+    public void setActive(Long userId, boolean active) {
+        User user = find(userId);
+        if (user == null) {
+            return;
+        }
+        user.setActive(active);
+        update(user);
+        if (!active) {
+            em.createQuery("DELETE FROM AccessToken t WHERE t.user = :user").setParameter("user", user).executeUpdate();
+        }
+    }
+
     public List<User> findByTeam(Team team) {
         return em.createQuery("SELECT u FROM User u WHERE u.team = :team ORDER BY u.name", User.class)
                 .setParameter("team", team)

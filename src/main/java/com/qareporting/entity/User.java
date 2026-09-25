@@ -75,6 +75,13 @@ public class User extends Timestamped {
     public void setRole(Role role) { this.role = role; }
     public Team getTeam() { return team; }
     public void setTeam(Team team) { this.team = team; }
+    /** Mot de passe provisoire (compte initial, création ou réinitialisation par l'admin) : à changer à la connexion. */
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword = false;
+
+    public boolean isMustChangePassword() { return mustChangePassword; }
+    public void setMustChangePassword(boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public LocalTime getReminderTime() { return reminderTime; }

@@ -15,21 +15,21 @@
         <div class="card">
             <h:form>
                 <div class="form-row">
-                    <label for="name">#{msg['common.name']}</label>
+                    <h:outputLabel for="name" value="#{msg['common.name']}"/>
                     <h:inputText id="name" value="#{projectFormBean.project.name}" required="true"/>
                 </div>
                 <div class="form-row">
-                    <label for="description">#{msg['common.description']}</label>
+                    <h:outputLabel for="description" value="#{msg['common.description']}"/>
                     <h:inputTextarea id="description" value="#{projectFormBean.project.description}"/>
                 </div>
                 <div class="form-row">
-                    <label for="status">#{msg['common.status']}</label>
+                    <h:outputLabel for="status" value="#{msg['common.status']}"/>
                     <h:selectOneMenu id="status" value="#{projectFormBean.project.status}">
                         <f:selectItems value="#{projectFormBean.statusOptions}" var="o" itemValue="#{o}" itemLabel="#{labels.of(o)}"/>
                     </h:selectOneMenu>
                 </div>
                 <div class="form-row">
-                    <label for="team">#{msg['common.team']}</label>
+                    <h:outputLabel for="team" value="#{msg['common.team']}"/>
                     <h:selectOneMenu id="team" value="#{projectFormBean.teamId}">
                         <f:selectItem itemLabel="#{msg['common.noneF']}" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{projectFormBean.teamOptions}" var="t"

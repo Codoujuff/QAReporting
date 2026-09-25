@@ -94,6 +94,10 @@ public class TestResource {
         if (test == null || !testService.canView(currentUser.get(), test)) {
             return Response.status(404).build();
         }
+        String blocker = testService.executionBlocker(test);
+        if (blocker != null) {
+            return Response.status(422).entity("{\"message\":\"" + blocker + "\"}").build();
+        }
         if (request == null || request.getStatus() == null) {
             return Response.status(422).entity("{\"message\":\"Le résultat est requis.\"}").build();
         }

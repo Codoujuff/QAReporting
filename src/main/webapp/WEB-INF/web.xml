@@ -26,6 +26,11 @@
 
     <session-config>
         <session-timeout>30</session-timeout>
+        <!-- Cookie de session illisible par JavaScript ; Secure et SameSite : voir undertow-handlers.conf. -->
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
     <error-page>

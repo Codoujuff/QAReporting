@@ -115,7 +115,9 @@ Connectez-vous avec le compte administrateur créé automatiquement :
 |---|---|
 | `admin@qa-reporting-j2ee.local` | `password` |
 
-Depuis ce compte, vous pouvez créer d'autres utilisateurs (QA, QA Lead, Manager) pour tester les différents rôles.
+**À la première connexion, l'application vous demande de choisir un nouveau mot de passe** : `password` n'est qu'un mot de passe provisoire. Toutes les pages restent bloquées tant qu'il n'est pas changé. Le nouveau mot de passe doit faire au moins 10 caractères, avec au moins une lettre et un chiffre.
+
+Depuis ce compte, vous pouvez créer d'autres utilisateurs (QA, QA Lead, Manager) pour tester les différents rôles. Le mot de passe que vous leur donnez est lui aussi **provisoire** : chacun le remplace à sa première connexion.
 
 La langue se change avec le sélecteur **FR | EN**, en haut à droite (et sur la page de connexion). Le choix est mémorisé.
 
@@ -123,7 +125,11 @@ La langue se change avec le sélecteur **FR | EN**, en haut à droite (et sur la
 
 ## Étape 6 : préparer l'application (première utilisation)
 
-L'application démarre vide, avec seulement le compte admin. Pour la rendre utilisable par une équipe, faites les étapes suivantes **dans cet ordre** (les suivantes ont besoin des précédentes) :
+L'application démarre vide, avec seulement le compte admin.
+
+> **Pour une démonstration**, inutile de tout saisir : en admin, **Administration → Paramètres généraux → Charger les données de démonstration** crée une équipe complète avec deux semaines d'historique. Les comptes et le déroulé sont dans [SCENARIO-DEMO.md](SCENARIO-DEMO.md).
+
+Pour une vraie équipe, faites les étapes suivantes **dans cet ordre** (les suivantes ont besoin des précédentes) :
 
 | # | Qui | Où | Quoi |
 |---|---|---|---|
@@ -131,7 +137,7 @@ L'application démarre vide, avec seulement le compte admin. Pour la rendre util
 | 2 | Admin | Administration → **Utilisateurs** | Créer les comptes : un **QA Lead**, un ou plusieurs **QA**, un **Manager**. Rattacher le lead et les QA à l'équipe. |
 | 3 | Admin | Administration → **Équipes** | Modifier l'équipe pour lui donner son responsable (le QA Lead). |
 | 4 | Admin | Administration → **Projets** | Créer le projet et le rattacher à l'équipe. **Sans équipe, le projet n'apparaît pas chez le QA Lead.** |
-| 5 | QA Lead | **Campagnes** → Nouvelle campagne | Créer la campagne du sprint / de la version, puis **Démarrer**. |
+| 5 | QA Lead | **Campagnes** → Nouvelle campagne | Créer la campagne du sprint / de la version, puis **Démarrer**. Les tests d'une campagne ne s'exécutent que lorsqu'elle est **en cours**. |
 | 6 | QA Lead | **Tests** → Nouveau test | Créer les cas de test et les **assigner** aux testeurs. |
 
 Les environnements (DEV, QA, PREPROD, PROD) et les paramètres généraux sont créés automatiquement au premier lancement.
@@ -146,12 +152,22 @@ Chaque rôle ne voit que les menus et les boutons qu'il a le droit d'utiliser. U
 
 Voit ses tests, ses anomalies et son activité.
 
-1. **Tests** : ouvrir un test qui vous est assigné, choisir le **Résultat** (réussi, échoué, bloqué, non exécuté), puis **Enregistrer le résultat**.
+1. **Tests** : ouvrir un test qui vous est assigné (la barre de recherche filtre par titre, projet, campagne ou statut), choisir le **Résultat** (réussi, échoué, bloqué, non exécuté), puis **Enregistrer le résultat**. Si la campagne n'est pas démarrée, est bloquée ou est terminée, l'exécution est refusée avec l'explication.
 2. **Si le test échoue** : un encadré rouge propose **Déclarer l'anomalie**. Le formulaire est déjà rempli (projet, étapes, résultat attendu, résultat obtenu) : complétez puis **Créer**.
 3. **Anomalies** → ouvrir l'anomalie → **Pièces jointes** : ajouter une capture, une vidéo ou un journal (10 Mo maximum).
 4. **Nouveau test** : vous pouvez rédiger vos propres cas de test. Ils vous sont assignés automatiquement.
-5. En fin de journée : **Mon activité** → **Nouvelle activité**. La somme réussis + échoués + bloqués + non exécutés doit être égale au nombre de tests exécutés, et un motif est obligatoire s'il y a des tests bloqués.
-6. Quand le développeur a corrigé : sur l'anomalie, **Marquer corrigée**, puis après revérification **Revérification : réussie** (l'anomalie est fermée) ou **échouée** (elle est rouverte).
+5. En fin de journée : **Mon activité** → **Nouvelle activité**. La somme réussis + échoués + bloqués + non exécutés doit être égale au nombre de tests exécutés, et un motif est obligatoire s'il y a des tests bloqués. Une fois validée par le QA Lead, la déclaration n'est plus modifiable. Dans **Paramètres**, le **rappel de saisie** vous envoie une notification à l'heure choisie si vous n'avez rien déclaré dans la journée.
+6. Cycle de vie d'une anomalie, depuis sa fiche :
+
+   | Statut | Bouton | Nouveau statut |
+   |---|---|---|
+   | Ouverte / Rouverte | **Prendre en charge** | En cours |
+   | Ouverte / En cours / Rouverte | **Marquer corrigée** (le développeur a livré le correctif) | Corrigée |
+   | Corrigée | **Commencer la revérification** | À revérifier |
+   | Corrigée / À revérifier | **Revérification : réussie** | Fermée |
+   | Corrigée / À revérifier | **Revérification : échouée** | Rouverte |
+   | Tout statut sauf Fermée | **Fermer**, avec un **motif obligatoire** dans le commentaire (doublon, non reproductible…) | Fermée |
+   | Fermée | **Rouvrir** | Rouverte |
 
 ### QA Lead (chef d'équipe)
 
@@ -159,7 +175,8 @@ Voit tout ce qui concerne son équipe.
 
 - **Campagnes** : créer, démarrer, bloquer, reprendre, terminer. L'équipe reçoit une notification à chaque changement.
 - **Tests** : créer les cas de test et les répartir entre testeurs (champ « Assigné à »).
-- **Anomalies** : les assigner à un testeur (bloc **Assigner à** sur la fiche).
+- **Anomalies** : les assigner à un testeur (bloc **Assigner à** sur la fiche). Seuls les testeurs de l'équipe du projet sont proposés.
+- **Activité de l'équipe** : valider les déclarations des testeurs (bouton **Valider**). La tuile jaune **Activités à valider** du tableau de bord en donne le nombre et ouvre la liste filtrée.
 - **Rapports** : activité de l'équipe par jour / semaine / mois, avec le détail **Par testeur**.
 - **Mon équipe** : anomalies assignées et créées par membre.
 
@@ -204,13 +221,67 @@ Relancez ensuite l'application (étape 4). Si de nouvelles dépendances ont ét�
 | « Accès refusé » (403) sur une page | Votre rôle n'y a pas droit (voir « Utiliser l'application selon son rôle »). |
 | Un QA Lead ne voit aucun projet, test ou campagne | Le projet n'est rattaché à aucune équipe, ou le lead n'est pas membre de l'équipe (voir l'étape 6). |
 | Un QA ne voit pas un test | Le test ne lui est pas assigné : demandez au QA Lead de l'assigner. |
+| « Ce test ne peut pas être exécuté maintenant » | Sa campagne n'est pas **en cours** : le QA Lead doit la démarrer (ou la reprendre si elle est bloquée). Une campagne terminée est figée. |
+| « Fermer » affiche un message au lieu de fermer | Fermer sans revérification demande un motif dans le commentaire. |
+| « Trop de tentatives de connexion » | 5 mots de passe faux de suite bloquent le compte 15 minutes (20 échecs bloquent l'adresse IP). Attendez, ou redémarrez le serveur en dépannage. |
+| Toujours renvoyé vers « Paramètres » après connexion | Votre mot de passe est provisoire : changez-le dans la section Sécurité. |
+| Un compte ne peut plus se connecter (« désactivé ») | Un admin l'a désactivé : **Administration → Utilisateurs → Réactiver**. Les comptes ne sont jamais supprimés, pour garder l'historique. |
 | Erreur 500 avec `Unresolved compilation problem` dans le terminal | L'éditeur (VS Code, Eclipse) a compilé une version cassée d'un fichier. Supprimez **uniquement** le dossier `target/classes`, puis relancez. |
+
+---
+
+## Mise en production (serveur d'entreprise)
+
+L'installation ci-dessus convient à un PC de développement ou à une démonstration. Sur un vrai serveur :
+
+### 1. Identifiants de la base : variables d'environnement
+
+Ne mettez aucun mot de passe dans le code. Créez un utilisateur MariaDB dédié (pas `root`), avec les seuls droits sur la base `qa_reporting_j2ee`, puis définissez ces variables avant de lancer WildFly :
+
+| Variable | Rôle | Valeur par défaut (développement) |
+|---|---|---|
+| `QA_DB_HOST` / `QA_DB_PORT` / `QA_DB_NAME` | Adresse de la base | `127.0.0.1` / `3306` / `qa_reporting_j2ee` |
+| `QA_DB_USER` / `QA_DB_PASSWORD` | Compte de la base | `root` / vide |
+| `QA_FORCE_HTTPS` | `true` : toute requête HTTP est redirigée vers HTTPS | désactivé |
+| `QA_HTTPS_PORT` | Port HTTPS pour la redirection | `8443` |
+
+### 2. HTTPS
+
+WildFly écoute déjà en HTTPS sur le port **8443**, avec un certificat auto-signé généré au premier accès : https://127.0.0.1:8443/qa-reporting-j2ee/ (le navigateur affiche un avertissement, c'est normal). En production :
+1. installez le **certificat de votre organisation** dans le magasin de clés `applicationKS` de WildFly (ou placez l'application derrière un reverse proxy — IIS, Nginx, Apache — qui porte le certificat) ;
+2. définissez `QA_FORCE_HTTPS=true`.
+
+Le cookie de session est déjà protégé : `HttpOnly`, `SameSite=Lax`, et `Secure` dès que la connexion est en HTTPS. Les en-têtes de sécurité (anti-clickjacking, CSP, HSTS en HTTPS…) sont envoyés sur toutes les pages.
+
+### 3. Sauvegardes automatiques
+
+Le script `scripts\sauvegarde.ps1` sauvegarde la base **et** les pièces jointes dans une archive zip datée, et garde les 14 dernières. Pour le lancer chaque nuit :
+1. **Planificateur de tâches** → *Créer une tâche de base* → quotidienne, 2 h du matin ;
+2. action : *Démarrer un programme* → `powershell.exe`, arguments : `-ExecutionPolicy Bypass -File "C:\chemin\du\projet\scripts\sauvegarde.ps1"`.
+
+Copiez régulièrement le dossier `backups` **hors du serveur** (autre disque, stockage réseau) : une sauvegarde sur la même machine ne protège pas d'une panne de disque. Testez une restauration de temps en temps.
+
+### 4. Ce que fait déjà l'application
+
+- Mots de passe hachés (BCrypt) ; 10 caractères minimum avec lettre et chiffre ; mot de passe **provisoire** à changer à la première connexion.
+- Blocage de 15 minutes après 5 échecs de connexion sur un compte (ou 20 depuis une même adresse IP).
+- Nouvel identifiant de session à chaque connexion ; déconnexion automatique après 30 minutes d'inactivité.
+- Jetons d'API valables 12 heures au plus, 2 heures sans utilisation ; la déconnexion les révoque.
+- Comptes désactivés (jamais supprimés) : connexion refusée, sessions et jetons coupés immédiatement.
+- Chaque modification est tracée dans le journal d'audit.
+
+### 5. Reste à la charge de l'exploitation
+
+- **Évolutions du schéma de base** : la base est mise à jour automatiquement au démarrage (`hibernate.hbm2ddl.auto=update`, dans `persistence.xml`). En production, **sauvegardez avant chaque mise à jour de l'application**. Pour une vraie gestion des versions du schéma, l'étape suivante serait un outil de migration (Flyway ou Liquibase) avec `hbm2ddl.auto=validate`.
+- **Supervision** : surveiller le journal `standalone\log\server.log`, l'espace disque et la mémoire.
+- **Lancer WildFly en service Windows** plutôt que par `mvn wildfly:run` : déployer le fichier `target\qa-reporting-j2ee.war` sur un WildFly installé comme service.
 
 ---
 
 ## Pour aller plus loin
 
-- **Tests unitaires** : `mvn test` (32 tests : mots de passe, jetons, droits par rôle, portée des données, règles métier…)
+- **Tests unitaires** : `mvn test` (40 tests : mots de passe, jetons, droits par rôle, portée des données, règles de campagne, d'anomalie et d'activité, recherche…)
+- **Sauvegarder la base** avant une opération risquée : `C:\xampp\mysql\bin\mysqldump -u root qa_reporting_j2ee > backups\sauvegarde.sql` (le dossier `backups/` est ignoré par Git). Pour restaurer : `mysql -u root qa_reporting_j2ee < backups\sauvegarde.sql`.
 - **Ne lancez pas `mvn clean`** sans raison : il efface aussi le serveur WildFly installé dans `target/server`, qui sera retéléchargé (il faut alors internet et plusieurs minutes).
 - **Traductions** : tous les textes de l'interface sont dans `src/main/resources/com/qareporting/i18n/messages_fr.properties` et `messages_en.properties`. Pour corriger un libellé, modifiez la même clé dans les deux fichiers.
 - **Produire le fichier `.war`** : `mvn package`. Le fichier est créé dans `target/qa-reporting-j2ee.war`.

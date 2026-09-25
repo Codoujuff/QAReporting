@@ -1,5 +1,6 @@
 package com.qareporting.resource;
 
+import com.qareporting.security.PasswordPolicy;
 import com.qareporting.dto.UserRequest;
 import com.qareporting.entity.Role;
 import com.qareporting.entity.User;
@@ -48,12 +49,17 @@ public class UserResource {
         if (request.getPassword() == null || request.getPassword().isBlank()) {
             return Response.status(422).entity("{\"message\":\"Le mot de passe est requis.\"}").build();
         }
+        String weak = PasswordPolicy.check(request.getPassword(), request.getEmail());
+        if (weak != null) {
+            return Response.status(422).entity("{\"message\":\"" + weak + "\"}").build();
+        }
 
         User user = new User();
         user.setName(request.getName());
         user.setInitials(request.getInitials());
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordHasher.hash(request.getPassword()));
+        user.setMustChangePassword(true);
         user.setRole(userService.findRole(request.getRoleId()));
         user.setTeam(request.getTeamId() != null ? userService.findTeam(request.getTeamId()) : null);
         user.setActive(request.getActive() == null || request.getActive());
@@ -85,6 +91,20 @@ public class UserResource {
         existing.setName(request.getName());
         existing.setInitials(request.getInitials());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            String weak = PasswordPolicy.check(request.getPassword(), existing.getEmail());
+            if (weak != null) {
+                return Response.status(422).entity("{\"message\":\"" + weak + "\"}").build();
+            }
+            if (isSelf) {
+                // Changer son propre mot de passe exige l'ancien : un jeton volé ne suffit pas.
+                if (request.getCurrentPassword() == null
+                        || !passwordHasher.matches(request.getCurrentPassword(), existing.getPasswordHash())) {
+                    return Response.status(403).entity("{\"message\":\"Mot de passe actuel incorrect.\"}").build();
+                }
+                existing.setMustChangePassword(false);
+            } else {
+                existing.setMustChangePassword(true); // réinitialisé par l'admin : provisoire
+            }
             existing.setPasswordHash(passwordHasher.hash(request.getPassword()));
         }
 
@@ -93,7 +113,7 @@ public class UserResource {
                 existing.setRole(userService.findRole(request.getRoleId()));
             }
             existing.setTeam(request.getTeamId() != null ? userService.findTeam(request.getTeamId()) : null);
-            if (request.getActive() != null) {
+            if (request.getActive() != null && !isSelf) {
                 existing.setActive(request.getActive());
             }
         }
@@ -105,6 +125,14 @@ public class UserResource {
     @Path("/{id}")
     @RequiresRole({Role.ADMIN})
     public Response destroy(@PathParam("id") Long id) {
-        return userService.delete(id) ? Response.noContent().build() : Response.status(404).build();
+        // Désactivation plutôt que suppression : l'historique référence le compte.
+        if (userService.find(id) == null) {
+            return Response.status(404).build();
+        }
+        if (currentUser.get() != null && currentUser.get().getId().equals(id)) {
+            return Response.status(422).entity("{\"message\":\"Impossible de désactiver son propre compte.\"}").build();
+        }
+        userService.setActive(id, false);
+        return Response.noContent().build();
     }
 }
