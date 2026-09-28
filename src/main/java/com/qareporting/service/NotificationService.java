@@ -30,6 +30,12 @@ public class NotificationService {
                 .getResultList();
     }
 
+    public long countUnread(User user) {
+        return em.createQuery("SELECT COUNT(n) FROM Notification n WHERE n.user = :user AND n.readAt IS NULL", Long.class)
+                .setParameter("user", user)
+                .getSingleResult();
+    }
+
     @Transactional
     public boolean markRead(Long notificationId, User user) {
         Notification notification = em.find(Notification.class, notificationId);
@@ -69,6 +75,23 @@ public class NotificationService {
             case "defect_fixed" -> user.isNotifyFixed();
             default -> !type.startsWith("campaign_") || user.isNotifyCampaign();
         };
+    }
+
+    /** Toute l'équipe du projet et ses membres affectés (chacun une seule fois). */
+    @Transactional
+    public void notifyProject(com.qareporting.entity.Project project, String type, String title, String message) {
+        if (project == null) {
+            return;
+        }
+        java.util.Map<Long, User> recipients = new java.util.LinkedHashMap<>();
+        if (project.getTeam() != null) {
+            em.createQuery("SELECT u FROM User u WHERE u.team = :team AND u.active = true", User.class)
+                    .setParameter("team", project.getTeam())
+                    .getResultList()
+                    .forEach(u -> recipients.put(u.getId(), u));
+        }
+        project.getMembers().stream().filter(User::isActive).forEach(u -> recipients.putIfAbsent(u.getId(), u));
+        recipients.values().forEach(u -> notify(u, type, title, message));
     }
 
     @Transactional

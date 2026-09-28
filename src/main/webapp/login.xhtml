@@ -28,6 +28,7 @@
                         <h:inputSecret id="password" value="#{loginBean.password}" required="true"/>
                     </div>
                     <h:commandButton styleClass="btn" value="#{msg['login.submit']}" action="#{loginBean.login}"/>
+                    <p class="login-footer"><h:link value="#{msg['reset.forgotLink']}" outcome="/forgot-password"/></p>
                 </h:form>
             </div>
         </div>

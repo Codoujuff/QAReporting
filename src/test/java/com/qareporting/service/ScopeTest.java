@@ -72,10 +72,32 @@ class ScopeTest {
     void onlyTheAuthorOrAdminEditsAnActivity() {
         Activity activity = new Activity();
         activity.setUser(qa);
+        activity.setProject(project(teamA));
         assertTrue(activities.canEdit(qa, activity));
         assertTrue(activities.canEdit(admin, activity));
         assertFalse(activities.canEdit(lead, activity));
         assertTrue(activities.canView(lead, activity));
+    }
+
+    @Test
+    void aQaAssignedToAnotherTeamsProjectSeesItsCampaigns() {
+        // Un QA peut être affecté à plusieurs projets, y compris ceux d'une autre équipe.
+        Project other = project(teamB);
+        Campaign campaign = new Campaign();
+        campaign.setProject(other);
+        assertFalse(campaigns.canView(qa, campaign));
+        other.getMembers().add(qa);
+        assertTrue(campaigns.canView(qa, campaign));
+    }
+
+    @Test
+    void aLeadMemberOfAnotherProjectSeesItsDefects() {
+        Project other = project(teamB);
+        Defect d = defect(teamB, otherQa, null);
+        d.setProject(other);
+        assertFalse(defects.canView(lead, d));
+        other.getMembers().add(lead);
+        assertTrue(defects.canView(lead, d));
     }
 
     @Test

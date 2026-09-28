@@ -41,6 +41,9 @@ public class CampaignFormBean implements Serializable {
     @Inject
     private UserService userService;
 
+    @Inject
+    private com.qareporting.web.auth.SessionAuth sessionAuth;
+
     private final Campaign campaign = new Campaign();
     private Long projectId;
     private Long environmentId;
@@ -55,7 +58,7 @@ public class CampaignFormBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        projectOptions = projectService.findAll();
+        projectOptions = projectService.visibleProjects(sessionAuth.getCurrentUser());
         environmentOptions = environmentService.findAll();
         userOptions = userService.findAll();
         campaign.setStatus(Campaign.Status.planned);
@@ -74,6 +77,10 @@ public class CampaignFormBean implements Serializable {
             return null;
         }
 
+        if (!projectService.isVisible(sessionAuth.getCurrentUser(), projectService.find(projectId))) {
+            addError(I18n.t("err.projectNotYours"));
+            return null;
+        }
         campaign.setProject(projectService.find(projectId));
         campaign.setEnvironment(environmentId == null ? null : environmentService.find(environmentId));
         campaign.setResponsible(responsibleId == null ? null : userService.find(responsibleId));

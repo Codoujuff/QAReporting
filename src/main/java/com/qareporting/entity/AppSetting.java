@@ -16,11 +16,16 @@ public class AppSetting extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(name = "setting_key", nullable = false, unique = true)
     private String settingKey;
 
-    @Lob
-    @Column(name = "setting_value")
+    @Column(name = "setting_value", columnDefinition = "TEXT") // texte long (64 Ko)
     private String settingValue;
 
     private String description;
@@ -33,4 +38,5 @@ public class AppSetting extends Timestamped {
     public void setSettingValue(String settingValue) { this.settingValue = settingValue; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public long getLockVersion() { return lockVersion; }
 }

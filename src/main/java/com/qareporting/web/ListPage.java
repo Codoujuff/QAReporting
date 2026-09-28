@@ -46,7 +46,22 @@ public class ListPage<T> implements Serializable {
         pageCount = Math.max(1, (total + PAGE_SIZE - 1) / PAGE_SIZE);
         page = requested == null ? 1 : Math.min(Math.max(1, requested), pageCount);
         int from = (page - 1) * PAGE_SIZE;
-        items = filtered.subList(from, Math.min(from + PAGE_SIZE, total));
+        items = new ArrayList<>(filtered.subList(from, Math.min(from + PAGE_SIZE, total)));
+    }
+
+    /**
+     * Pagination faite par la base : on donne le nombre total de lignes, on reçoit le rang
+     * de la première ligne à charger (page demandée ramenée dans les bornes), puis setItems().
+     */
+    public int prepare(long totalRows, Integer requested) {
+        total = (int) Math.min(totalRows, Integer.MAX_VALUE);
+        pageCount = Math.max(1, (total + PAGE_SIZE - 1) / PAGE_SIZE);
+        page = requested == null ? 1 : Math.min(Math.max(1, requested), pageCount);
+        return (page - 1) * PAGE_SIZE;
+    }
+
+    public void setItems(List<T> items) {
+        this.items = items;
     }
 
     /** Minuscules sans accents : « Réouverte » est trouvé en tapant « reouverte ». */

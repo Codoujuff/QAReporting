@@ -11,6 +11,12 @@ public class Team extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(nullable = false, unique = true)
     private String name;
 
@@ -38,4 +44,5 @@ public class Team extends Timestamped {
 
     /** Seul ce qui reste exposé en JSON une fois "lead" rendu @JsonbTransient. */
     public Long getLeadId() { return lead != null ? lead.getId() : null; }
+    public long getLockVersion() { return lockVersion; }
 }

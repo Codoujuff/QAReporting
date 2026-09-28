@@ -33,7 +33,7 @@ Lancez MariaDB, par exemple avec le panneau XAMPP → *MySQL* → *Start*. Atten
 CREATE DATABASE qa_reporting_j2ee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Les tables sont créées et mises à jour automatiquement au démarrage à partir des entités JPA (`hibernate.hbm2ddl.auto=update`). Vous n'avez aucun script de migration à lancer.
+Les tables sont créées et mises à jour automatiquement au démarrage par les migrations Flyway (`src/main/resources/db/migration`). Vous n'avez rien à lancer à la main.
 
 Par défaut, l'application se connecte avec l'utilisateur `root` sans mot de passe (configuration XAMPP par défaut). Pour changer ces identifiants, modifiez [`src/main/webapp/WEB-INF/qa-reporting-ds.xml`](src/main/webapp/WEB-INF/qa-reporting-ds.xml).
 
@@ -68,7 +68,7 @@ Ce mot de passe est **provisoire** : l'application impose d'en choisir un nouvea
 ## Autres commandes
 
 ```bash
-mvn test       # 40 tests unitaires (JUnit 5)
+mvn test       # 48 tests unitaires (JUnit 5)
 mvn package    # produit target/qa-reporting-j2ee.war, déployable sur un WildFly existant
 ```
 
@@ -103,7 +103,7 @@ L'interface est disponible en français (par défaut) et en anglais. Le sélecte
 
 | Rôle | Périmètre |
 |---|---|
-| QA | Rédige et exécute ses tests, déclare son activité, crée des anomalies (avec pièces jointes) |
+| QA | Rédige et exécute ses tests, déclare son activité, crée des anomalies (avec pièces jointes) ; peut être affecté à plusieurs projets |
 | QA Lead | Son équipe : campagnes, répartition des tests, assignation des anomalies, validation de l'activité, rapports par testeur |
 | Manager | Consultation de tous les projets : vue d'ensemble et rapports |
 | Admin | Tout, plus l'administration (utilisateurs, projets, équipes, paramètres) et le journal d'audit |

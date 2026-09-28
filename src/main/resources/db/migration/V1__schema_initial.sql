@@ -1,0 +1,311 @@
+-- V1 : schéma initial de QA Reporting (état au 25/09/2026, tel qu'Hibernate l'avait créé).
+-- Sur une base existante, Flyway le considère comme déjà appliqué (baseline) ;
+-- sur une base vide, il crée toutes les tables. Les données de départ (rôles, admin,
+-- environnements, paramètres) sont ensuite ajoutées par StartupSeeder.
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE `access_tokens` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `last_used_at` datetime(6) DEFAULT NULL,
+  `token_hash` varchar(64) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `expires_at` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_mx738vwrpyl0u1eekaifasvxl` (`token_hash`),
+  KEY `FKjxi0wavfc9xw97x1mhuc8nphm` (`user_id`),
+  CONSTRAINT `FKjxi0wavfc9xw97x1mhuc8nphm` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `activities` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `activity_date` date NOT NULL,
+  `activity_type` varchar(255) NOT NULL,
+  `blocked` int(11) NOT NULL,
+  `blocked_reason` tinytext DEFAULT NULL,
+  `comment` tinytext DEFAULT NULL,
+  `defects_count` int(11) NOT NULL,
+  `duration` varchar(255) DEFAULT NULL,
+  `failed` int(11) NOT NULL,
+  `is_blocked` bit(1) NOT NULL,
+  `not_run` int(11) NOT NULL,
+  `passed` int(11) NOT NULL,
+  `tests_executed` int(11) NOT NULL,
+  `campaign_id` bigint(20) DEFAULT NULL,
+  `environment_id` bigint(20) DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `validated_at` datetime(6) DEFAULT NULL,
+  `validated_by` bigint(20) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKoq74085oku2de0ydd6he5lkwd` (`campaign_id`),
+  KEY `FKggxi3yg1uy7yv8mej2vkbjgdx` (`environment_id`),
+  KEY `FKsp1gle1x16hi1viq0vjx26hmf` (`project_id`),
+  KEY `FKq6cjukylkgxdjkm9npk9va2f2` (`user_id`),
+  KEY `FK6b2psn0kukhn7567tavtomtds` (`validated_by`),
+  CONSTRAINT `FK6b2psn0kukhn7567tavtomtds` FOREIGN KEY (`validated_by`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKggxi3yg1uy7yv8mej2vkbjgdx` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`),
+  CONSTRAINT `FKoq74085oku2de0ydd6he5lkwd` FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`id`),
+  CONSTRAINT `FKq6cjukylkgxdjkm9npk9va2f2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKsp1gle1x16hi1viq0vjx26hmf` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `app_settings` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `setting_key` varchar(255) NOT NULL,
+  `setting_value` tinytext DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_7p82g7l6uve2vd8l30djhxpel` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `attachments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `filename` varchar(255) DEFAULT NULL,
+  `mime_type` varchar(255) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `size` bigint(20) NOT NULL,
+  `defect_id` bigint(20) NOT NULL,
+  `uploaded_by` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKcqn5qdwfpdvlitldujhlt3mm0` (`defect_id`),
+  KEY `FKl3qeaqe1mykgrd4ltgmqthdkp` (`uploaded_by`),
+  CONSTRAINT `FKcqn5qdwfpdvlitldujhlt3mm0` FOREIGN KEY (`defect_id`) REFERENCES `defects` (`id`),
+  CONSTRAINT `FKl3qeaqe1mykgrd4ltgmqthdkp` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `audit_logs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `changes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`changes`)),
+  `created_at` datetime(6) NOT NULL,
+  `model_id` bigint(20) DEFAULT NULL,
+  `model_type` varchar(255) NOT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKjs4iimve3y0xssbtve5ysyef0` (`user_id`),
+  CONSTRAINT `FKjs4iimve3y0xssbtve5ysyef0` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `campaigns` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` tinytext DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `status` enum('planned','in_progress','completed','blocked') NOT NULL,
+  `version` varchar(255) DEFAULT NULL,
+  `environment_id` bigint(20) DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `responsible_id` bigint(20) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKmyimryhxtshr5smm4vb6y7ny8` (`environment_id`),
+  KEY `FK8tqxs91vmi30cb4pkapa432mi` (`project_id`),
+  KEY `FK4bjr0og8jwf4hmhsfregj6oc8` (`responsible_id`),
+  CONSTRAINT `FK4bjr0og8jwf4hmhsfregj6oc8` FOREIGN KEY (`responsible_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK8tqxs91vmi30cb4pkapa432mi` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  CONSTRAINT `FKmyimryhxtshr5smm4vb6y7ny8` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `defect_histories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `comment` tinytext DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `new_status` enum('open','in_progress','fixed','retest','closed','reopened') NOT NULL,
+  `old_status` enum('open','in_progress','fixed','retest','closed','reopened') DEFAULT NULL,
+  `defect_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKrtafxd58rk4mlilkeqdvxpqr5` (`defect_id`),
+  KEY `FK5rgyulwrd5ied5d17uuenl2jd` (`user_id`),
+  CONSTRAINT `FK5rgyulwrd5ied5d17uuenl2jd` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKrtafxd58rk4mlilkeqdvxpqr5` FOREIGN KEY (`defect_id`) REFERENCES `defects` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `defects` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `actual_result` tinytext DEFAULT NULL,
+  `browser` varchar(255) DEFAULT NULL,
+  `description` tinytext DEFAULT NULL,
+  `device` varchar(255) DEFAULT NULL,
+  `expected_result` tinytext DEFAULT NULL,
+  `os` varchar(255) DEFAULT NULL,
+  `priority` enum('p1','p2','p3','p4') NOT NULL,
+  `reproduction_steps` tinytext DEFAULT NULL,
+  `severity` enum('critical','high','medium','low') NOT NULL,
+  `status` enum('open','in_progress','fixed','retest','closed','reopened') NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `version` varchar(255) DEFAULT NULL,
+  `assigned_to` bigint(20) DEFAULT NULL,
+  `campaign_id` bigint(20) DEFAULT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `environment_id` bigint(20) DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `test_id` bigint(20) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKdqgvrlvyhiitmbfirjrdmg9c9` (`assigned_to`),
+  KEY `FKftma1rxk162d7petbcpntj2sh` (`campaign_id`),
+  KEY `FKomidd6libwk668f5byi8ve9mx` (`created_by`),
+  KEY `FK4bq8usnkhoin6kq2ojhiiojgn` (`environment_id`),
+  KEY `FKh9uo7lm4nb2xrqwk843754656` (`project_id`),
+  KEY `FKa8kgw0vnbv0drf1p8av1fi0l6` (`test_id`),
+  CONSTRAINT `FK4bq8usnkhoin6kq2ojhiiojgn` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`),
+  CONSTRAINT `FKa8kgw0vnbv0drf1p8av1fi0l6` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`),
+  CONSTRAINT `FKdqgvrlvyhiitmbfirjrdmg9c9` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`),
+  CONSTRAINT `FKftma1rxk162d7petbcpntj2sh` FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`id`),
+  CONSTRAINT `FKh9uo7lm4nb2xrqwk843754656` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  CONSTRAINT `FKomidd6libwk668f5byi8ve9mx` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `environments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `status` enum('available','unavailable') NOT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_egbp7nsmcafke1djorxtxsi3u` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `notifications` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `message` tinytext DEFAULT NULL,
+  `read_at` datetime(6) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK9y21adhxn0ayjhfocscqox7bh` (`user_id`),
+  CONSTRAINT `FK9y21adhxn0ayjhfocscqox7bh` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `password_reset_tokens` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) NOT NULL,
+  `expires_at` datetime(6) NOT NULL,
+  `token_hash` varchar(64) NOT NULL,
+  `used_at` datetime(6) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_ajre85ybxavf1tt4omkrs5p6g` (`token_hash`),
+  KEY `FKk3ndxg5xp6v7wd4gjyusp15gq` (`user_id`),
+  CONSTRAINT `FKk3ndxg5xp6v7wd4gjyusp15gq` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `project_members` (
+  `project_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`project_id`,`user_id`),
+  KEY `FKgul2el0qjk5lsvig3wgajwm77` (`user_id`),
+  CONSTRAINT `FKdki1sp2homqsdcvqm9yrix31g` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  CONSTRAINT `FKgul2el0qjk5lsvig3wgajwm77` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `projects` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` tinytext DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `status` enum('active','inactive','archived') NOT NULL,
+  `team_id` bigint(20) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKmqih0928bq6r3gbuh47giq8w` (`team_id`),
+  CONSTRAINT `FKmqih0928bq6r3gbuh47giq8w` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_ofx66keruapi6vyqpv6f2or37` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `teams` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `lead_id` bigint(20) DEFAULT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_a510no6sjwqcx153yd5sm4jrr` (`name`),
+  KEY `FK8dwk4qe8sem9o0t4q0cqy1wef` (`lead_id`),
+  CONSTRAINT `FK8dwk4qe8sem9o0t4q0cqy1wef` FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `test_executions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `actual_result` tinytext DEFAULT NULL,
+  `duration` varchar(255) DEFAULT NULL,
+  `executed_at` datetime(6) NOT NULL,
+  `status` enum('passed','failed','blocked','not_run') NOT NULL,
+  `environment_id` bigint(20) DEFAULT NULL,
+  `executed_by` bigint(20) DEFAULT NULL,
+  `test_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKp03s224ru2dv8v2pwmhc6lqkq` (`environment_id`),
+  KEY `FKpbgbeog4enxlpqpw9r0x6nnp3` (`executed_by`),
+  KEY `FKl5stos5s00av12aufxuvxtnvc` (`test_id`),
+  CONSTRAINT `FKl5stos5s00av12aufxuvxtnvc` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`),
+  CONSTRAINT `FKp03s224ru2dv8v2pwmhc6lqkq` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`),
+  CONSTRAINT `FKpbgbeog4enxlpqpw9r0x6nnp3` FOREIGN KEY (`executed_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tests` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `description` tinytext DEFAULT NULL,
+  `expected_result` tinytext DEFAULT NULL,
+  `preconditions` tinytext DEFAULT NULL,
+  `status` enum('passed','failed','blocked','not_run') NOT NULL,
+  `steps` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`steps`)),
+  `title` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `assigned_to` bigint(20) DEFAULT NULL,
+  `campaign_id` bigint(20) DEFAULT NULL,
+  `environment_id` bigint(20) DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK1glmk8ide0b4ccwj7jydjikuj` (`assigned_to`),
+  KEY `FK2jepknfh4ogwt6h98di262ha7` (`campaign_id`),
+  KEY `FKbglqg5m28uxo4yk5sfkku87u9` (`environment_id`),
+  KEY `FKig845o8yuaiuxng9fsyteqyc9` (`project_id`),
+  CONSTRAINT `FK1glmk8ide0b4ccwj7jydjikuj` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK2jepknfh4ogwt6h98di262ha7` FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`id`),
+  CONSTRAINT `FKbglqg5m28uxo4yk5sfkku87u9` FOREIGN KEY (`environment_id`) REFERENCES `environments` (`id`),
+  CONSTRAINT `FKig845o8yuaiuxng9fsyteqyc9` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime(6) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` datetime(6) DEFAULT NULL,
+  `initials` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `reminder_time` time(6) DEFAULT NULL,
+  `role_id` bigint(20) NOT NULL,
+  `team_id` bigint(20) DEFAULT NULL,
+  `notify_assigned` bit(1) NOT NULL,
+  `notify_campaign` bit(1) NOT NULL,
+  `notify_fixed` bit(1) NOT NULL,
+  `must_change_password` bit(1) NOT NULL,
+  `lock_version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_6dotkott2kjsp8vw4d0m25fb7` (`email`),
+  KEY `FKp56c1712k691lhsyewcssf40f` (`role_id`),
+  KEY `FKfjws1rdruab2bqg7qipoqf65r` (`team_id`),
+  CONSTRAINT `FKfjws1rdruab2bqg7qipoqf65r` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`),
+  CONSTRAINT `FKp56c1712k691lhsyewcssf40f` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;

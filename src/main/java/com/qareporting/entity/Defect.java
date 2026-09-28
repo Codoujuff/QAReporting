@@ -14,10 +14,16 @@ public class Defect extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(nullable = false)
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String description;
 
     @ManyToOne
@@ -56,13 +62,13 @@ public class Defect extends Timestamped {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @Lob @Column(name = "expected_result")
+    @Column(name = "expected_result", columnDefinition = "TEXT") // texte long (64 Ko)
     private String expectedResult;
 
-    @Lob @Column(name = "actual_result")
+    @Column(name = "actual_result", columnDefinition = "TEXT") // texte long (64 Ko)
     private String actualResult;
 
-    @Lob @Column(name = "reproduction_steps")
+    @Column(name = "reproduction_steps", columnDefinition = "TEXT") // texte long (64 Ko)
     private String reproductionSteps;
 
     private String browser;
@@ -108,4 +114,5 @@ public class Defect extends Timestamped {
     public void setVersion(String version) { this.version = version; }
     public String getDevice() { return device; }
     public void setDevice(String device) { this.device = device; }
+    public long getLockVersion() { return lockVersion; }
 }

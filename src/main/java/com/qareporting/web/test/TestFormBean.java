@@ -74,7 +74,7 @@ public class TestFormBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        projectOptions = projectService.findAll();
+        projectOptions = projectService.visibleProjects(sessionAuth.getCurrentUser());
         campaignOptions = campaignService.findAll();
         environmentOptions = environmentService.findAll();
         userOptions = userService.findAll();
@@ -120,11 +120,20 @@ public class TestFormBean implements Serializable {
             return null;
         }
 
+        if (!projectService.isVisible(sessionAuth.getCurrentUser(), projectService.find(projectId))) {
+            addError(I18n.t("err.projectNotYours"));
+            return null;
+        }
         test.setProject(projectService.find(projectId));
         test.setCampaign(campaignId == null ? null : campaignService.find(campaignId));
         test.setEnvironment(environmentId == null ? null : environmentService.find(environmentId));
         if (perm.has(Permissions.ASSIGN_TESTS)) {
-            test.setAssignedTo(assignedToId == null ? null : userService.find(assignedToId));
+            com.qareporting.entity.User assignee = assignedToId == null ? null : userService.find(assignedToId);
+            if (assignee != null && !projectService.canBeAssignedTo(test.getProject(), assignee)) {
+                addError(I18n.t("err.assigneeNotOnProject"));
+                return null;
+            }
+            test.setAssignedTo(assignee);
         } else if (test.getId() == null) {
             // Un QA qui rédige un cas de test en devient le testeur ; il ne réassigne pas.
             test.setAssignedTo(sessionAuth.getCurrentUser());

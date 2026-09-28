@@ -18,14 +18,15 @@ public class TestService extends AbstractCrudService<Test, Long> {
     }
 
     /** QA : ses tests (assignés) ; QA Lead : ceux de son équipe ; Manager/Admin : tous. */
+    /** QA : ses tests (assignés) ; QA Lead : ceux de ses projets ; Manager / Admin : tous. */
     public List<Test> listForUser(User viewer) {
         if (Scope.seesEverything(viewer)) {
             return findAll();
         }
-        if (Scope.isLeadWithTeam(viewer)) {
-            return em.createQuery("SELECT t FROM Test t WHERE t.project.team = :team", Test.class)
-                    .setParameter("team", viewer.getTeam())
-                    .getResultList();
+        if (Scope.isLead(viewer)) {
+            var q = em.createQuery("SELECT t FROM Test t WHERE " + Scope.projectClause("t.project", viewer), Test.class);
+            Scope.bindProjectScope(q, viewer);
+            return q.getResultList();
         }
         return em.createQuery("SELECT t FROM Test t WHERE t.assignedTo = :user", Test.class)
                 .setParameter("user", viewer)
@@ -39,8 +40,8 @@ public class TestService extends AbstractCrudService<Test, Long> {
         if (Scope.seesEverything(viewer)) {
             return true;
         }
-        if (Scope.isLeadWithTeam(viewer)) {
-            return Scope.inTeam(test.getProject(), viewer.getTeam());
+        if (Scope.isLead(viewer)) {
+            return Scope.onProject(test.getProject(), viewer);
         }
         return Scope.sameUser(test.getAssignedTo(), viewer);
     }
@@ -67,6 +68,25 @@ public class TestService extends AbstractCrudService<Test, Long> {
         return executionId == null ? null : em.find(TestExecution.class, executionId);
     }
 
+    public SearchQuery search(User viewer, String q, String status) {
+        SearchQuery s = new SearchQuery("FROM Test t JOIN t.project p LEFT JOIN t.campaign c LEFT JOIN t.assignedTo a");
+        if (!Scope.seesEverything(viewer)) {
+            s.scope(Scope.isLead(viewer) ? Scope.projectClause("t.project", viewer) : "t.assignedTo = :scopeUser", viewer);
+        }
+        if (status != null && !status.isBlank()) {
+            s.and("t.status = :status").param("status", Test.Status.valueOf(status));
+        }
+        return s.text(q, "t.id", "t", "t.title", "p.name", "c.name", "a.name");
+    }
+
+    public long count(SearchQuery s) {
+        return s.count(em, "t");
+    }
+
+    public List<Test> page(SearchQuery s, int first, int size) {
+        return s.page(em, "t", Test.class, "t.id DESC", first, size);
+    }
+
     public List<TestExecution> executions(Long testId) {
         return em.createQuery(
                         "SELECT e FROM TestExecution e WHERE e.test.id = :testId ORDER BY e.executedAt DESC",
@@ -87,6 +107,29 @@ public class TestService extends AbstractCrudService<Test, Long> {
     }
 
     /** Tests d'une campagne — utilisé pour calculer sa progression (part de tests déjà exécutés). */
+    /**
+     * Progression (%) de chaque campagne — part des tests déjà exécutés (statut autre que
+     * not_run) — calculée en UNE requête groupée, au lieu d'une requête par campagne.
+     */
+    public java.util.Map<Long, Integer> progressByCampaign(java.util.Collection<Long> campaignIds) {
+        java.util.Map<Long, Integer> progress = new java.util.HashMap<>();
+        if (campaignIds == null || campaignIds.isEmpty()) {
+            return progress;
+        }
+        List<Object[]> rows = em.createQuery("SELECT t.campaign.id, COUNT(t), "
+                        + "SUM(CASE WHEN t.status <> :notRun THEN 1 ELSE 0 END) "
+                        + "FROM Test t WHERE t.campaign.id IN :ids GROUP BY t.campaign.id", Object[].class)
+                .setParameter("notRun", Test.Status.not_run)
+                .setParameter("ids", campaignIds)
+                .getResultList();
+        for (Object[] row : rows) {
+            long total = ((Number) row[1]).longValue();
+            long executed = row[2] == null ? 0 : ((Number) row[2]).longValue();
+            progress.put((Long) row[0], total == 0 ? 0 : (int) Math.round(100.0 * executed / total));
+        }
+        return progress;
+    }
+
     public List<Test> findByCampaign(Long campaignId) {
         return em.createQuery("SELECT t FROM Test t WHERE t.campaign.id = :campaignId", Test.class)
                 .setParameter("campaignId", campaignId)

@@ -36,6 +36,16 @@
                                        itemValue="#{t.id}" itemLabel="#{t.name}"/>
                     </h:selectOneMenu>
                 </div>
+                <div class="form-row">
+                    <span class="form-row-label">#{msg['project.members']}</span>
+                    <span class="field-hint">#{msg['project.membersHint']}</span>
+                    <h:selectManyCheckbox id="members" value="#{projectFormBean.memberIds}" layout="pageDirection"
+                                          styleClass="member-checks">
+                        <f:converter converterId="jakarta.faces.Long"/>
+                        <f:selectItems value="#{projectFormBean.memberOptions}" var="u" itemValue="#{u.id}"
+                                       itemLabel="#{u.name} — #{labels.role(u.role.name)}#{u.team != null ? ' · '.concat(u.team.name) : ''}"/>
+                    </h:selectManyCheckbox>
+                </div>
                 <h:commandButton styleClass="btn" value="#{msg['common.save']}" action="#{projectFormBean.save}"/>
                 <h:link styleClass="btn btn-secondary" value="#{msg['common.cancel']}" outcome="/app/admin/projects/list"/>
             </h:form>

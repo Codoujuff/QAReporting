@@ -16,6 +16,9 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
     @Inject
     NotificationService notificationService;
 
+    @Inject
+    ProjectService projectService;
+
     @Override
     protected Class<Defect> entityClass() {
         return Defect.class;
@@ -26,15 +29,9 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
      * du projet (tous les QA / QA Lead actifs si le projet n'a pas d'équipe). Ni le Manager
      * ni l'Admin ne corrigent ou ne revérifient d'anomalie.
      */
+    /** Testeurs à qui l'anomalie peut être assignée : ceux du projet (équipe du projet et membres). */
     public List<User> assignableUsers(Defect defect) {
-        boolean teamless = defect == null || defect.getProject() == null || defect.getProject().getTeam() == null;
-        var query = em.createQuery("SELECT u FROM User u WHERE u.active = true AND u.role.name IN :roles"
-                        + (teamless ? "" : " AND u.team = :team") + " ORDER BY u.name", User.class)
-                .setParameter("roles", List.of(Role.QA, Role.QA_LEAD));
-        if (!teamless) {
-            query.setParameter("team", defect.getProject().getTeam());
-        }
-        return query.getResultList();
+        return projectService.assignableUsers(defect == null ? null : defect.getProject());
     }
 
     public boolean canBeAssignedTo(Defect defect, User assignee) {
@@ -49,26 +46,47 @@ public class DefectService extends AbstractCrudService<Defect, Long> {
         if (Scope.seesEverything(viewer)) {
             return true;
         }
-        if (Scope.isLeadWithTeam(viewer)) {
-            return Scope.inTeam(defect.getProject(), viewer.getTeam());
+        if (Scope.isLead(viewer)) {
+            return Scope.onProject(defect.getProject(), viewer);
         }
         return Scope.sameUser(defect.getAssignedTo(), viewer) || Scope.sameUser(defect.getCreatedBy(), viewer);
     }
 
     /** Same visibility rule as reporting: QA sees their own, QA Lead their team's, Manager/Admin everything. */
+    /** QA : ses anomalies (créées ou assignées) ; QA Lead : celles de ses projets ; Manager / Admin : toutes. */
     public List<Defect> listForUser(User viewer) {
-        String roleName = viewer.getRole().getName();
-        if (roleName.equals(Role.MANAGER) || roleName.equals(Role.ADMIN)) {
+        if (Scope.seesEverything(viewer)) {
             return findAll();
         }
-        if (roleName.equals(Role.QA_LEAD) && viewer.getTeam() != null) {
-            return em.createQuery("SELECT d FROM Defect d WHERE d.project.team = :team", Defect.class)
-                    .setParameter("team", viewer.getTeam())
-                    .getResultList();
+        if (Scope.isLead(viewer)) {
+            var q = em.createQuery("SELECT d FROM Defect d WHERE " + Scope.projectClause("d.project", viewer), Defect.class);
+            Scope.bindProjectScope(q, viewer);
+            return q.getResultList();
         }
         return em.createQuery("SELECT d FROM Defect d WHERE d.assignedTo = :user OR d.createdBy = :user", Defect.class)
                 .setParameter("user", viewer)
                 .getResultList();
+    }
+
+    /** Liste paginée en base : même périmètre que listForUser, plus recherche et filtre de statut. */
+    public SearchQuery search(User viewer, String q, String status) {
+        SearchQuery s = new SearchQuery("FROM Defect d JOIN d.project p LEFT JOIN d.assignedTo a");
+        if (!Scope.seesEverything(viewer)) {
+            s.scope(Scope.isLead(viewer) ? Scope.projectClause("d.project", viewer)
+                    : "(d.assignedTo = :scopeUser OR d.createdBy = :scopeUser)", viewer);
+        }
+        if (status != null && !status.isBlank()) {
+            s.and("d.status = :status").param("status", Defect.Status.valueOf(status));
+        }
+        return s.text(q, "d.id", "ANO-", "d.title", "p.name", "a.name");
+    }
+
+    public long count(SearchQuery s) {
+        return s.count(em, "d");
+    }
+
+    public List<Defect> page(SearchQuery s, int first, int size) {
+        return s.page(em, "d", Defect.class, "d.createdAt DESC, d.id DESC", first, size);
     }
 
     public List<DefectHistory> history(Long defectId) {

@@ -37,6 +37,17 @@ class WorkflowRulesTest {
     }
 
     @Test
+    void aTesterLentToAnotherProjectIsValidatedByThatProjectsLead() {
+        // Awa (équipe de lead) travaille sur un projet de l'autre équipe : c'est otherLead qui valide.
+        Activity lent = activity(qa);
+        com.qareporting.entity.Project otherProject = new com.qareporting.entity.Project();
+        otherProject.setTeam(otherTeam);
+        lent.setProject(otherProject);
+        assertTrue(activities.canValidate(otherLead, lent));
+        assertFalse(activities.canValidate(lead, lent));
+    }
+
+    @Test
     void aValidatedEntryIsFrozenForItsAuthor() {
         Activity entry = activity(qa);
         assertTrue(activities.canEdit(qa, entry));
@@ -101,9 +112,13 @@ class WorkflowRulesTest {
         return u;
     }
 
-    private static Activity activity(User author) {
+    /** Activité déclarée sur un projet de l'équipe « team » (celle de lead). */
+    private Activity activity(User author) {
         Activity a = new Activity();
         a.setUser(author);
+        com.qareporting.entity.Project p = new com.qareporting.entity.Project();
+        p.setTeam(team);
+        a.setProject(p);
         return a;
     }
 }

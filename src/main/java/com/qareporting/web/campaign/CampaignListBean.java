@@ -45,8 +45,11 @@ public class CampaignListBean implements Serializable {
         fetch();
     }
 
+    private java.util.Map<Long, Integer> progress = java.util.Map.of();
+
     private void fetch() {
         campaigns = campaignService.listForUser(sessionAuth.getCurrentUser());
+        progress = testService.progressByCampaign(campaigns.stream().map(Campaign::getId).toList());
     }
 
     public boolean isStartable(Campaign campaign) {
@@ -67,12 +70,7 @@ public class CampaignListBean implements Serializable {
 
     /** Part des tests de la campagne déjà exécutés (statut différent de "not_run"), en %. */
     public int getProgress(Campaign campaign) {
-        List<Test> tests = testService.findByCampaign(campaign.getId());
-        if (tests.isEmpty()) {
-            return 0;
-        }
-        long executed = tests.stream().filter(t -> t.getStatus() != Test.Status.not_run).count();
-        return (int) Math.round(100.0 * executed / tests.size());
+        return progress.getOrDefault(campaign.getId(), 0);
     }
 
     public String start(Campaign campaign) {

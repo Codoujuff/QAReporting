@@ -22,7 +22,7 @@ public class Notification {
     @Column(nullable = false)
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String message;
 
     @Column(name = "read_at")

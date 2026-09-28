@@ -16,21 +16,26 @@ public class Test extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(nullable = false)
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String description;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String preconditions;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "longtext") // JSON : MariaDB le stocke en LONGTEXT (JSON n'en est qu'un alias)
     private List<String> steps;
 
-    @Column(name = "expected_result")
-    @Lob
+    @Column(name = "expected_result", columnDefinition = "TEXT") // texte long (64 Ko)
     private String expectedResult;
 
     @Column(nullable = false)
@@ -80,4 +85,5 @@ public class Test extends Timestamped {
     public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    public long getLockVersion() { return lockVersion; }
 }

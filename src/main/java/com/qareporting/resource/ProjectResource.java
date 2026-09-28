@@ -15,6 +15,9 @@ import jakarta.ws.rs.core.Response;
 public class ProjectResource {
 
     @Inject
+    com.qareporting.service.UserService userService;
+
+    @Inject
     ProjectService projectService;
 
     @GET
@@ -32,6 +35,7 @@ public class ProjectResource {
     @POST
     @RequiresRole({Role.ADMIN})
     public Response store(Project project) {
+        applyMembers(project, project.getRequestedMemberIds());
         return Response.status(201).entity(projectService.create(project)).build();
     }
 
@@ -47,7 +51,24 @@ public class ProjectResource {
         existing.setDescription(incoming.getDescription());
         existing.setStatus(incoming.getStatus());
         existing.setTeam(incoming.getTeam());
+        if (incoming.getRequestedMemberIds() != null) {
+            applyMembers(existing, incoming.getRequestedMemberIds());
+        }
         return Response.ok(projectService.update(existing)).build();
+    }
+
+    /** « memberIds » : testeurs affectés au projet (un QA peut être sur plusieurs projets). */
+    private void applyMembers(Project project, java.util.List<Long> ids) {
+        java.util.Set<com.qareporting.entity.User> members = new java.util.HashSet<>();
+        if (ids != null) {
+            for (Long id : ids) {
+                com.qareporting.entity.User u = userService.find(id);
+                if (u != null) {
+                    members.add(u);
+                }
+            }
+        }
+        project.setMembers(members);
     }
 
     @DELETE

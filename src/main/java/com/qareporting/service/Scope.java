@@ -31,6 +31,35 @@ final class Scope {
         return a != null && b != null && Objects.equals(a.getId(), b.getId());
     }
 
+    /**
+     * « Mes projets » : ceux de mon équipe, plus ceux dont je suis membre (un testeur peut
+     * être affecté à des projets d'autres équipes).
+     */
+    static boolean onProject(Project project, User viewer) {
+        if (project == null || viewer == null) {
+            return false;
+        }
+        return inTeam(project, viewer.getTeam()) || project.hasMember(viewer);
+    }
+
+    /** Même règle en JPQL, pour un chemin vers un projet (ex. « d.project »). */
+    static String projectClause(String projectPath, User viewer) {
+        return viewer.getTeam() != null
+                ? "(" + projectPath + ".team = :scopeTeam OR :scopeUser MEMBER OF " + projectPath + ".members)"
+                : "(:scopeUser MEMBER OF " + projectPath + ".members)";
+    }
+
+    static void bindProjectScope(jakarta.persistence.Query query, User viewer) {
+        if (viewer.getTeam() != null) {
+            query.setParameter("scopeTeam", viewer.getTeam());
+        }
+        query.setParameter("scopeUser", viewer);
+    }
+
+    static boolean isLead(User viewer) {
+        return Role.QA_LEAD.equals(roleOf(viewer));
+    }
+
     static boolean inTeam(Project project, Team team) {
         return project != null && project.getTeam() != null && team != null
                 && Objects.equals(project.getTeam().getId(), team.getId());

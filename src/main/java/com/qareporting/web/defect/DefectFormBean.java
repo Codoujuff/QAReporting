@@ -49,7 +49,7 @@ public class DefectFormBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        projectOptions = projectService.findAll();
+        projectOptions = projectService.visibleProjects(sessionAuth.getCurrentUser());
     }
 
     /**
@@ -101,6 +101,11 @@ public class DefectFormBean implements Serializable {
         if (projectId == null) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.projectRequired"), null));
+            return null;
+        }
+        if (!projectService.isVisible(sessionAuth.getCurrentUser(), projectService.find(projectId))) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, I18n.t("err.projectNotYours"), null));
             return null;
         }
         defect.setProject(projectService.find(projectId));

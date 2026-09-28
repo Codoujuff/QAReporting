@@ -12,6 +12,12 @@ public class Environment extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(nullable = false, unique = true)
     private String name;
 
@@ -32,4 +38,5 @@ public class Environment extends Timestamped {
     public void setUrl(String url) { this.url = url; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    public long getLockVersion() { return lockVersion; }
 }

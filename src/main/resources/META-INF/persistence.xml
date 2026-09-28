@@ -11,7 +11,8 @@
             <!-- Auto-generates/updates the schema from the JPA entities — the Jakarta EE
                  equivalent of running Laravel's migrations. -->
             <property name="jakarta.persistence.schema-generation.database.action" value="update"/>
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <!-- Le schéma est géré par les migrations Flyway (db/migration), plus par Hibernate. -->
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
             <!-- Le serveur réel (XAMPP) est MariaDB, pas MySQL : MySQLDialect génère
                  CAST(? AS JSON) pour les colonnes @JdbcTypeCode(SqlTypes.JSON) (voir
                  Test.steps), syntaxe que MariaDB rejette. MariaDBDialect génère le bon SQL. -->

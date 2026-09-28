@@ -249,16 +249,11 @@ public class DashboardBean implements Serializable {
             testsByDaySvg = buildChart(dayRows);
 
             campaignProgress = new ArrayList<>();
-            for (Campaign c : campaignService.listForUser(viewer)) {
-                List<com.qareporting.entity.Test> campaignTests = testService.findByCampaign(c.getId());
-                int percent = 0;
-                if (!campaignTests.isEmpty()) {
-                    long executed = campaignTests.stream()
-                            .filter(t -> t.getStatus() != com.qareporting.entity.Test.Status.not_run)
-                            .count();
-                    percent = (int) Math.round(100.0 * executed / campaignTests.size());
-                }
-                campaignProgress.add(new CampaignProgressRow(c.getName(), percent));
+            List<Campaign> myCampaigns = campaignService.listForUser(viewer);
+            java.util.Map<Long, Integer> progress = testService.progressByCampaign(
+                    myCampaigns.stream().map(Campaign::getId).toList());
+            for (Campaign c : myCampaigns) {
+                campaignProgress.add(new CampaignProgressRow(c.getName(), progress.getOrDefault(c.getId(), 0)));
             }
         }
 

@@ -21,24 +21,21 @@ public class CampaignService extends AbstractCrudService<Campaign, Long> {
     }
 
     /** Same visibility rule as reporting: QA/QA Lead see their team's campaigns, Manager/Admin everything. */
+    /** QA et QA Lead : les campagnes de leurs projets ; Manager / Admin : toutes. */
     public List<Campaign> listForUser(User viewer) {
-        String roleName = viewer.getRole().getName();
-        if (roleName.equals(Role.MANAGER) || roleName.equals(Role.ADMIN) || viewer.getTeam() == null) {
+        if (Scope.seesEverything(viewer)) {
             return findAll();
         }
-        return em.createQuery("SELECT c FROM Campaign c WHERE c.project.team = :team", Campaign.class)
-                .setParameter("team", viewer.getTeam())
-                .getResultList();
+        var q = em.createQuery("SELECT c FROM Campaign c WHERE " + Scope.projectClause("c.project", viewer), Campaign.class);
+        Scope.bindProjectScope(q, viewer);
+        return q.getResultList();
     }
 
     public boolean canView(User viewer, Campaign campaign) {
         if (viewer == null || campaign == null) {
             return false;
         }
-        if (Scope.seesEverything(viewer) || viewer.getTeam() == null) {
-            return true;
-        }
-        return Scope.inTeam(campaign.getProject(), viewer.getTeam());
+        return Scope.seesEverything(viewer) || Scope.onProject(campaign.getProject(), viewer);
     }
 
     /**
@@ -66,7 +63,7 @@ public class CampaignService extends AbstractCrudService<Campaign, Long> {
                 case planned -> "planifiée";
             };
             String message = saved.getName() + " est passée à \"" + statusLabel + "\".";
-            notificationService.notifyTeam(saved.getProject().getTeam(),
+            notificationService.notifyProject(saved.getProject(),
                     "campaign_" + newStatus, title, message);
         }
 

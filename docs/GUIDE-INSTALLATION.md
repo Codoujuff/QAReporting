@@ -79,7 +79,7 @@ exit;
 
 *Autre méthode* : démarrez aussi Apache dans XAMPP, allez sur http://localhost/phpmyadmin, cliquez sur **Nouvelle base de données**, saisissez le nom `qa_reporting_j2ee` et choisissez l'interclassement `utf8mb4_unicode_ci`.
 
-Vous n'avez **rien d'autre à faire** : les tables et les données de départ sont créées automatiquement au premier lancement de l'application.
+Vous n'avez **rien d'autre à faire** : au premier lancement, l'application crée les tables (migrations Flyway, voir « Pour aller plus loin ») puis les données de départ.
 
 > Si votre utilisateur `root` MySQL a un mot de passe, indiquez-le dans le fichier `src/main/webapp/WEB-INF/qa-reporting-ds.xml`, dans la balise `<password></password>`.
 
@@ -136,7 +136,7 @@ Pour une vraie équipe, faites les étapes suivantes **dans cet ordre** (les sui
 | 1 | Admin | Administration → **Équipes** | Créer l'équipe QA (ex. « Équipe Paiement »). |
 | 2 | Admin | Administration → **Utilisateurs** | Créer les comptes : un **QA Lead**, un ou plusieurs **QA**, un **Manager**. Rattacher le lead et les QA à l'équipe. |
 | 3 | Admin | Administration → **Équipes** | Modifier l'équipe pour lui donner son responsable (le QA Lead). |
-| 4 | Admin | Administration → **Projets** | Créer le projet et le rattacher à l'équipe. **Sans équipe, le projet n'apparaît pas chez le QA Lead.** |
+| 4 | Admin | Administration → **Projets** | Créer le projet et le rattacher à l'équipe. **Sans équipe, le projet n'apparaît pas chez le QA Lead.** Cocher aussi les **testeurs affectés** : un QA peut être affecté à plusieurs projets, y compris ceux d'une autre équipe. |
 | 5 | QA Lead | **Campagnes** → Nouvelle campagne | Créer la campagne du sprint / de la version, puis **Démarrer**. Les tests d'une campagne ne s'exécutent que lorsqu'elle est **en cours**. |
 | 6 | QA Lead | **Tests** → Nouveau test | Créer les cas de test et les **assigner** aux testeurs. |
 
@@ -221,6 +221,10 @@ Relancez ensuite l'application (étape 4). Si de nouvelles dépendances ont ét�
 | « Accès refusé » (403) sur une page | Votre rôle n'y a pas droit (voir « Utiliser l'application selon son rôle »). |
 | Un QA Lead ne voit aucun projet, test ou campagne | Le projet n'est rattaché à aucune équipe, ou le lead n'est pas membre de l'équipe (voir l'étape 6). |
 | Un QA ne voit pas un test | Le test ne lui est pas assigné : demandez au QA Lead de l'assigner. |
+| Un QA ne voit pas un projet (campagnes, liste des projets de l'activité) | Il n'est ni dans l'équipe du projet ni affecté au projet : **Administration → Projets → Modifier → Testeurs affectés**. |
+| « Quelqu'un a modifié cet élément pendant que vous l'éditiez » | Un collègue a enregistré le même élément juste avant vous : la page est rechargée avec sa version, refaites votre modification. |
+| Mot de passe oublié | Lien **Mot de passe oublié ?** sur la page de connexion. Sans serveur d'e-mails configuré (voir « Mise en production »), le lien est écrit dans `target\server\standalone\log\server.log`. |
+| Au démarrage : « Le schéma de la base ne correspond pas aux entités Java » | Une entité a été modifiée sans migration : ajoutez un fichier `V<n>__description.sql` (voir « Pour aller plus loin »). |
 | « Ce test ne peut pas être exécuté maintenant » | Sa campagne n'est pas **en cours** : le QA Lead doit la démarrer (ou la reprendre si elle est bloquée). Une campagne terminée est figée. |
 | « Fermer » affiche un message au lieu de fermer | Fermer sans revérification demande un motif dans le commentaire. |
 | « Trop de tentatives de connexion » | 5 mots de passe faux de suite bloquent le compte 15 minutes (20 échecs bloquent l'adresse IP). Attendez, ou redémarrez le serveur en dépannage. |
@@ -243,6 +247,10 @@ Ne mettez aucun mot de passe dans le code. Créez un utilisateur MariaDB dédié
 | `QA_DB_HOST` / `QA_DB_PORT` / `QA_DB_NAME` | Adresse de la base | `127.0.0.1` / `3306` / `qa_reporting_j2ee` |
 | `QA_DB_USER` / `QA_DB_PASSWORD` | Compte de la base | `root` / vide |
 | `QA_FORCE_HTTPS` | `true` : toute requête HTTP est redirigée vers HTTPS | désactivé |
+| `QA_SMTP_HOST` / `QA_SMTP_PORT` | Serveur d'e-mails (mot de passe oublié, rappels) | aucun : l'e-mail est écrit dans le journal / `587` |
+| `QA_SMTP_USER` / `QA_SMTP_PASSWORD` | Compte d'envoi | aucun |
+| `QA_SMTP_FROM` / `QA_SMTP_TLS` | Expéditeur / chiffrement STARTTLS | le compte d'envoi / `true` |
+| `QA_PUBLIC_URL` | Adresse publique utilisée dans les liens des e-mails (derrière un proxy) | déduite de la requête |
 | `QA_HTTPS_PORT` | Port HTTPS pour la redirection | `8443` |
 
 ### 2. HTTPS
@@ -272,7 +280,7 @@ Copiez régulièrement le dossier `backups` **hors du serveur** (autre disque, s
 
 ### 5. Reste à la charge de l'exploitation
 
-- **Évolutions du schéma de base** : la base est mise à jour automatiquement au démarrage (`hibernate.hbm2ddl.auto=update`, dans `persistence.xml`). En production, **sauvegardez avant chaque mise à jour de l'application**. Pour une vraie gestion des versions du schéma, l'étape suivante serait un outil de migration (Flyway ou Liquibase) avec `hbm2ddl.auto=validate`.
+- **Évolutions du schéma de base** : gérées par des migrations Flyway versionnées, appliquées automatiquement au démarrage (voir « Pour aller plus loin »). **Sauvegardez quand même avant chaque mise à jour de l'application** : une migration MariaDB ne s'annule pas.
 - **Supervision** : surveiller le journal `standalone\log\server.log`, l'espace disque et la mémoire.
 - **Lancer WildFly en service Windows** plutôt que par `mvn wildfly:run` : déployer le fichier `target\qa-reporting-j2ee.war` sur un WildFly installé comme service.
 
@@ -280,8 +288,14 @@ Copiez régulièrement le dossier `backups` **hors du serveur** (autre disque, s
 
 ## Pour aller plus loin
 
-- **Tests unitaires** : `mvn test` (40 tests : mots de passe, jetons, droits par rôle, portée des données, règles de campagne, d'anomalie et d'activité, recherche…)
+- **Tests unitaires** : `mvn test` (48 tests : mots de passe, jetons, droits par rôle, portée des données et affectations multi-projets, règles de campagne, d'anomalie et d'activité, recherche…)
 - **Sauvegarder la base** avant une opération risquée : `C:\xampp\mysql\bin\mysqldump -u root qa_reporting_j2ee > backups\sauvegarde.sql` (le dossier `backups/` est ignoré par Git). Pour restaurer : `mysql -u root qa_reporting_j2ee < backups\sauvegarde.sql`.
+- **Modifier la structure de la base (migrations Flyway)** : Hibernate ne touche plus au schéma. Pour ajouter une colonne, une table, etc. :
+  1. modifiez l'entité Java ;
+  2. créez `src/main/resources/db/migration/V<n>__description.sql` (numéro suivant le dernier, ex. `V4__ajout_champ_navigateur.sql`) avec l'instruction SQL ;
+  3. relancez : Flyway applique le script **une seule fois**, puis l'application vérifie que les tables correspondent aux entités (sinon elle refuse de démarrer, avec le nom de la colonne en cause).
+
+  **Ne modifiez jamais une migration déjà appliquée** : ajoutez-en une nouvelle. L'historique est dans la table `flyway_schema_history`.
 - **Ne lancez pas `mvn clean`** sans raison : il efface aussi le serveur WildFly installé dans `target/server`, qui sera retéléchargé (il faut alors internet et plusieurs minutes).
 - **Traductions** : tous les textes de l'interface sont dans `src/main/resources/com/qareporting/i18n/messages_fr.properties` et `messages_en.properties`. Pour corriger un libellé, modifiez la même clé dans les deux fichiers.
 - **Produire le fichier `.war`** : `mvn package`. Le fichier est créé dans `target/qa-reporting-j2ee.war`.

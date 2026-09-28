@@ -95,6 +95,9 @@ public class DemoDataService {
 
         Project shop = project(MARKER_PROJECT, "Site e-commerce : catalogue, panier et paiement.", team);
         Project mobile = project("Application mobile", "Application Android / iOS de la boutique.", team);
+        // Affectations : un testeur peut être sur plusieurs projets.
+        shop.getMembers().addAll(java.util.List.of(fatou, awa, moussa, khadija));
+        mobile.getMembers().addAll(java.util.List.of(awa, khadija));
 
         // ---------------- campagnes ----------------
         currentUser.set(fatou);

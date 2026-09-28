@@ -33,7 +33,7 @@ public class TestListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        tests = testService.listForUser(sessionAuth.getCurrentUser());
+        // La liste est chargée page par page en base, dans load().
     }
 
     /** Réservé à ADMIN côté REST (TestResource.destroy) — le bouton lui-même
@@ -59,7 +59,22 @@ public class TestListBean implements Serializable {
 
     /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
     public void load() {
-        pageData.apply(tests, q, t -> "t" + t.getId() + " " + t.getTitle() + " " + t.getProject().getName() + " " + (t.getCampaign() != null ? t.getCampaign().getName() : "") + " " + (t.getAssignedTo() != null ? t.getAssignedTo().getName() : ""), status == null || status.isBlank() ? null : t -> t.getStatus().name().equals(status), page);
+        var search = testService.search(sessionAuth.getCurrentUser(), q, validStatus(com.qareporting.entity.Test.Status.class));
+        int first = pageData.prepare(testService.count(search), page);
+        pageData.setItems(testService.page(search, first, ListPage.PAGE_SIZE));
+    }
+
+    /** Le statut de l'URL s'il désigne bien une valeur de l'enum, sinon null (paramètre trafiqué). */
+    private <E extends Enum<E>> String validStatus(Class<E> type) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        for (E value : type.getEnumConstants()) {
+            if (value.name().equals(status)) {
+                return status;
+            }
+        }
+        return null;
     }
 
     public ListPage<Test> getPageData() { return pageData; }

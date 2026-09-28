@@ -26,16 +26,23 @@ public class ProjectFormBean implements Serializable {
     private Project project;
     private Long teamId;
     private List<Team> teamOptions;
+    private List<Long> memberIds = new java.util.ArrayList<>();
+    private List<com.qareporting.entity.User> memberOptions;
+
+    @Inject
+    private com.qareporting.service.UserService userService;
 
     @PostConstruct
     public void init() {
         teamOptions = teamService.findAll();
+        memberOptions = userService.testers();
     }
 
     public void load() {
         if (id != null) {
             project = projectService.find(id);
             teamId = project.getTeam() != null ? project.getTeam().getId() : null;
+            memberIds = new java.util.ArrayList<>(project.getMemberIds());
         } else {
             project = new Project();
         }
@@ -43,12 +50,32 @@ public class ProjectFormBean implements Serializable {
 
     public String save() {
         project.setTeam(teamId == null ? null : teamService.find(teamId));
+        java.util.Set<com.qareporting.entity.User> members = new java.util.HashSet<>();
+        for (Long memberId : memberIds) {
+            com.qareporting.entity.User member = userService.find(memberId);
+            if (member != null) {
+                members.add(member);
+            }
+        }
+        project.setMembers(members);
         if (project.getId() == null) {
             projectService.create(project);
         } else {
             projectService.update(project);
         }
         return "list.xhtml?faces-redirect=true";
+    }
+
+    public List<Long> getMemberIds() {
+        return memberIds;
+    }
+
+    public void setMemberIds(List<Long> memberIds) {
+        this.memberIds = memberIds;
+    }
+
+    public List<com.qareporting.entity.User> getMemberOptions() {
+        return memberOptions;
     }
 
     public Long getId() {

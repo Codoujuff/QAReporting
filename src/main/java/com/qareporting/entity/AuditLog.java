@@ -30,7 +30,7 @@ public class AuditLog {
     private Long modelId;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "longtext") // JSON : MariaDB le stocke en LONGTEXT (JSON n'en est qu'un alias)
     private Map<String, Object> changes;
 
     @Column(name = "created_at", nullable = false)

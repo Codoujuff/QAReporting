@@ -29,7 +29,7 @@ public class DefectHistory {
     @Column(name = "new_status", nullable = false)
     private Defect.Status newStatus;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String comment;
 
     @Column(name = "created_at", nullable = false)

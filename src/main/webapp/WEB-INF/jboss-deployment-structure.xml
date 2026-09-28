@@ -11,6 +11,10 @@
              NoSuchMethodError; not caught by compilation or code review. -->
         <exclusions>
             <module name="org.apache.commons.io"/>
+            <!-- Les classes de Flyway portent des annotations Jackson : WildFly en déduisait
+                 que l'application voulait Jackson pour le JSON de l'API, à la place de JSON-B
+                 (dates Java alors refusées, erreur 500 sur /api/login). On garde JSON-B. -->
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
         </exclusions>
     </deployment>
 </jboss-deployment-structure>

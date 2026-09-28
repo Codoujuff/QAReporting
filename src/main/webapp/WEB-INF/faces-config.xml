@@ -14,4 +14,8 @@
             <var>msg</var>
         </resource-bundle>
     </application>
+    <factory>
+        <!-- Conflit de modification (verrou optimiste) : message clair + page rechargée. -->
+        <exception-handler-factory>com.qareporting.web.error.ConcurrencyExceptionHandlerFactory</exception-handler-factory>
+    </factory>
 </faces-config>

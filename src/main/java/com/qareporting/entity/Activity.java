@@ -12,6 +12,12 @@ public class Activity extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -52,11 +58,10 @@ public class Activity extends Timestamped {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked = false;
 
-    @Lob
-    @Column(name = "blocked_reason")
+    @Column(name = "blocked_reason", columnDefinition = "TEXT") // texte long (64 Ko)
     private String blockedReason;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String comment;
 
     private String duration;
@@ -117,4 +122,5 @@ public class Activity extends Timestamped {
     public java.time.LocalDateTime getValidatedAt() { return validatedAt; }
     public void setValidatedAt(java.time.LocalDateTime validatedAt) { this.validatedAt = validatedAt; }
     public boolean isValidated() { return validatedAt != null; }
+    public long getLockVersion() { return lockVersion; }
 }

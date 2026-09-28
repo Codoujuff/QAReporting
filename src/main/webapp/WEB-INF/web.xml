@@ -20,6 +20,12 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
 
+    <!-- JSON de l'API : toujours JSON-B (standard Jakarta EE), jamais Jackson. -->
+    <context-param>
+        <param-name>resteasy.preferJacksonOverJsonB</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
     <welcome-file-list>
         <welcome-file>app/dashboard.xhtml</welcome-file>
     </welcome-file-list>

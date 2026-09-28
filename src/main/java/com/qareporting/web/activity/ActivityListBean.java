@@ -31,7 +31,7 @@ public class ActivityListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        activities = activityService.listForUser(sessionAuth.getCurrentUser());
+        // La liste est chargée page par page en base, dans load().
     }
 
     public boolean canValidate(Activity activity) {
@@ -62,17 +62,9 @@ public class ActivityListBean implements Serializable {
 
     /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
     public void load() {
-        pageData.apply(activities, q, a -> (a.getUser() != null ? a.getUser().getName() : "") + " " + a.getProject().getName() + " " + (a.getCampaign() != null ? a.getCampaign().getName() : "") + " " + a.getActivityType(), activityFilter(), page);
-    }
-
-    private java.util.function.Predicate<Activity> activityFilter() {
-        if ("toValidate".equals(status)) {
-            return a -> !a.isValidated();
-        }
-        if ("validated".equals(status)) {
-            return Activity::isValidated;
-        }
-        return null;
+        var search = activityService.search(sessionAuth.getCurrentUser(), q, status);
+        int first = pageData.prepare(activityService.count(search), page);
+        pageData.setItems(activityService.page(search, first, ListPage.PAGE_SIZE));
     }
 
     public ListPage<Activity> getPageData() { return pageData; }

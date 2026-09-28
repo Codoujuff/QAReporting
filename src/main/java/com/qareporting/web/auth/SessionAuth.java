@@ -134,9 +134,7 @@ public class SessionAuth implements Serializable {
         if (user == null) {
             return 0;
         }
-        return notificationService.listFor(user).stream()
-                .filter(n -> n.getReadAt() == null)
-                .count();
+        return notificationService.countUnread(user);
     }
 
     public Long getUserId() {

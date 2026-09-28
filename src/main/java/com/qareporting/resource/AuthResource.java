@@ -44,6 +44,9 @@ public class AuthResource {
     @Inject
     LoginService loginService;
 
+    @Inject
+    com.qareporting.service.PasswordResetService passwordResetService;
+
     @jakarta.ws.rs.core.Context
     jakarta.servlet.http.HttpServletRequest httpRequest;
 
@@ -83,6 +86,35 @@ public class AuthResource {
         em.persist(token);
 
         return Response.ok(new LoginResponse(plainToken, user)).build();
+    }
+
+    /** Toujours 202, que le compte existe ou non : l'API ne révèle pas les adresses connues. */
+    @POST
+    @Path("/forgot-password")
+    @Public
+    public Response forgotPassword(java.util.Map<String, String> body) {
+        String email = body == null ? null : body.get("email");
+        passwordResetService.request(email, httpRequest.getRemoteAddr(),
+                com.qareporting.web.auth.PasswordResetLinks.baseUrl(httpRequest),
+                (part, link) -> "subject".equals(part) ? "QA Reporting — réinitialisation du mot de passe"
+                        : "Pour choisir un nouveau mot de passe, ouvrez ce lien (valable 1 heure) :\n" + link
+                          + "\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.");
+        return Response.accepted().entity("{\"message\":\"Si un compte correspond, un e-mail a été envoyé.\"}").build();
+    }
+
+    @POST
+    @Path("/reset-password")
+    @Public
+    public Response resetPassword(java.util.Map<String, String> body) {
+        if (body == null) {
+            return error(Response.Status.fromStatusCode(422), "Jeton et mot de passe requis.");
+        }
+        var result = passwordResetService.reset(body.get("token"), body.get("password"));
+        return switch (result.status()) {
+            case OK -> Response.noContent().build();
+            case INVALID_LINK -> error(Response.Status.fromStatusCode(422), "Lien invalide ou expiré.");
+            case WEAK_PASSWORD -> error(Response.Status.fromStatusCode(422), result.errorKey());
+        };
     }
 
     @POST

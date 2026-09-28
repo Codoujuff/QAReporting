@@ -22,6 +22,7 @@ import jakarta.transaction.Transactional;
  */
 @Singleton
 @Startup
+@jakarta.ejb.DependsOn("FlywayMigrator") // tables créées / migrées d'abord
 public class StartupSeeder {
 
     @PersistenceContext(unitName = "qaReportingJ2eePU")

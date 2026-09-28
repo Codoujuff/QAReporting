@@ -73,7 +73,7 @@ public class ActivityFormBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        projectOptions = projectService.findAll();
+        projectOptions = projectService.visibleProjects(sessionAuth.getCurrentUser());
         campaignOptions = campaignService.listForUser(sessionAuth.getCurrentUser());
         environmentOptions = environmentService.findAll();
         activity.setActivityDate(LocalDate.now());
@@ -96,6 +96,10 @@ public class ActivityFormBean implements Serializable {
             return null;
         }
 
+        if (!projectService.isVisible(sessionAuth.getCurrentUser(), projectService.find(projectId))) {
+            addError(I18n.t("err.projectNotYours"));
+            return null;
+        }
         activity.setProject(projectService.find(projectId));
         activity.setCampaign(campaignId == null ? null : campaignService.find(campaignId));
         activity.setEnvironment(environmentId == null ? null : environmentService.find(environmentId));

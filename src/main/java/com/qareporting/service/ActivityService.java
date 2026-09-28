@@ -22,17 +22,19 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
      * QA sees only their own activity, QA Lead sees their whole team,
      * Manager/Admin see everything.
      */
+    /**
+     * QA : ses déclarations ; QA Lead : les siennes et toutes celles faites sur ses projets
+     * (y compris par des testeurs d'autres équipes) ; Manager / Admin : toutes.
+     */
     public List<Activity> listForUser(User viewer) {
-        String roleName = viewer.getRole().getName();
-        if (roleName.equals(Role.MANAGER) || roleName.equals(Role.ADMIN)) {
-            return findAll();
+        if (Scope.seesEverything(viewer)) {
+            return em.createQuery("SELECT a FROM Activity a ORDER BY a.activityDate DESC", Activity.class).getResultList();
         }
-        if (roleName.equals(Role.QA_LEAD) && viewer.getTeam() != null) {
-            return em.createQuery(
-                            "SELECT a FROM Activity a WHERE a.user.team = :team ORDER BY a.activityDate DESC",
-                            Activity.class)
-                    .setParameter("team", viewer.getTeam())
-                    .getResultList();
+        if (Scope.isLead(viewer)) {
+            var q = em.createQuery("SELECT a FROM Activity a WHERE a.user = :scopeUser OR "
+                    + Scope.projectClause("a.project", viewer) + " ORDER BY a.activityDate DESC", Activity.class);
+            Scope.bindProjectScope(q, viewer);
+            return q.getResultList();
         }
         return em.createQuery(
                         "SELECT a FROM Activity a WHERE a.user = :user ORDER BY a.activityDate DESC",
@@ -41,18 +43,36 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
                 .getResultList();
     }
 
+    public SearchQuery search(User viewer, String q, String status) {
+        SearchQuery s = new SearchQuery("FROM Activity x JOIN x.user u JOIN x.project p LEFT JOIN x.campaign c");
+        if (!Scope.seesEverything(viewer)) {
+            s.scope(Scope.isLead(viewer) ? "(x.user = :scopeUser OR " + Scope.projectClause("x.project", viewer) + ")"
+                    : "x.user = :scopeUser", viewer);
+        }
+        if ("toValidate".equals(status)) {
+            s.and("x.validatedAt IS NULL");
+        } else if ("validated".equals(status)) {
+            s.and("x.validatedAt IS NOT NULL");
+        }
+        return s.text(q, null, "", "u.name", "p.name", "c.name", "x.activityType");
+    }
+
+    public long count(SearchQuery s) {
+        return s.count(em, "x");
+    }
+
+    public List<Activity> page(SearchQuery s, int first, int size) {
+        return s.page(em, "x", Activity.class, "x.activityDate DESC, x.id DESC", first, size);
+    }
+
     public boolean canView(User viewer, Activity activity) {
         if (viewer == null || activity == null) {
             return false;
         }
-        if (Scope.seesEverything(viewer)) {
+        if (Scope.seesEverything(viewer) || Scope.sameUser(activity.getUser(), viewer)) {
             return true;
         }
-        if (Scope.sameUser(activity.getUser(), viewer)) {
-            return true;
-        }
-        return Scope.isLeadWithTeam(viewer) && activity.getUser() != null && activity.getUser().getTeam() != null
-                && viewer.getTeam().getId().equals(activity.getUser().getTeam().getId());
+        return Scope.isLead(viewer) && Scope.onProject(activity.getProject(), viewer);
     }
 
     /** Une déclaration d'activité ne se modifie / supprime que par son auteur (ou l'admin). */
@@ -71,6 +91,11 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
      * Le QA Lead valide les déclarations des membres de son équipe (pas les siennes : on ne
      * valide pas son propre travail) ; l'admin peut tout valider.
      */
+    /**
+     * La déclaration est validée par le QA Lead de l'équipe du PROJET sur lequel on a
+     * travaillé — un testeur prêté à un autre projet est validé par le lead de ce projet —
+     * jamais par son auteur ; l'admin peut tout valider.
+     */
     public boolean canValidate(User viewer, Activity activity) {
         if (viewer == null || activity == null || activity.isValidated() || activity.getUser() == null) {
             return false;
@@ -80,8 +105,7 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
         }
         return Scope.isLeadWithTeam(viewer)
                 && !Scope.sameUser(activity.getUser(), viewer)
-                && activity.getUser().getTeam() != null
-                && viewer.getTeam().getId().equals(activity.getUser().getTeam().getId());
+                && Scope.inTeam(activity.getProject(), viewer.getTeam());
     }
 
     @Transactional
@@ -97,11 +121,12 @@ public class ActivityService extends AbstractCrudService<Activity, Long> {
     }
 
     /** Déclarations de l'équipe du lead encore à valider (hors les siennes). */
+    /** Déclarations faites sur les projets de l'équipe du lead et encore à valider (hors les siennes). */
     public long countToValidate(User lead) {
         if (!Scope.isLeadWithTeam(lead)) {
             return 0;
         }
-        return em.createQuery("SELECT COUNT(a) FROM Activity a WHERE a.user.team = :team "
+        return em.createQuery("SELECT COUNT(a) FROM Activity a WHERE a.project.team = :team "
                         + "AND a.user <> :lead AND a.validatedAt IS NULL", Long.class)
                 .setParameter("team", lead.getTeam())
                 .setParameter("lead", lead)

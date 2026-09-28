@@ -54,6 +54,13 @@ public class UserService extends AbstractCrudService<User, Long> {
         }
     }
 
+    /** Testeurs actifs (QA et QA Lead), pour l'affectation aux projets. */
+    public List<User> testers() {
+        return em.createQuery("SELECT u FROM User u WHERE u.active = true AND u.role.name IN :roles ORDER BY u.name", User.class)
+                .setParameter("roles", List.of(Role.QA, Role.QA_LEAD))
+                .getResultList();
+    }
+
     public List<User> findByTeam(Team team) {
         return em.createQuery("SELECT u FROM User u WHERE u.team = :team ORDER BY u.name", User.class)
                 .setParameter("team", team)

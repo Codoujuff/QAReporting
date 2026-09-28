@@ -26,7 +26,7 @@ public class DefectListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        defects = defectService.listForUser(sessionAuth.getCurrentUser());
+        // La liste est chargée page par page en base, dans load().
     }
 
     public List<Defect> getDefects() {
@@ -42,7 +42,22 @@ public class DefectListBean implements Serializable {
 
     /** f:viewAction : applique recherche, filtre et page à la liste du périmètre. */
     public void load() {
-        pageData.apply(defects, q, d -> "ANO-" + d.getId() + " " + d.getTitle() + " " + d.getProject().getName() + " " + (d.getAssignedTo() != null ? d.getAssignedTo().getName() : ""), status == null || status.isBlank() ? null : d -> d.getStatus().name().equals(status), page);
+        var search = defectService.search(sessionAuth.getCurrentUser(), q, validStatus(com.qareporting.entity.Defect.Status.class));
+        int first = pageData.prepare(defectService.count(search), page);
+        pageData.setItems(defectService.page(search, first, ListPage.PAGE_SIZE));
+    }
+
+    /** Le statut de l'URL s'il désigne bien une valeur de l'enum, sinon null (paramètre trafiqué). */
+    private <E extends Enum<E>> String validStatus(Class<E> type) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        for (E value : type.getEnumConstants()) {
+            if (value.name().equals(status)) {
+                return status;
+            }
+        }
+        return null;
     }
 
     public ListPage<Defect> getPageData() { return pageData; }

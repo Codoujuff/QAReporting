@@ -24,8 +24,7 @@ public class TestExecution {
     @Column(nullable = false)
     private Test.Status status;
 
-    @Lob
-    @Column(name = "actual_result")
+    @Column(name = "actual_result", columnDefinition = "TEXT") // texte long (64 Ko)
     private String actualResult;
 
     @ManyToOne

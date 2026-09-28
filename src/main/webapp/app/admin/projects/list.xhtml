@@ -25,6 +25,10 @@
                     #{p.team != null ? p.team.name : '—'}
                 </h:column>
                 <h:column>
+                    <f:facet name="header">#{msg['project.members']}</f:facet>
+                    #{p.members.size()}
+                </h:column>
+                <h:column>
                     <f:facet name="header">#{msg['common.actions']}</f:facet>
                     <div class="table-actions">
                         <h:link styleClass="btn btn-secondary" value="#{msg['common.edit']}" outcome="/app/admin/projects/form">

@@ -34,52 +34,41 @@ public class ReportingService {
     EntityManager em;
 
     public JsonObject dashboard(User viewer) {
-        String scopeClause;
-        if (isGlobal(viewer)) {
-            scopeClause = "";
-        } else if (isTeamScoped(viewer)) {
-            scopeClause = " AND t.project.team = :team";
-        } else {
-            scopeClause = " AND t.assignedTo = :user";
+        // Tout est compté par la base (COUNT / GROUP BY) : rien n'est chargé en mémoire,
+        // quel que soit le nombre de tests ou d'anomalies.
+        String testScope = scope(viewer, "t.project", "t.assignedTo = :scopeUser");
+        TypedQuery<Object[]> byStatus = em.createQuery(
+                "SELECT t.status, COUNT(t) FROM Test t WHERE 1=1" + testScope + " GROUP BY t.status", Object[].class);
+        bind(byStatus, testScope, viewer);
+        java.util.Map<Test.Status, Long> counts = new java.util.EnumMap<>(Test.Status.class);
+        for (Object[] row : byStatus.getResultList()) {
+            counts.put((Test.Status) row[0], (Long) row[1]);
         }
+        long passed = counts.getOrDefault(Test.Status.passed, 0L);
+        long failed = counts.getOrDefault(Test.Status.failed, 0L);
+        long blocked = counts.getOrDefault(Test.Status.blocked, 0L);
+        long notRun = counts.getOrDefault(Test.Status.not_run, 0L);
+        long total = passed + failed + blocked + notRun;
 
-        TypedQuery<Test> testsQuery = em.createQuery("SELECT t FROM Test t WHERE 1=1" + scopeClause, Test.class);
-        bindScope(testsQuery, viewer);
-        List<Test> tests = testsQuery.getResultList();
+        String defectScope = scope(viewer, "d.project", "(d.assignedTo = :scopeUser OR d.createdBy = :scopeUser)");
+        long openDefects = count("SELECT COUNT(d) FROM Defect d WHERE d.status <> :closed" + defectScope,
+                defectScope, viewer, "closed", Defect.Status.closed);
+        long criticalDefects = count("SELECT COUNT(d) FROM Defect d WHERE d.severity = :critical" + defectScope,
+                defectScope, viewer, "critical", Defect.Severity.critical);
 
-        long passed = tests.stream().filter(t -> t.getStatus() == Test.Status.passed).count();
-        long failed = tests.stream().filter(t -> t.getStatus() == Test.Status.failed).count();
-        long blocked = tests.stream().filter(t -> t.getStatus() == Test.Status.blocked).count();
-        long notRun = tests.stream().filter(t -> t.getStatus() == Test.Status.not_run).count();
+        String campaignScope = isGlobal(viewer) ? "" : " AND " + Scope.projectClause("c.project", viewer);
+        long campaignsInProgress = count("SELECT COUNT(c) FROM Campaign c WHERE c.status = :running" + campaignScope,
+                campaignScope, viewer, "running", Campaign.Status.in_progress);
 
-        String defectScope = isGlobal(viewer) ? ""
-                : isTeamScoped(viewer) ? " AND d.project.team = :team"
-                : " AND d.assignedTo = :user";
-        TypedQuery<Defect> defectsQuery = em.createQuery("SELECT d FROM Defect d WHERE 1=1" + defectScope, Defect.class);
-        bindScope(defectsQuery, viewer);
-        List<Defect> defects = defectsQuery.getResultList();
-
-        long openDefects = defects.stream().filter(d -> d.getStatus() != Defect.Status.closed).count();
-        long criticalDefects = defects.stream().filter(d -> d.getSeverity() == Defect.Severity.critical).count();
-
-        String campaignScope = isGlobal(viewer) ? "" : isTeamScoped(viewer) ? " AND c.project.team = :team" : "";
-        TypedQuery<Campaign> campaignsQuery = em.createQuery(
-                "SELECT c FROM Campaign c WHERE 1=1" + campaignScope, Campaign.class);
-        if (isTeamScoped(viewer)) {
-            campaignsQuery.setParameter("team", viewer.getTeam());
-        }
-        long campaignsInProgress = campaignsQuery.getResultList().stream()
-                .filter(c -> c.getStatus() == Campaign.Status.in_progress)
-                .count();
-
+        long testsTotal = total;
         return Json.createObjectBuilder()
                 .add("campaigns_in_progress", campaignsInProgress)
-                .add("tests_total", tests.size())
+                .add("tests_total", testsTotal)
                 .add("tests_passed", passed)
                 .add("tests_failed", failed)
                 .add("tests_blocked", blocked)
                 .add("tests_not_run", notRun)
-                .add("pass_rate", tests.isEmpty() ? 0 : Math.round(passed * 1000.0 / tests.size()) / 10.0)
+                .add("pass_rate", testsTotal == 0 ? 0 : Math.round(passed * 1000.0 / testsTotal) / 10.0)
                 .add("defects_open", openDefects)
                 .add("defects_critical", criticalDefects)
                 .build();
@@ -137,16 +126,17 @@ public class ReportingService {
     }
 
     private List<Activity> scopedActivities(User viewer, LocalDate start, LocalDate end) {
+        // Lead : ses déclarations et toutes celles faites sur ses projets ; QA : les siennes.
         String scopeClause = isGlobal(viewer) ? ""
-                : isTeamScoped(viewer) ? " AND a.user.team = :team"
-                : " AND a.user = :user";
+                : Scope.isLead(viewer) ? " AND (a.user = :scopeUser OR " + Scope.projectClause("a.project", viewer) + ")"
+                : " AND a.user = :scopeUser";
 
         TypedQuery<Activity> query = em.createQuery(
                 "SELECT a FROM Activity a WHERE a.activityDate BETWEEN :start AND :end" + scopeClause,
                 Activity.class);
         query.setParameter("start", start);
         query.setParameter("end", end);
-        bindScope(query, viewer);
+        bind(query, scopeClause, viewer);
         return query.getResultList();
     }
 
@@ -173,15 +163,26 @@ public class ReportingService {
         return role.equals(Role.MANAGER) || role.equals(Role.ADMIN);
     }
 
-    private boolean isTeamScoped(User viewer) {
-        return viewer.getRole().getName().equals(Role.QA_LEAD) && viewer.getTeam() != null;
+    /** Clause de périmètre : rien (Manager / Admin), les projets du lead, ou la condition « à moi » du QA. */
+    private String scope(User viewer, String projectPath, String ownCondition) {
+        if (isGlobal(viewer)) {
+            return "";
+        }
+        return Scope.isLead(viewer) ? " AND " + Scope.projectClause(projectPath, viewer) : " AND " + ownCondition;
     }
 
-    private void bindScope(TypedQuery<?> query, User viewer) {
-        if (isTeamScoped(viewer)) {
-            query.setParameter("team", viewer.getTeam());
-        } else if (!isGlobal(viewer)) {
-            query.setParameter("user", viewer);
+    private void bind(jakarta.persistence.Query query, String clause, User viewer) {
+        if (clause.contains(":scopeTeam")) {
+            query.setParameter("scopeTeam", viewer.getTeam());
         }
+        if (clause.contains(":scopeUser")) {
+            query.setParameter("scopeUser", viewer);
+        }
+    }
+
+    private long count(String jpql, String clause, User viewer, String param, Object value) {
+        TypedQuery<Long> q = em.createQuery(jpql, Long.class).setParameter(param, value);
+        bind(q, clause, viewer);
+        return q.getSingleResult();
     }
 }

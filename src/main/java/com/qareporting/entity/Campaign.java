@@ -14,6 +14,12 @@ public class Campaign extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Verrou optimiste : une modification faite sur une version périmée est refusée au lieu d'écraser celle d'un collègue. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    @jakarta.json.bind.annotation.JsonbTransient
+    private long lockVersion;
+
     @Column(nullable = false)
     private String name;
 
@@ -23,7 +29,7 @@ public class Campaign extends Timestamped {
 
     private String version;
 
-    @Lob
+    @Column(columnDefinition = "TEXT") // texte long (64 Ko)
     private String description;
 
     @ManyToOne
@@ -64,4 +70,5 @@ public class Campaign extends Timestamped {
     public void setStatus(Status status) { this.status = status; }
     public User getResponsible() { return responsible; }
     public void setResponsible(User responsible) { this.responsible = responsible; }
+    public long getLockVersion() { return lockVersion; }
 }
